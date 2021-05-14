@@ -1,4 +1,4 @@
-pragma solidity 0.8.0;
+pragma solidity ^0.8.0;
 
 import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
@@ -58,7 +58,7 @@ contract Token is ERC721, Ownable {
 
     function canFight(uint tokenId) public view returns (bool) {
         uint id =  _tokenDetails[tokenId].tokenId;
-        return id > 1 && id != 17 && id != 13;
+        return id > 1 && getStatsMultiplier(id) != 0;
     }
 
     function getName(uint tokenId) private view returns (string memory) {
