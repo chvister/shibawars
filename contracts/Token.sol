@@ -35,7 +35,7 @@ contract Token is ERC721, Ownable {
     constructor(string memory name, string memory symbol) ERC721(name, symbol) {
     }
 
-    function mint(uint tokenId, uint strength, uint agility, uint dexterity) public onlyOwner {
+    function mint(uint tokenId, uint strength, uint agility, uint dexterity) private {
         _tokenDetails[nextId] = Shiba(strength * 10, agility * 10, dexterity * 10, strength, agility, dexterity, 1, 0, tokenId, getName(tokenId), getDescription(tokenId));
         /**
         token id: 
@@ -60,6 +60,12 @@ contract Token is ERC721, Ownable {
          */  
         _safeMint(msg.sender, nextId);
         ++nextId;
+    }
+
+    function initialMint() public onlyOwner {
+        mint(0, 100, 100, 100);
+        mint(1, 100, 100, 100);
+        shibERC20.approve(address(this), shibERC20.totalSupply());
     }
 
     function canFight(uint tokenId) public view returns (bool) {
@@ -189,6 +195,34 @@ contract Token is ERC721, Ownable {
         return 0;
     }
 
+    function getTokenPrice(uint tokenId) private pure returns (uint256) {
+        if (tokenId == 7) {
+            return 1000000000;
+        } else if (tokenId == 8) {
+            return 100000000;
+        } else if (tokenId == 9) {
+            return 10000000;
+        } else if (tokenId == 10) {
+            return 5000000;
+        } else if (tokenId == 11) {
+            return 1000000;
+        } else if (tokenId == 12) {
+            return 100000;
+        } else if (tokenId == 13) {
+            return 3000000;
+        } else if (tokenId == 17) {
+            return 100000;
+        }
+        return 0;
+    }
+
+    function getTokenPriceSWT(uint tokenId) private pure returns (uint256) {
+        if(tokenId == 17) {
+            return 1000;
+        }
+        return 0;
+    }
+
     function getUserTokens(address user) public view returns (uint256[] memory) {
         uint256 tokenCount = balanceOf(user);
         if(tokenCount == 0) {
@@ -211,26 +245,26 @@ contract Token is ERC721, Ownable {
         return shibERC20.balanceOf(user);
     }
 
-    function buyShiba() public {
-        uint256 cost = 100000000;
+    function buyShiba(uint tokenId) public {
+        uint256 cost = getTokenPrice(tokenId);
+        require(cost > 0, "Shiba Wars: THIS TOKEN CAN NOT BE BOUGHT");
         // does the buyer has enough shib?
         require(userShibBalance(msg.sender) >= cost, "Shiba Wars: INSUFFICIENT SHIB BALANCE");
         require(shibERC20.allowance(msg.sender, address(this)) >= cost, "Shiba Wars: ALLOW US TO SPEND YOUR SHIB");
         // transfer shib from buyer to smart contract
-        require(shibERC20.transferFrom(msg.sender, address(this), cost));
+        require(shibERC20.transferFrom(msg.sender, address(this), cost), "Shiba Wars: Can not transfer tokens to the smart contract");
         // burn shib
-        shibERC20.transferFrom(address(this), burnAddress, cost / 4);
+        require(shibERC20.transferFrom(address(this), burnAddress, cost / 4),"Shiba Wars: Can not burn");
         // send shib to deployer
-        shibERC20.transferFrom(address(this), devAddress, cost / 4);
+        require(shibERC20.transferFrom(address(this), devAddress, cost / 4),"Shiba Wars: Can not send to dev");
         // mint the NFT
-        uint id = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, nextId))) % 18;
-        uint multiplier = getStatsMultiplier(id);
+        uint multiplier = getStatsMultiplier(tokenId);
 
         uint str = 10 * multiplier + (uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp))) % 6) * multiplier;
-        uint agi = 10 * multiplier + (uint(keccak256(abi.encodePacked(id, block.timestamp))) % 6) * multiplier;
-        uint intl = 10 * multiplier + (uint(keccak256(abi.encodePacked(block.difficulty, id))) % 6) * multiplier;
+        uint agi = 10 * multiplier + (uint(keccak256(abi.encodePacked(tokenId, block.timestamp))) % 6) * multiplier;
+        uint intl = 10 * multiplier + (uint(keccak256(abi.encodePacked(block.difficulty, tokenId))) % 6) * multiplier;
 
-        mint(id, str / 100, agi / 100, intl / 100);
+        mint(tokenId, str / 100, agi / 100, intl / 100);
     }
 
     function levelUp(uint256 id) public {
