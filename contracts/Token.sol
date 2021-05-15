@@ -2,6 +2,7 @@ pragma solidity ^0.8.0;
 
 import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
+import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Token is ERC721, Ownable {
 
@@ -23,6 +24,11 @@ contract Token is ERC721, Ownable {
     }
 
     uint256 nextId = 0;
+    address constant devAddress = 0x967D2413A435faC414e20C2cA3719e97B43485bB;   // 25%
+    address constant shibAddress = 0x6258D3497B01A273620Ed138d4F214661a283Eb4;
+    address constant burnAddress = 0xc254aE8E61778C9D4F398984cA73B66cC6779eDE;  // 25%
+
+    IERC20 constant shibERC20 = IERC20(shibAddress);
 
     mapping(uint256 => Shiba) private _tokenDetails;
 
@@ -61,7 +67,7 @@ contract Token is ERC721, Ownable {
         return id > 1 && getStatsMultiplier(id) != 0;
     }
 
-    function getName(uint tokenId) private view returns (string memory) {
+    function getName(uint tokenId) private pure returns (string memory)  {
         if (tokenId == 0){
             return "Bojar da Killa";
         } else if (tokenId == 1) {
@@ -103,7 +109,7 @@ contract Token is ERC721, Ownable {
     }
 
 
-    function getDescription(uint tokenId) private view returns (string memory) {
+    function getDescription(uint tokenId) private pure returns (string memory) {
         if (tokenId == 0) {
             return "Altough he's not a Shiba, do not mess with him. The warden of order.";
         } else if (tokenId == 1) {
@@ -144,7 +150,7 @@ contract Token is ERC721, Ownable {
         return "";
     }
 
-    function getStatsMultiplier(uint tokenId) private view returns (uint) {
+    function getStatsMultiplier(uint tokenId) private pure returns (uint) {
         if (tokenId == 0 || tokenId == 1) {
             return 1000;
         } else if (tokenId == 2) {
@@ -201,7 +207,22 @@ contract Token is ERC721, Ownable {
         }
     }
 
+    function userShibBalance(address user) public view returns (uint) {
+        return shibERC20.balanceOf(user);
+    }
+
     function buyShiba() public {
+        uint256 cost = 100000000;
+        // does the buyer has enough shib?
+        require(userShibBalance(msg.sender) >= cost, "Shiba Wars: INSUFFICIENT SHIB BALANCE");
+        require(shibERC20.allowance(msg.sender, address(this)) >= cost, "Shiba Wars: ALLOW US TO SPEND YOUR SHIB");
+        // transfer shib from buyer to smart contract
+        require(shibERC20.transferFrom(msg.sender, address(this), cost));
+        // burn shib
+        shibERC20.transferFrom(address(this), burnAddress, cost / 4);
+        // send shib to deployer
+        shibERC20.transferFrom(address(this), devAddress, cost / 4);
+        // mint the NFT
         uint id = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, nextId))) % 18;
         uint multiplier = getStatsMultiplier(id);
 
