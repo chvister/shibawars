@@ -275,6 +275,13 @@ contract Token is ERC721, Ownable {
         _tokenDetails[id].dexterity += _tokenDetails[id].dexterityGain;
     }
 
+    function openPack(uint256 id) public {
+        // level up if power treat
+        // open pack
+        // burn the token
+        // mint random token
+    }
+
     function getTokenDetails(uint256 id) public view returns (Shiba memory){
         return _tokenDetails[id];
     }
