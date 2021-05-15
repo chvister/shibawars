@@ -1,10 +1,11 @@
 pragma solidity ^0.8.0;
 
 import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "../node_modules/@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
 import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract Token is ERC721, Ownable {
+contract Token is ERC721Burnable, Ownable {
 
     struct Shiba {
         uint strength;      // HP, armor
@@ -232,8 +233,8 @@ contract Token is ERC721, Ownable {
             uint256[] memory result = new uint256[](tokenCount);
             uint256 index = 0;
             for(uint256 i = 0; i < nextId; ++i) {
-                // if owner and not treat
-                if(ownerOf(i) == user) {
+                // if owner and exists
+                if(_exists(i) && ownerOf(i) == user) {
                     result[index++] = i;
                 }
             }
@@ -257,6 +258,11 @@ contract Token is ERC721, Ownable {
         require(shibERC20.transferFrom(address(this), burnAddress, cost / 4),"Shiba Wars: Can not burn");
         // send shib to deployer
         require(shibERC20.transferFrom(address(this), devAddress, cost / 4),"Shiba Wars: Can not send to dev");
+        
+        mintNFT(tokenId);
+    }
+
+    function mintNFT(uint tokenId) private {
         // mint the NFT
         uint multiplier = getStatsMultiplier(tokenId);
 
@@ -276,10 +282,40 @@ contract Token is ERC721, Ownable {
     }
 
     function openPack(uint256 id) public {
-        // level up if power treat
         // open pack
         // burn the token
+        require(ownerOf(id) == msg.sender, "Shiba Wars: YOU DO NOT OWN THIS TOKEN");
+        delete _tokenDetails[id];
+        burn(id);
         // mint random token
+        uint number = (uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp))) % 100000);
+        uint tokenId = 0;
+        if (number < 1) {
+            // woofmeister
+            tokenId = 2;
+        } else if (number < 11) {
+            // doge father
+            tokenId = 14;
+        } else if (number < 111) {
+            // golden doge
+            tokenId = 15;
+        } else if (number < 1111) {
+            // ryoshi
+            tokenId = 16;
+        } else if (number < 10000) {
+            // shiba inu
+            tokenId = 9;
+        } else if (number < 25000) {
+            // akita inu
+            tokenId = 10; 
+        } else if (number < 50000) {
+            // sanshu inu
+            tokenId = 11;
+        } else {
+            // shiba pup
+            tokenId = 12;
+        }
+        mintNFT(tokenId);
     }
 
     function getTokenDetails(uint256 id) public view returns (Shiba memory){
