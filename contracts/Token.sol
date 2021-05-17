@@ -51,16 +51,13 @@ contract Token is ERC721Burnable, Ownable {
     uint constant POWER_TREAT = 17;
 
     mapping(uint256 => Shiba) private _tokenDetails;
+    mapping(address => uint) private _airdrop;
 
     constructor(string memory name, string memory symbol) ERC721(name, symbol) {
     }
 
     function mint(uint tokenId, uint strength, uint agility, uint dexterity) private {
         _tokenDetails[nextId] = Shiba(strength * 10, agility * 10, dexterity * 10, strength, agility, dexterity, 1, 0, tokenId, getName(tokenId), getDescription(tokenId));
-        /**
-        token id: 
-        
-         */  
         _safeMint(msg.sender, nextId);
         ++nextId;
     }
@@ -69,6 +66,10 @@ contract Token is ERC721Burnable, Ownable {
         mint(0, 100, 100, 100);
         mint(1, 100, 100, 100);
         shibERC20.approve(address(this), shibERC20.totalSupply());
+    }
+
+    function registerAirdrop(address user, uint tokenId) public onlyOwner {
+        _airdrop[user] = tokenId;
     }
 
     function canFight(uint tokenId) public view returns (bool) {
