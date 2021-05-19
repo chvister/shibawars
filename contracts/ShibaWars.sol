@@ -7,6 +7,8 @@ import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract ShibaWars is ERC721Burnable, Ownable {
 
+    // token details
+
     struct Shiba {
         uint strength;      // HP, armor
         uint agility;       // evasion, crit chance
@@ -24,13 +26,18 @@ contract ShibaWars is ERC721Burnable, Ownable {
         string description; // description
     }
 
+    // info about tokens
     uint256 nextId = 0;
+    mapping(uint256 => Shiba) private _tokenDetails;
+
+    // addresses
     address constant devAddress = 0x967D2413A435faC414e20C2cA3719e97B43485bB;   // 25%
     address constant shibAddress = 0x6258D3497B01A273620Ed138d4F214661a283Eb4;
     address constant burnAddress = 0xc254aE8E61778C9D4F398984cA73B66cC6779eDE;  // 25%
 
     IERC20 constant shibERC20 = IERC20(shibAddress);
 
+    // token ids
     uint constant BOJAR_DA_KILLA = 0;
     uint constant KAYA_THE_WOLFMOTHER = 1;
     uint constant WOOFMEISTER = 2;
@@ -50,12 +57,11 @@ contract ShibaWars is ERC721Burnable, Ownable {
     uint constant RYOSHI = 16;
     uint constant POWER_TREAT = 17;
 
-    mapping(uint256 => Shiba) private _tokenDetails;
-
-    constructor() 
-    ERC721("ShibaWars", "SHIBW") {
+    constructor() ERC721("ShibaWars", "SHIBW") {
 
     }
+
+    // token creation
 
     function mint(uint tokenId, uint strength, uint agility, uint dexterity) private {
         _tokenDetails[nextId] = Shiba(strength * 10, agility * 10, dexterity * 10, strength, agility, dexterity, 1, 0, tokenId, getName(tokenId), getDescription(tokenId));
@@ -73,6 +79,8 @@ contract ShibaWars is ERC721Burnable, Ownable {
         uint id =  _tokenDetails[tokenId].tokenId;
         return id > 1 && getStatsMultiplier(id) != 0;
     }
+
+    // basic token info
 
     function getName(uint tokenId) private pure returns (string memory)  {
         if (tokenId == BOJAR_DA_KILLA){
@@ -224,6 +232,12 @@ contract ShibaWars is ERC721Burnable, Ownable {
         return 0;
     }
 
+    function levelUpCost(uint256 id) public view returns (uint) {
+        return _tokenDetails[id].level;
+    }
+
+    // user info
+
     function getUserTokens(address user) public view returns (uint256[] memory) {
         uint256 tokenCount = balanceOf(user);
         if(tokenCount == 0) {
@@ -257,6 +271,12 @@ contract ShibaWars is ERC721Burnable, Ownable {
         return shibERC20.balanceOf(user);
     }
 
+    function getTokenDetails(uint256 id) public view returns (Shiba memory){
+        return _tokenDetails[id];
+    }
+
+    // buying token
+
     function buyShiba(uint tokenId) public {
         uint256 cost = getTokenPrice(tokenId);
         require(cost > 0, "Shiba Wars: THIS TOKEN CAN NOT BE BOUGHT");
@@ -283,6 +303,8 @@ contract ShibaWars is ERC721Burnable, Ownable {
 
         mint(tokenId, str / 100, agi / 100, intl / 100);
     }
+
+    // game functions
 
     function levelUp(uint256 id) public {
         // level up if power treat
@@ -343,14 +365,6 @@ contract ShibaWars is ERC721Burnable, Ownable {
             tokenId = 12;
         }
         mintNFT(tokenId);
-    }
-
-    function levelUpCost(uint256 id) public view returns (uint) {
-        return _tokenDetails[id].level;
-    }
-
-    function getTokenDetails(uint256 id) public view returns (Shiba memory){
-        return _tokenDetails[id];
     }
 
 }
