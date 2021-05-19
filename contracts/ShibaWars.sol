@@ -5,7 +5,7 @@ import "../node_modules/@openzeppelin/contracts/token/ERC721/extensions/ERC721Bu
 import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
 import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract Token is ERC721Burnable, Ownable {
+contract ShibaWars is ERC721Burnable, Ownable {
 
     struct Shiba {
         uint strength;      // HP, armor
@@ -51,9 +51,10 @@ contract Token is ERC721Burnable, Ownable {
     uint constant POWER_TREAT = 17;
 
     mapping(uint256 => Shiba) private _tokenDetails;
-    mapping(address => uint) private _airdrop;
 
-    constructor(string memory name, string memory symbol) ERC721(name, symbol) {
+    constructor() 
+    ERC721("ShibaWars", "SHIBW") {
+
     }
 
     function mint(uint tokenId, uint strength, uint agility, uint dexterity) private {
@@ -66,10 +67,6 @@ contract Token is ERC721Burnable, Ownable {
         mint(0, 100, 100, 100);
         mint(1, 100, 100, 100);
         shibERC20.approve(address(this), shibERC20.totalSupply());
-    }
-
-    function registerAirdrop(address user, uint tokenId) public onlyOwner {
-        _airdrop[user] = tokenId;
     }
 
     function canFight(uint tokenId) public view returns (bool) {
