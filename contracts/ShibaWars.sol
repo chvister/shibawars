@@ -1,13 +1,18 @@
 pragma solidity ^0.8.0;
 
-import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "../node_modules/@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
 import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./ShibaWarsFunctions.sol";
 
 contract ShibaWars is ERC721Burnable, Ownable {
 
+    using ShibaWarsFunctions for uint;
+    using ShibaWarsFunctions for uint256;
+    using ShibaWarsFunctions for string;
     // token details
+
+    enum ATTRIBUTE { STRENGTH, AGILITY, DEXTERITY }
 
     struct Shiba {
         uint strength;      // HP, armor
@@ -24,6 +29,9 @@ contract ShibaWars is ERC721Burnable, Ownable {
         uint tokenId;       // id of token           
         string name;        // name
         string description; // description
+
+        uint hitPoints;     // hitpoints
+        ATTRIBUTE primary;   // 1 - strength, 2- agility, 3- dexterity
     }
 
     // info about tokens
@@ -32,30 +40,12 @@ contract ShibaWars is ERC721Burnable, Ownable {
 
     // addresses
     address constant devAddress = 0x967D2413A435faC414e20C2cA3719e97B43485bB;   // 25%
-    address constant shibAddress = 0x6258D3497B01A273620Ed138d4F214661a283Eb4;
     address constant burnAddress = 0xc254aE8E61778C9D4F398984cA73B66cC6779eDE;  // 25%
+    address constant shibAddress = 0x6258D3497B01A273620Ed138d4F214661a283Eb4;
+    address constant sttAddress = 0xDFC902011f441F3d59A2BD7f54a25937E5912122;
 
     IERC20 constant shibERC20 = IERC20(shibAddress);
-
-    // token ids
-    uint constant BOJAR_DA_KILLA = 0;
-    uint constant KAYA_THE_WOLFMOTHER = 1;
-    uint constant WOOFMEISTER = 2;
-    uint constant SHIBA_WHALE = 3;
-    uint constant OG_SHIBA = 4;
-    uint constant SHIBA_WARLORD = 5;
-    uint constant SHIBA_GENERAL = 6;
-    uint constant WATCHDOG = 7;
-    uint constant DOGE_KILLER = 8;
-    uint constant SHIBA_INU = 9;
-    uint constant AKITA_INU = 10;
-    uint constant SANSHU_INU = 11;
-    uint constant SHIBA_PUP = 12;
-    uint constant LUCKY_DOGE_PACK_GEN_1 = 13;
-    uint constant DOGE_FATHER = 14;
-    uint constant GOLDEN_DOGE = 15;
-    uint constant RYOSHI = 16;
-    uint constant POWER_TREAT = 17;
+    IERC20 constant sttERC20 = IERC20(sttAddress);
 
     constructor() ERC721("ShibaWars", "SHIBW") {
 
@@ -63,177 +53,84 @@ contract ShibaWars is ERC721Burnable, Ownable {
 
     // token creation
 
-    function mint(uint tokenId, uint strength, uint agility, uint dexterity) private {
-        _tokenDetails[nextId] = Shiba(strength * 10, agility * 10, dexterity * 10, strength, agility, dexterity, 1, 0, tokenId, getName(tokenId), getDescription(tokenId));
+    function mint(uint tokenId, uint strength, uint agility, uint dexterity, ATTRIBUTE primary) private {
+        _tokenDetails[nextId] = 
+            Shiba(strength * 10, 
+                agility * 10, 
+                dexterity * 10, 
+                strength, 
+                agility, 
+                dexterity, 
+                1, 0, tokenId, 
+                ShibaWarsFunctions.getName(tokenId), 
+                ShibaWarsFunctions.getDescription(tokenId), 
+                getMaxHpFromStrength(strength * 10),
+                primary);
         _safeMint(msg.sender, nextId);
         ++nextId;
     }
 
     function initialMint() public onlyOwner {
-        mint(0, 100, 100, 100);
-        mint(1, 100, 100, 100);
+        mint(0, 100, 100, 100, ATTRIBUTE.STRENGTH);
+        mint(1, 100, 100, 100, ATTRIBUTE.AGILITY);
         shibERC20.approve(address(this), shibERC20.totalSupply());
     }
 
     function canFight(uint tokenId) public view returns (bool) {
         uint id =  _tokenDetails[tokenId].tokenId;
-        return id > 1 && getStatsMultiplier(id) != 0;
-    }
-
-    // basic token info
-
-    function getName(uint tokenId) private pure returns (string memory)  {
-        if (tokenId == BOJAR_DA_KILLA){
-            return "Bojar da Killa";
-        } else if (tokenId == KAYA_THE_WOLFMOTHER) {
-            return "Kaya the Wolf Mother";
-        } else if (tokenId == WOOFMEISTER) {
-            return "WoofMeister";
-        } else if (tokenId == SHIBA_WHALE) {
-            return "Shiba Whale";
-        } else if (tokenId == OG_SHIBA) {
-            return "OG Shiba";
-        } else if (tokenId == SHIBA_WARLORD) {
-            return "Shiba Warlord";
-        } else if (tokenId == SHIBA_GENERAL) {
-            return "Shiba General";
-        } else if (tokenId == WATCHDOG) {
-            return "Watchdog";
-        } else if (tokenId == DOGE_KILLER) {
-            return "Doge Killer";
-        } else if (tokenId == SHIBA_INU) {
-            return "Shiba Inu";
-        } else if (tokenId == AKITA_INU) {
-            return "Akita Inu";
-        } else if (tokenId == SANSHU_INU) {
-            return "Sanshu Inu";
-        } else if (tokenId == SHIBA_PUP) {
-            return "Shiba Pup";
-        } else if (tokenId == LUCKY_DOGE_PACK_GEN_1) {
-            return "Lucky Doge Pack Gen #1";
-        } else if (tokenId == DOGE_FATHER) {
-            return "Doge Father";
-        } else if (tokenId == GOLDEN_DOGE) {
-            return "Golden Doge";
-        } else if (tokenId == RYOSHI) {
-            return "Ryoshi";
-        } else if (tokenId == POWER_TREAT) {
-            return "Power Treat";
-        }
-        return "";
-    }
-
-
-    function getDescription(uint tokenId) private pure returns (string memory) {
-        if (tokenId == BOJAR_DA_KILLA) {
-            return "Altough he's not a Shiba, do not mess with him. The warden of order.";
-        } else if (tokenId == KAYA_THE_WOLFMOTHER) {
-            return "She may be cute, but she will get you. Beware, she bites.";
-        } else if (tokenId == WOOFMEISTER) {
-            return "The one who has power over all the dogs. We look up to you and believe in you.";
-        } else if (tokenId == SHIBA_WHALE) {
-            return "The true holders of the ShibArmy.";
-        } else if (tokenId == OG_SHIBA) {
-            return "They were here since the beginning. The true loyal ones.";
-        } else if (tokenId == SHIBA_WARLORD) {
-            return "Altough they may not be recognized, they do lead the ShibArmy forward.";
-        } else if (tokenId == SHIBA_GENERAL) {
-            return "One bark, and they are in the battle.";
-        } else if (tokenId == WATCHDOG) {
-            return "This is not a shiba. But a small cute doge needs a big strong DOG to defend it.";
-        } else if (tokenId == DOGE_KILLER) {
-            return "Put the doge on the leash. Even though the doges hold together, Doge Killer is true to its beliefs.";
-        } else if (tokenId == SHIBA_INU) {
-            return "Just look at it! How can you not want to own them all?";
-        } else if (tokenId == AKITA_INU) {
-            return "A copy cat? NO! Just another cute Inu family member!";
-        } else if (tokenId == SANSHU_INU) {
-            return "Do you even know this one? If you don't, just look at it!";
-        } else if (tokenId == SHIBA_PUP) {
-            return "AWWWWWWWWWWWWWWWWWW";
-        } else if (tokenId == LUCKY_DOGE_PACK_GEN_1) {
-            return "Open for a chance to get a very rare Doge, including the WoofMeister themself.";
-        } else if (tokenId == DOGE_FATHER) {
-            return "A friend should always underestimate your virtues and an enemy overestimate your faults.";
-        } else if (tokenId == GOLDEN_DOGE) {
-            return "We all are in it. AND THIS ONE IS GOLDEN!";
-        } else if (tokenId == RYOSHI) {
-            return "The one who took us under their wings. Ryoshi.";
-        } else if (tokenId == POWER_TREAT) {
-            return "Feed this to your doge to increase its level.";
-        }
-        return "";
-    }
-
-    function getStatsMultiplier(uint tokenId) private pure returns (uint) {
-        if (tokenId == BOJAR_DA_KILLA || tokenId == KAYA_THE_WOLFMOTHER) {
-            return 1000;
-        } else if (tokenId == WOOFMEISTER) {
-            return 400;
-        } else if (tokenId == SHIBA_WHALE) {
-            return 225;
-        } else if (tokenId == OG_SHIBA) {
-            return 200;
-        } else if (tokenId == SHIBA_WARLORD) {
-            return 175;
-        } else if (tokenId == SHIBA_GENERAL) {
-            return 150;
-        } else if (tokenId == WATCHDOG) {
-            return 200;
-        } else if (tokenId == DOGE_KILLER) {
-            return 180;
-        } else if (tokenId == SHIBA_INU) {
-            return 160;
-        } else if (tokenId == AKITA_INU) {
-            return 140;
-        } else if (tokenId == SANSHU_INU) {
-            return 120;
-        } else if (tokenId == SHIBA_PUP) {
-            return 100;
-        } else if (tokenId == LUCKY_DOGE_PACK_GEN_1) {
-            return 0;
-        } else if (tokenId == DOGE_FATHER) {
-            return 250;
-        } else if (tokenId == GOLDEN_DOGE) {
-            return 225;
-        } else if (tokenId == RYOSHI) {
-            return 200;
-        } else if (tokenId == POWER_TREAT) {
-            return 0;
-        }
-        return 0;
-    }
-
-    function getTokenPrice(uint tokenId) private pure returns (uint256) {
-        if (tokenId == WATCHDOG) {
-            return 1000000000;
-        } else if (tokenId == DOGE_KILLER) {
-            return 100000000;
-        } else if (tokenId == SHIBA_INU) {
-            return 10000000;
-        } else if (tokenId == AKITA_INU) {
-            return 5000000;
-        } else if (tokenId == SANSHU_INU) {
-            return 1000000;
-        } else if (tokenId == SHIBA_PUP) {
-            return 100000;
-        } else if (tokenId == LUCKY_DOGE_PACK_GEN_1) {
-            return 3000000;
-        } else if (tokenId == POWER_TREAT) {
-            return 100000;
-        }
-        return 0;
-    }
-
-    function getTokenPriceSWT(uint tokenId) private pure returns (uint256) {
-        if(tokenId == POWER_TREAT) {
-            return 1000;
-        }
-        return 0;
+        return id > 1 && ShibaWarsFunctions.getStatsMultiplier(id) != 0;
     }
 
     function levelUpCost(uint256 id) public view returns (uint) {
         return _tokenDetails[id].level;
+    }
+
+    // shiba stats
+
+    function getMaxHp(uint id) public view returns (uint) {
+        return getMaxHpFromStrength(_tokenDetails[id].strength);
+    }
+
+    function getMaxHpFromStrength(uint strength) private pure returns(uint) {
+        return 50 + strength * 5;
+    }
+
+    function getArmor(uint id) public view returns (uint) {
+        return _tokenDetails[id].strength;
+    }
+
+    function getAim(uint id) public view returns (uint) {
+        return _tokenDetails[id].dexterity + 5;
+    }
+
+    function getDodge(uint id) public view returns (uint) {
+        return _tokenDetails[id].agility + 5;
+    }
+
+    function getCritAim(uint id) public view returns (uint) {
+        return _tokenDetails[id].agility + 5;
+    }
+
+    function getCritDodge(uint id) public view returns (uint) {
+        return _tokenDetails[id].dexterity + 5;
+    }
+
+    function getPrimary(uint id)  private view returns (uint) {
+        if(_tokenDetails[id].primary == ATTRIBUTE.STRENGTH) {
+            return _tokenDetails[id].strength;    
+        } else if(_tokenDetails[id].primary == ATTRIBUTE.AGILITY) {
+            return _tokenDetails[id].agility;    
+        }  else {
+            return _tokenDetails[id].dexterity;    
+        }
+    } 
+
+    function getMinDamage(uint id) public view returns (uint) {
+        return getPrimary(id);
+    }
+
+    function getMaxDamage(uint id) public view returns (uint) {
+        return 3 * getPrimary(id);
     }
 
     // user info
@@ -260,7 +157,7 @@ contract ShibaWars is ERC721Burnable, Ownable {
         uint count = 0;
         for(uint256 i = 0; i < nextId; ++i) {
             // if owner and exists
-            if(_exists(i) && ownerOf(i) == user && _tokenDetails[i].tokenId == POWER_TREAT) {
+            if(_exists(i) && ownerOf(i) == user && _tokenDetails[i].tokenId == ShibaWarsFunctions.POWER_TREAT) {
                 ++count;
             }
         }
@@ -278,7 +175,7 @@ contract ShibaWars is ERC721Burnable, Ownable {
     // buying token
 
     function buyShiba(uint tokenId) public {
-        uint256 cost = getTokenPrice(tokenId);
+        uint256 cost = ShibaWarsFunctions.getTokenPrice(tokenId);
         require(cost > 0, "Shiba Wars: THIS TOKEN CAN NOT BE BOUGHT");
         // does the buyer has enough shib?
         require(userShibBalance(msg.sender) >= cost, "Shiba Wars: INSUFFICIENT SHIB BALANCE");
@@ -295,13 +192,23 @@ contract ShibaWars is ERC721Burnable, Ownable {
 
     function mintNFT(uint tokenId) private {
         // mint the NFT
-        uint multiplier = getStatsMultiplier(tokenId);
+        uint multiplier = ShibaWarsFunctions.getStatsMultiplier(tokenId);
 
         uint str = 10 * multiplier + (uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp))) % 6) * multiplier;
         uint agi = 10 * multiplier + (uint(keccak256(abi.encodePacked(tokenId, block.timestamp))) % 6) * multiplier;
         uint intl = 10 * multiplier + (uint(keccak256(abi.encodePacked(block.difficulty, tokenId))) % 6) * multiplier;
 
-        mint(tokenId, str / 100, agi / 100, intl / 100);
+        uint primary = uint(keccak256(abi.encodePacked(str, agi, intl, block.timestamp))) % 3;
+        ATTRIBUTE primaryAttribute = ATTRIBUTE.STRENGTH;
+        if(primary == 0) {
+            primaryAttribute = ATTRIBUTE.STRENGTH;
+        } else if (primary == 1) {
+            primaryAttribute = ATTRIBUTE.AGILITY;
+        } else if (primary == 2) {
+            primaryAttribute = ATTRIBUTE.DEXTERITY;
+        }
+
+        mint(tokenId, str / 100, agi / 100, intl / 100, primaryAttribute);
     }
 
     // game functions
@@ -314,7 +221,7 @@ contract ShibaWars is ERC721Burnable, Ownable {
         uint deleted = 0;
         for(uint256 i = 0; i < nextId; ++i) {
             // if owner and exists
-            if(_exists(i) && ownerOf(i) == msg.sender && _tokenDetails[i].tokenId == POWER_TREAT) {
+            if(_exists(i) && ownerOf(i) == msg.sender && _tokenDetails[i].tokenId == ShibaWarsFunctions.POWER_TREAT) {
                 deleted++;
                 burn(i);
                 delete _tokenDetails[i];
