@@ -2,11 +2,15 @@ const ShibaWars = artifacts.require("ShibaWars");
 const ShibaInu = artifacts.require("ShibaInu");
 const STT = artifacts.require("ShibaTreatToken");
 const ShibaWarsFunctions = artifacts.require("ShibaWarsFunctions");
+const ShibaWarsEntity = artifacts.require("ShibaWarsEntity");
 
 module.exports = async function (deployer) {
-  // deploy lib
+  // deploy libs
   await deployer.deploy(ShibaWarsFunctions);
   await deployer.link(ShibaWarsFunctions, ShibaWars);  
+
+  await deployer.deploy(ShibaWarsEntity);
+  await deployer.link(ShibaWarsEntity, ShibaWars);
 
   // create shiba wars smart contract
   await deployer.deploy(ShibaWars);

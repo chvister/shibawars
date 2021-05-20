@@ -4,39 +4,20 @@ import "../node_modules/@openzeppelin/contracts/token/ERC721/extensions/ERC721Bu
 import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
 import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./ShibaWarsFunctions.sol";
+import "./ShibaWarsEntity.sol";
 
 contract ShibaWars is ERC721Burnable, Ownable {
 
     using ShibaWarsFunctions for uint;
     using ShibaWarsFunctions for uint256;
     using ShibaWarsFunctions for string;
-    // token details
 
-    enum ATTRIBUTE { STRENGTH, AGILITY, DEXTERITY }
-
-    struct Shiba {
-        uint strength;      // HP, armor
-        uint agility;       // evasion, crit chance
-        uint dexterity;     // aim, crit chance decrease
-
-        uint strengthGain;  // strength gain per level
-        uint agilityGain;   // agility gain per level
-        uint dexterityGain; // dexterity gain per level
-
-        uint level;         // level
-        uint arenaScore;    // score in arena
-
-        uint tokenId;       // id of token           
-        string name;        // name
-        string description; // description
-
-        uint hitPoints;     // hitpoints
-        ATTRIBUTE primary;   // 1 - strength, 2- agility, 3- dexterity
-    }
+    using ShibaWarsEntity for ShibaWarsEntity.Shiba;
+    using ShibaWarsEntity for ShibaWarsEntity.ATTRIBUTE;
 
     // info about tokens
     uint256 nextId = 0;
-    mapping(uint256 => Shiba) private _tokenDetails;
+    mapping(uint256 => ShibaWarsEntity.Shiba) private _tokenDetails;
 
     // addresses
     address constant devAddress = 0x967D2413A435faC414e20C2cA3719e97B43485bB;   // 25%
@@ -53,9 +34,9 @@ contract ShibaWars is ERC721Burnable, Ownable {
 
     // token creation
 
-    function mint(uint tokenId, uint strength, uint agility, uint dexterity, ATTRIBUTE primary) private {
+    function mint(uint tokenId, uint strength, uint agility, uint dexterity, ShibaWarsEntity.ATTRIBUTE primary) private {
         _tokenDetails[nextId] = 
-            Shiba(strength * 10, 
+            ShibaWarsEntity.Shiba(strength * 10, 
                 agility * 10, 
                 dexterity * 10, 
                 strength, 
@@ -71,8 +52,8 @@ contract ShibaWars is ERC721Burnable, Ownable {
     }
 
     function initialMint() public onlyOwner {
-        mint(0, 100, 100, 100, ATTRIBUTE.STRENGTH);
-        mint(1, 100, 100, 100, ATTRIBUTE.AGILITY);
+        mint(0, 100, 100, 100, ShibaWarsEntity.ATTRIBUTE.STRENGTH);
+        mint(1, 100, 100, 100, ShibaWarsEntity.ATTRIBUTE.AGILITY);
         shibERC20.approve(address(this), shibERC20.totalSupply());
     }
 
@@ -116,9 +97,9 @@ contract ShibaWars is ERC721Burnable, Ownable {
     }
 
     function getPrimary(uint id)  private view returns (uint) {
-        if(_tokenDetails[id].primary == ATTRIBUTE.STRENGTH) {
+        if(_tokenDetails[id].primary == ShibaWarsEntity.ATTRIBUTE.STRENGTH) {
             return _tokenDetails[id].strength;    
-        } else if(_tokenDetails[id].primary == ATTRIBUTE.AGILITY) {
+        } else if(_tokenDetails[id].primary == ShibaWarsEntity.ATTRIBUTE.AGILITY) {
             return _tokenDetails[id].agility;    
         }  else {
             return _tokenDetails[id].dexterity;    
@@ -168,7 +149,7 @@ contract ShibaWars is ERC721Burnable, Ownable {
         return shibERC20.balanceOf(user);
     }
 
-    function getTokenDetails(uint256 id) public view returns (Shiba memory){
+    function getTokenDetails(uint256 id) public view returns (ShibaWarsEntity.Shiba memory){
         return _tokenDetails[id];
     }
 
@@ -199,13 +180,13 @@ contract ShibaWars is ERC721Burnable, Ownable {
         uint intl = 10 * multiplier + (uint(keccak256(abi.encodePacked(block.difficulty, tokenId))) % 6) * multiplier;
 
         uint primary = uint(keccak256(abi.encodePacked(str, agi, intl, block.timestamp))) % 3;
-        ATTRIBUTE primaryAttribute = ATTRIBUTE.STRENGTH;
+        ShibaWarsEntity.ATTRIBUTE primaryAttribute = ShibaWarsEntity.ATTRIBUTE.STRENGTH;
         if(primary == 0) {
-            primaryAttribute = ATTRIBUTE.STRENGTH;
+            primaryAttribute = ShibaWarsEntity.ATTRIBUTE.STRENGTH;
         } else if (primary == 1) {
-            primaryAttribute = ATTRIBUTE.AGILITY;
+            primaryAttribute = ShibaWarsEntity.ATTRIBUTE.AGILITY;
         } else if (primary == 2) {
-            primaryAttribute = ATTRIBUTE.DEXTERITY;
+            primaryAttribute = ShibaWarsEntity.ATTRIBUTE.DEXTERITY;
         }
 
         mint(tokenId, str / 100, agi / 100, intl / 100, primaryAttribute);
@@ -248,30 +229,40 @@ contract ShibaWars is ERC721Burnable, Ownable {
         uint tokenId = 0;
         if (number < 1) {
             // woofmeister
-            tokenId = 2;
+            tokenId = ShibaWarsFunctions.WOOFMEISTER;
         } else if (number < 11) {
             // doge father
-            tokenId = 14;
+            tokenId = ShibaWarsFunctions.DOGE_FATHER;
         } else if (number < 111) {
             // golden doge
-            tokenId = 15;
+            tokenId = ShibaWarsFunctions.GOLDEN_DOGE;
         } else if (number < 1111) {
             // ryoshi
-            tokenId = 16;
+            tokenId = ShibaWarsFunctions.RYOSHI;
         } else if (number < 10000) {
             // shiba inu
-            tokenId = 9;
+            tokenId = ShibaWarsFunctions.SHIBA_INU;
         } else if (number < 25000) {
             // akita inu
-            tokenId = 10; 
+            tokenId = ShibaWarsFunctions.AKITA_INU; 
         } else if (number < 50000) {
             // sanshu inu
-            tokenId = 11;
+            tokenId = ShibaWarsFunctions.SANSHU_INU;
         } else {
             // shiba pup
-            tokenId = 12;
+            tokenId = ShibaWarsFunctions.SHIBA_PUP;
         }
         mintNFT(tokenId);
+    }
+
+    function feed(uint256 id) public {
+        // need allowance for treat token
+        uint treatTokensNeeded = getMaxHp(id) - _tokenDetails[id].hitPoints;
+        require(treatTokensNeeded > 0, "Shiba Wars: This Shiba is not hungry");
+        require(sttERC20.balanceOf(msg.sender) >= treatTokensNeeded, "Shiba Wars: Not enough treat tokens to feed this Shiba");
+        require(sttERC20.allowance(msg.sender, address(this)) >= treatTokensNeeded, "Shiba Wars: Allow us to spend treat tokens");
+        sttERC20.transferFrom(msg.sender, address(this), treatTokensNeeded);
+        _tokenDetails[id].hitPoints = getMaxHp(id);
     }
 
 }
