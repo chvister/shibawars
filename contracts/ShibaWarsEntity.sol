@@ -5,6 +5,8 @@ library ShibaWarsEntity {
     enum ATTRIBUTE { STRENGTH, AGILITY, DEXTERITY }
 
     struct Shiba {
+        uint id;            // uinque id of token
+
         uint strength;      // HP, armor
         uint agility;       // evasion, crit chance
         uint dexterity;     // aim, crit chance decrease
@@ -16,7 +18,7 @@ library ShibaWarsEntity {
         uint level;         // level
         uint arenaScore;    // score in arena
 
-        uint tokenId;       // id of token           
+        uint tokenId;       // id of shiba    
         string name;        // name
         string description; // description
 

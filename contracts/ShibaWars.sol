@@ -36,7 +36,9 @@ contract ShibaWars is ERC721Burnable, Ownable {
 
     function mint(uint tokenId, uint strength, uint agility, uint dexterity, ShibaWarsEntity.ATTRIBUTE primary) private {
         _tokenDetails[nextId] = 
-            ShibaWarsEntity.Shiba(strength * 10, 
+            ShibaWarsEntity.Shiba(
+                nextId,
+                strength * 10, 
                 agility * 10, 
                 dexterity * 10, 
                 strength, 
@@ -263,6 +265,84 @@ contract ShibaWars is ERC721Burnable, Ownable {
         require(sttERC20.allowance(msg.sender, address(this)) >= treatTokensNeeded, "Shiba Wars: Allow us to spend treat tokens");
         sttERC20.transferFrom(msg.sender, address(this), treatTokensNeeded);
         _tokenDetails[id].hitPoints = getMaxHp(id);
+    }
+
+    function fight(uint256 firstShiba, uint256 secondShiba) private {
+        // the one with higher agility goes first
+        bool firstAttacks = _tokenDetails[firstShiba].agility >= _tokenDetails[secondShiba].agility;
+        ShibaWarsEntity.Shiba memory attacker;
+        ShibaWarsEntity.Shiba memory defender;
+        if (firstAttacks) {
+            attacker = _tokenDetails[firstShiba];
+            defender = _tokenDetails[secondShiba];
+        } else {
+            attacker = _tokenDetails[secondShiba];
+            defender = _tokenDetails[firstShiba];
+        }
+        uint damageAttacker = 0;
+        uint damageDefender = 0;
+        uint attackerHp = _tokenDetails[attacker.id].hitPoints;
+        uint defenderHp = _tokenDetails[defender.id].hitPoints;
+        // 8 rounds
+        uint round = 0;
+        while(round < 8 && attackerHp > 1 && defenderHp > 1) {
+            // attacker attacks
+            if(ShibaWarsFunctions.hit(getAim(attacker.id), getDodge(defender.id))) {
+                // if hit damage is dealt
+                uint damage = ShibaWarsFunctions.getDamage(getMinDamage(attacker.id), getMaxDamage(attacker.id));
+                bool isCritical = ShibaWarsFunctions.criticalHit(getCritAim(attacker.id), getCritDodge(defender.id));
+                if (isCritical) {
+                    damage *= 3;
+                    damage /= 2;
+                }
+                uint armor = getArmor(defender.id);
+                damage -= armor;
+                if (damage < 0) {
+                    damage = 0;
+                } else if (damage >= defenderHp) {
+                    damage = defenderHp - 1;
+                }
+                defenderHp -= damage;
+                damageAttacker += damage;
+                // if dead -> end
+                if(defenderHp == 1) {
+                    break;
+                }
+            }
+            // defender attacks
+            if(ShibaWarsFunctions.hit(getAim(defender.id), getDodge(attacker.id))) {
+                // if hit damage is dealt
+                uint damage = ShibaWarsFunctions.getDamage(getMinDamage(defender.id), getMaxDamage(defender.id));
+                bool isCritical = ShibaWarsFunctions.criticalHit(getCritAim(defender.id), getCritDodge(attacker.id));
+                if (isCritical) {
+                    damage *= 3;
+                    damage /= 2;
+                }
+                uint armor = getArmor(attacker.id);
+                damage -= armor;
+                if (damage < 0) {
+                    damage = 0;
+                } else if (damage >= attackerHp) {
+                    damage = attackerHp - 1;
+                }
+                attackerHp -= damage;
+                damageDefender += damage;
+                // if dead -> end
+                if(attackerHp == 1) {
+                    break;
+                }
+            }
+            // next round
+            ++round;
+        }
+        _tokenDetails[attacker.id].hitPoints -= damageDefender;
+        _tokenDetails[defender.id].hitPoints -= damageAttacker;
+        // attacker wins if defender fainted or attacker did more damage
+        if(defenderHp == 1 || damageAttacker > damageDefender) {
+            ++_tokenDetails[attacker.id].arenaScore;
+        } else {
+            ++_tokenDetails[defender.id].arenaScore;
+        }
     }
 
 }
