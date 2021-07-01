@@ -1,6 +1,6 @@
 pragma solidity ^0.8.0;
 
-library ShibaWarsFunctions {
+library ShibaWarsUtils {
 
     // token ids
     uint constant BOJAR_DA_KILLA = 0;
@@ -145,21 +145,21 @@ library ShibaWarsFunctions {
 
     function getTokenPrice(uint tokenId) public pure returns (uint256) {
         if (tokenId == WATCHDOG) {
-            return 1000000000;
+            return 100000000 * 10 ** 18;
         } else if (tokenId == DOGE_KILLER) {
-            return 100000000;
+            return 20000000 * 10 ** 18;
         } else if (tokenId == SHIBA_INU) {
-            return 10000000;
+            return 10000000 * 10 ** 18;
         } else if (tokenId == AKITA_INU) {
-            return 5000000;
+            return 5000000 * 10 ** 18;
         } else if (tokenId == SANSHU_INU) {
-            return 1000000;
+            return 2500000 * 10 ** 18;
         } else if (tokenId == SHIBA_PUP) {
-            return 100000;
+            return 500000 * 10 ** 18;
         } else if (tokenId == LUCKY_DOGE_PACK_GEN_1) {
-            return 3000000;
+            return 4000000 * 10 ** 18;
         } else if (tokenId == POWER_TREAT) {
-            return 100000;
+            return 150000 * 10 ** 18;
         }
         return 0;
     }

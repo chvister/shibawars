@@ -1,9 +1,9 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const CONTRACT_ADDRESS = "0x0B0aa55e4CF8371D43193f120eB68AB5552cb7F5";
-const SHIB_ADDRESS = "0x6258D3497B01A273620Ed138d4F214661a283Eb4";
-const SHIB_SUPPLY = 1000000000000000;
+const CONTRACT_ADDRESS = "0x536382D6321C830DBb519Cc07fe5cb0736547F45";
+const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
+const SHIB_SUPPLY = "1000000000000000000000000000000000";
 
 async function init() {
     try {
@@ -49,7 +49,7 @@ async function renderGame(){
     });
 
     let userBalance = await contract.methods.userShibBalance(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
-    $("#shib-balance").html(numberWithCommas(userBalance));
+    $("#shib-balance").html(numberWithCommas(userBalance ));
 
     let prizepool = await contract.methods.userShibBalance(CONTRACT_ADDRESS).call({from: ethereum.selectedAddress});
     $("#shib-prizepool").html(numberWithCommas(prizepool));
@@ -105,7 +105,7 @@ async function getContract(){
 
 function getAbi(){
     return new Promise((res)=>{
-        $.getJSON("Token.json", ((json) => {
+        $.getJSON("ShibaWars.json", ((json) => {
             res(json.abi);
         }))
     })

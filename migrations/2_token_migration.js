@@ -1,13 +1,13 @@
 const ShibaWars = artifacts.require("ShibaWars");
 const ShibaInu = artifacts.require("ShibaInu");
 const STT = artifacts.require("ShibaTreatToken");
-const ShibaWarsFunctions = artifacts.require("ShibaWarsFunctions");
+const ShibaWarsUtils = artifacts.require("ShibaWarsUtils");
 const ShibaWarsEntity = artifacts.require("ShibaWarsEntity");
 
-module.exports = async function (deployer) {
+module.exports = async function (deployer, networks, accounts) {
   // deploy libs
-  await deployer.deploy(ShibaWarsFunctions);
-  await deployer.link(ShibaWarsFunctions, ShibaWars);  
+  await deployer.deploy(ShibaWarsUtils);
+  await deployer.link(ShibaWarsUtils, ShibaWars);  
 
   await deployer.deploy(ShibaWarsEntity);
   await deployer.link(ShibaWarsEntity, ShibaWars);
@@ -23,6 +23,6 @@ module.exports = async function (deployer) {
   tokenInstance = await STT.deployed();
   await tokenInstance.transferOwnership(shibaWarsAddress);
 
-  //await deployer.deploy(ShibaInu, "Shiba Inu", "SHIB", 1000000000000000, deployer["networks"]["development"]["from"]);
-  //let tokenInstance = await ShibaInu.deployed();
+  /*await deployer.deploy(ShibaInu, {from : accounts[0]});
+  let tokenInstance2 = await ShibaInu.deployed();*/
 };
