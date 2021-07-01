@@ -133,9 +133,9 @@ library ShibaWarsUtils {
             return 0;
         } else if (tokenId == DOGE_FATHER) {
             return 250;
-        } else if (tokenId == GOLDEN_DOGE) {
-            return 225;
         } else if (tokenId == RYOSHI) {
+            return 225;
+        } else if (tokenId == GOLDEN_DOGE) {
             return 200;
         } else if (tokenId == POWER_TREAT) {
             return 0;
@@ -143,23 +143,35 @@ library ShibaWarsUtils {
         return 0;
     }
 
+    function millions(uint count) private pure returns (uint) {
+        return count * 10 ** 6;
+    }
+
+    function thousand(uint count) private pure returns (uint) {
+        return count * 10 ** 3;
+    }
+
+    function tokens(uint count) private pure returns (uint) {
+        return count * 10 ** 18;
+    }
+
     function getTokenPrice(uint tokenId) public pure returns (uint256) {
         if (tokenId == WATCHDOG) {
-            return 100000000 * 10 ** 18;
+            return tokens(millions(100));
         } else if (tokenId == DOGE_KILLER) {
-            return 20000000 * 10 ** 18;
+            return tokens(millions(20));
         } else if (tokenId == SHIBA_INU) {
-            return 10000000 * 10 ** 18;
+            return tokens(millions(10));
         } else if (tokenId == AKITA_INU) {
-            return 5000000 * 10 ** 18;
+            return tokens(millions(5));
         } else if (tokenId == SANSHU_INU) {
-            return 2500000 * 10 ** 18;
+            return tokens(millions(25) / 10);
         } else if (tokenId == SHIBA_PUP) {
-            return 500000 * 10 ** 18;
+            return tokens(thousand(500));
         } else if (tokenId == LUCKY_DOGE_PACK_GEN_1) {
-            return 4000000 * 10 ** 18;
+            return tokens(millions(4));
         } else if (tokenId == POWER_TREAT) {
-            return 150000 * 10 ** 18;
+            return tokens(thousand(150));
         }
         return 0;
     }
@@ -171,19 +183,19 @@ library ShibaWarsUtils {
         return 0;
     }
 
-    function getDamage(uint minDamage, uint maxDamage) public view returns (uint) {
-        return (uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp))) % (maxDamage - minDamage + 1)) + minDamage;
+    function getDamage(uint minDamage, uint maxDamage, uint seed) public view returns (uint) {
+        return (uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, seed, minDamage, maxDamage))) % (maxDamage - minDamage + 1)) + minDamage;
     }
 
-    function hit(uint aim, uint dodge) public view returns (bool) {
-        uint aimValue = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, aim))) % aim;
-        uint dodgeValue = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, dodge))) % dodge;
+    function hit(uint aim, uint dodge, uint seed) public view returns (bool) {
+        uint aimValue = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, aim, seed))) % aim;
+        uint dodgeValue = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, dodge, seed))) % dodge;
         return aimValue > dodgeValue;
     }
 
-    function criticalHit(uint critAim, uint critDodge) public view returns (bool) {
-        uint aimValue = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, critAim))) % critAim;
-        uint dodgeValue = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, critDodge))) % (critDodge * 10);
+    function criticalHit(uint critAim, uint critDodge, uint seed) public view returns (bool) {
+        uint aimValue = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, critAim, seed))) % critAim;
+        uint dodgeValue = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, critDodge, seed))) % (critDodge * 10);
         return aimValue > dodgeValue;
     }
 

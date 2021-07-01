@@ -13,22 +13,20 @@ contract ShibaWars is ERC721Burnable, Ownable {
     using ShibaWarsEntity for ShibaWarsEntity.ATTRIBUTE;
 
     // info about tokens
-    uint256 nextId = 0;
+    uint256 private nextId = 0;
     mapping(uint256 => ShibaWarsEntity.Shiba) private _tokenDetails;
 
     // addresses
-    address constant devAddress = 0x967D2413A435faC414e20C2cA3719e97B43485bB;   // 25%
-    address constant burnAddress = 0xc254aE8E61778C9D4F398984cA73B66cC6779eDE;  // 25%
-    address constant shibAddress = 0xAC27f67D1D2321FBa609107d41Ff603c43fF6931;
-    address constant sttAddress = 0xDFC902011f441F3d59A2BD7f54a25937E5912122;
+    address private devAddress;
 
-    IShibaInu constant shibaInu = IShibaInu(shibAddress);
-    IERC20 constant sttERC20 = IERC20(sttAddress);
+    IShibaInu constant shibaInu = IShibaInu(0xAC27f67D1D2321FBa609107d41Ff603c43fF6931);
+    IERC20 constant sttERC20 = IERC20(0xDFC902011f441F3d59A2BD7f54a25937E5912122);
 
     uint256 private matchmakerReward;
 
     constructor() ERC721("ShibaWars", "SHIBW") {
-
+        devAddress = msg.sender;
+        matchmakerReward = 0;
     }
 
     // token creation
@@ -53,8 +51,16 @@ contract ShibaWars is ERC721Burnable, Ownable {
     }
 
     function initialMint() public onlyOwner {
-        mint(0, 100, 100, 100, ShibaWarsEntity.ATTRIBUTE.STRENGTH);
-        mint(1, 100, 100, 100, ShibaWarsEntity.ATTRIBUTE.AGILITY);
+        mint(0, 10000, 10000, 10000, ShibaWarsEntity.ATTRIBUTE.STRENGTH);
+        mint(1, 10000, 10000, 10000, ShibaWarsEntity.ATTRIBUTE.AGILITY);
+    }
+
+    function getPrizePool() public view returns (uint256) {
+        return shibaInu.balanceOf(address(this)) - matchmakerReward;
+    }
+
+    function getMatchMakerReward() public view returns (uint256) {
+        return matchmakerReward;
     }
 
     function canFight(uint tokenId) public view returns (bool) {
@@ -168,7 +174,7 @@ contract ShibaWars is ERC721Burnable, Ownable {
         // send shib to deployer
         require(shibaInu.transfer(devAddress, cost / 4),"Shiba Wars: Can not send to dev");
         // 3% to matchmaking
-        matchmakerReward += (cost * 100) / 3;
+        matchmakerReward += ((cost * 100) - (cost * 97)) / 100;
 
         mintNFT(tokenId);
     }
@@ -226,10 +232,8 @@ contract ShibaWars is ERC721Burnable, Ownable {
         require(ownerOf(id) == msg.sender, "Shiba Wars: YOU DO NOT OWN THIS TOKEN");
         delete _tokenDetails[id];
         burn(id);
-        // be sure the token is burned
-        require(ownerOf(id) == address(0), "Shiba Wars: FAILED TO OPEN PACK");
         // mint random token
-        uint number = (uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp))) % 100000);
+        uint number = (uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp))) % 10000);
         uint tokenId = 0;
         if (number < 1) {
             // woofmeister
@@ -237,19 +241,19 @@ contract ShibaWars is ERC721Burnable, Ownable {
         } else if (number < 11) {
             // doge father
             tokenId = ShibaWarsUtils.DOGE_FATHER;
-        } else if (number < 111) {
-            // golden doge
-            tokenId = ShibaWarsUtils.GOLDEN_DOGE;
-        } else if (number < 1111) {
+        } else if (number < 100) {
             // ryoshi
             tokenId = ShibaWarsUtils.RYOSHI;
-        } else if (number < 10000) {
+        } else if (number < 500) {
+            // golden doge
+            tokenId = ShibaWarsUtils.GOLDEN_DOGE;
+        } else if (number < 1500) {
             // shiba inu
             tokenId = ShibaWarsUtils.SHIBA_INU;
-        } else if (number < 25000) {
+        } else if (number < 3000) {
             // akita inu
             tokenId = ShibaWarsUtils.AKITA_INU; 
-        } else if (number < 50000) {
+        } else if (number < 5500) {
             // sanshu inu
             tokenId = ShibaWarsUtils.SANSHU_INU;
         } else {
@@ -289,10 +293,10 @@ contract ShibaWars is ERC721Burnable, Ownable {
         uint round = 0;
         while(round < 8 && attackerHp > 1 && defenderHp > 1) {
             // attacker attacks
-            if(ShibaWarsUtils.hit(getAim(attacker.id), getDodge(defender.id))) {
+            if(ShibaWarsUtils.hit(getAim(attacker.id), getDodge(defender.id), round)) {
                 // if hit damage is dealt
-                uint damage = ShibaWarsUtils.getDamage(getMinDamage(attacker.id), getMaxDamage(attacker.id));
-                bool isCritical = ShibaWarsUtils.criticalHit(getCritAim(attacker.id), getCritDodge(defender.id));
+                uint damage = ShibaWarsUtils.getDamage(getMinDamage(attacker.id), getMaxDamage(attacker.id), round);
+                bool isCritical = ShibaWarsUtils.criticalHit(getCritAim(attacker.id), getCritDodge(defender.id), round);
                 if (isCritical) {
                     damage *= 3;
                     damage /= 2;
@@ -312,10 +316,10 @@ contract ShibaWars is ERC721Burnable, Ownable {
                 }
             }
             // defender attacks
-            if(ShibaWarsUtils.hit(getAim(defender.id), getDodge(attacker.id))) {
+            if(ShibaWarsUtils.hit(getAim(defender.id), getDodge(attacker.id), round + 8)) {
                 // if hit damage is dealt
-                uint damage = ShibaWarsUtils.getDamage(getMinDamage(defender.id), getMaxDamage(defender.id));
-                bool isCritical = ShibaWarsUtils.criticalHit(getCritAim(defender.id), getCritDodge(attacker.id));
+                uint damage = ShibaWarsUtils.getDamage(getMinDamage(defender.id), getMaxDamage(defender.id), round + 8);
+                bool isCritical = ShibaWarsUtils.criticalHit(getCritAim(defender.id), getCritDodge(attacker.id), round + 8);
                 if (isCritical) {
                     damage *= 3;
                     damage /= 2;

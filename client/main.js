@@ -1,7 +1,7 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const CONTRACT_ADDRESS = "0x536382D6321C830DBb519Cc07fe5cb0736547F45";
+const CONTRACT_ADDRESS = "0xaA8bae81D421E139d473D1464583C750d73A74cE";
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const SHIB_SUPPLY = "1000000000000000000000000000000000";
 
@@ -35,7 +35,27 @@ async function renderGame(){
         $("#buy-shiba-row").hide();
     }
 
+    let shibContrat = await getShibContract();
+
     let contract = await getContract();
+    
+    let userBalance = await shibContrat.methods.balanceOf(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
+    if(userBalance != 0) {
+        $("#shib-balance").html(numberWithCommas(userBalance.substring(0, userBalance.length - 18)));
+    }
+
+    let prizepool = await contract.methods.getPrizePool().call({from: ethereum.selectedAddress});
+    if(prizepool != 0) {
+        $("#shib-prizepool").html(numberWithCommas(prizepool.substring(0, prizepool.length - 18)));
+    }
+
+    let matchmaker = await contract.methods.getMatchMakerReward().call({from: ethereum.selectedAddress});
+    if(matchmaker != 0) {
+        $("#shib-matchmaker").html(numberWithCommas(matchmaker.substring(0, matchmaker.length - 18)));
+    }
+
+    $("#login_button").hide();
+
     let userShibas = await contract.methods.getUserTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
     if(Array.length == 0){
         return;
@@ -45,19 +65,12 @@ async function renderGame(){
 
     userShibas.forEach(async (shibaId) => {
         let data = await contract.methods.getTokenDetails(shibaId).call({from: ethereum.selectedAddress});
-        renderShiba(shibaId, data, userPowerTreats);
+        let shibaMaxHp = await contract.methods.getMaxHp(shibaId).call({from: ethereum.selectedAddress});
+        renderShiba(shibaId, data, userPowerTreats, shibaMaxHp);
     });
-
-    let userBalance = await contract.methods.userShibBalance(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
-    $("#shib-balance").html(numberWithCommas(userBalance ));
-
-    let prizepool = await contract.methods.userShibBalance(CONTRACT_ADDRESS).call({from: ethereum.selectedAddress});
-    $("#shib-prizepool").html(numberWithCommas(prizepool));
-
-    $("#login_button").hide();
 }
 
-function renderShiba(id, data, userPowerTreats){
+function renderShiba(id, data, userPowerTreats, shibaMaxHp){
     // 13 doge pack
     // 17 power treat
     let card = 
@@ -69,9 +82,10 @@ function renderShiba(id, data, userPowerTreats){
         <div>Description: <span class="shiba-description">${data.description}</span></div>`;
     if(data.tokenId != 13 && data.tokenId != 17) {
         card += `<div>Level: <span class="shiba-level">${data.level}</span></div>
-        <div>Strength: <span class="shiba-strength">${parseFloat (data.strength) / 10}</span></div>
-        <div>Agility: <span class="shiba-agility">${parseFloat (data.agility) / 10}</span></div>
-        <div>Dexterity: <span idclass="shiba-dexterity">${parseFloat (data.dexterity) / 10}</span></div>`;
+        <div>Strength: <span class="shiba-strength">${parseFloat (data.strength) / 100}</span></div>
+        <div>Agility: <span class="shiba-agility">${parseFloat (data.agility) / 100}</span></div>
+        <div>Dexterity: <span idclass="shiba-dexterity">${parseFloat (data.dexterity) / 100}</span></div>
+        <div>Hitpoints: <span idclass="shiba-hp">${parseFloat (data.hitPoints) / 100} / ${parseFloat (shibaMaxHp) / 100}</span></div>`;
         if(userPowerTreats == data.level) {
             card += `<button id="btn-level-up-${id}" class="btn btn-primary btn-block">Level up</button>`;
         }
