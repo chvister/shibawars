@@ -41,7 +41,7 @@ contract ShibaWars is ERC721 {
     }
 
     // MINT NEW TOKEN
-    function mint(address owner, uint tokenId, uint strength, uint agility, uint dexterity, ShibaWarsEntity.ATTRIBUTE primary) public isShibaWars(msg.sender) {
+    function _mint(address owner, uint tokenId, uint strength, uint agility, uint dexterity, ShibaWarsEntity.ATTRIBUTE primary) private {
         _tokenDetails[nextId] = 
             ShibaWarsEntity.Shiba(
                 nextId,
@@ -61,10 +61,14 @@ contract ShibaWars is ERC721 {
         ++nextId;
     }
 
+    function mint(address owner, uint tokenId, uint strength, uint agility, uint dexterity, ShibaWarsEntity.ATTRIBUTE primary) public isShibaWars(msg.sender) {
+        _mint(owner, tokenId, strength, agility, dexterity, primary);
+    }
+
     // MINTS FIRST TWO TOKENS. CAN ONLY BE CALLED BY DEV BUT THESE DOGES CAN NOT FIGHT IN ARENA
     function initialMint() public isDev(msg.sender) {
-        mint(msg.sender, 0, 10000, 10000, 10000, ShibaWarsEntity.ATTRIBUTE.STRENGTH);
-        mint(msg.sender, 1, 10000, 10000, 10000, ShibaWarsEntity.ATTRIBUTE.AGILITY);
+        _mint(msg.sender, 0, 10000, 10000, 10000, ShibaWarsEntity.ATTRIBUTE.STRENGTH);
+        _mint(msg.sender, 1, 10000, 10000, 10000, ShibaWarsEntity.ATTRIBUTE.AGILITY);
     }
 
     // SETS ADDRESS OF ARENA CONTRACT. CAN ONLY BE CALLED BY DEV

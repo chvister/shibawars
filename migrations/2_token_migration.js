@@ -11,12 +11,16 @@ module.exports = async function (deployer, networks, accounts) {
   // deploy libs
   await deployer.deploy(ShibaWarsUtils);
   await deployer.link(ShibaWarsUtils, ShibaWars);  
+  await deployer.link(ShibaWarsUtils, ShibaWarsFactory);
 
   await deployer.deploy(ShibaWarsEntity);
   await deployer.link(ShibaWarsEntity, ShibaWars);
+  await deployer.link(ShibaWarsEntity, ShibaWarsArena);
 
   await deployer.deploy(ShibaMath);
   await deployer.link(ShibaMath, ShibaWars);
+  await deployer.link(ShibaMath, ShibaWarsArena);
+  await deployer.link(ShibaMath, ShibaWarsFactory);
 
   // create shiba wars smart contract
   await deployer.deploy(ShibaWars);
@@ -40,6 +44,10 @@ module.exports = async function (deployer, networks, accounts) {
   await deployer.deploy(STT, shibaWarsAddress);
   let stt = await STT.deployed();
   await stt.transferOwnership(shibaWarsAddress);
+
+  console.log("wars: " + shibaWarsAddress);
+  console.log("arena: " + arenaAddress);
+  console.log("factory: " + factoryAddress);
 
   /*await deployer.deploy(ShibaInu, {from : accounts[0]});
   let tokenInstance2 = await ShibaInu.deployed();*/
