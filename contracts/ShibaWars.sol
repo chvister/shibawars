@@ -4,7 +4,6 @@ import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./ShibaMath.sol";
 import "./ShibaWarsUtils.sol";
 import "./ShibaWarsEntity.sol";
-import "./IShibaTreatToken.sol";
 
 contract ShibaWars is ERC721 {
 
@@ -17,13 +16,12 @@ contract ShibaWars is ERC721 {
     // info about tokens
     uint256 private nextId = 0;
     mapping(uint256 => ShibaWarsEntity.Shiba) private _tokenDetails;
+    mapping(address => uint256) private shibaTreatTokens;
 
     // addresses
     address private devAddress;
     address private shibaWarsArena;
     address private factoryAddress;
-
-    IShibaTreatToken constant shibaTreatToken = IShibaTreatToken(0xDFC902011f441F3d59A2BD7f54a25937E5912122);
 
     modifier isDev(address caller) {
         require(caller == devAddress, "Shiba Wars: Caller is not a dev");
@@ -89,7 +87,7 @@ contract ShibaWars is ERC721 {
 
     // COST OF LEVEL UP IN POWER TREATS
     function levelUpCost(uint256 id) public view returns (uint) {
-        return _tokenDetails[id].level;
+        return _tokenDetails[id].level.mul(1500000);
     }
 
     // MAX HP OF DOGE
@@ -119,18 +117,6 @@ contract ShibaWars is ERC721 {
             }
             return result;
         }
-    }
-
-    // NUMBER OF USER'S POWER TREAT TOKENS
-    function userPowerTreatTokens(address user) public view returns (uint) {
-        uint count = 0;
-        for(uint256 i = 0; i < nextId; ++i) {
-            // if owner and exists
-            if(_exists(i) && ownerOf(i) == user && _tokenDetails[i].tokenId == ShibaWarsUtils.POWER_TREAT) {
-                ++count;
-            }
-        }
-        return count;
     }
 
     // DETAILS OF TOKEN
@@ -163,23 +149,11 @@ contract ShibaWars is ERC721 {
     function levelUp(uint256 id) public {
         // level up if power treat
         require(ownerOf(id) == msg.sender, "Shiba Wars: YOU DO NOT OWN THIS TOKEN");
-        require(userPowerTreatTokens(msg.sender) >= levelUpCost(id), "Shiba Wars: NOT ENOUGH POWER TREATS TO UPGRADE THIS SHIBA");
-
-        uint deleted = 0;
-        for(uint256 i = 0; i < nextId; ++i) {
-            // if owner and exists
-            if(_exists(i) && ownerOf(i) == msg.sender && _tokenDetails[i].tokenId == ShibaWarsUtils.POWER_TREAT) {
-                ++deleted;
-                _burn(i);
-                delete _tokenDetails[i];
-            }
-            if(deleted == levelUpCost(id)) {
-                break;
-            }
-        }
-
+        require(shibaTreatTokens[msg.sender] >= levelUpCost(id), "Shiba Wars: NOT ENOUGH POWER TREATS TO UPGRADE THIS SHIBA");
+        shibaTreatTokens[msg.sender] = shibaTreatTokens[msg.sender].sub(levelUpCost(id));
         ++_tokenDetails[id].level;
         _tokenDetails[id].strength += _tokenDetails[id].strengthGain;
+        _tokenDetails[id].hitPoints = getMaxHpFromStrength(_tokenDetails[id].strength);
         _tokenDetails[id].agility += _tokenDetails[id].agilityGain;
         _tokenDetails[id].dexterity += _tokenDetails[id].dexterityGain;
     }
@@ -215,10 +189,13 @@ contract ShibaWars is ERC721 {
         // need allowance for treat token
         uint treatTokensNeeded = getMaxHp(id).sub(_tokenDetails[id].hitPoints);
         require(treatTokensNeeded > 0, "Shiba Wars: This Shiba is not hungry");
-        require(shibaTreatToken.balanceOf(msg.sender) >= treatTokensNeeded, "Shiba Wars: Not enough treat tokens to feed this Shiba");
-        require(shibaTreatToken.allowance(msg.sender, address(this)) >= treatTokensNeeded, "Shiba Wars: Allow us to spend treat tokens");
-        shibaTreatToken.transferFrom(msg.sender, address(this), treatTokensNeeded);
+        require(shibaTreatTokens[msg.sender] >= treatTokensNeeded, "Shiba Wars: Not enough treat tokens to feed this Shiba");
+        shibaTreatTokens[msg.sender] = shibaTreatTokens[msg.sender].sub(treatTokensNeeded);
         _tokenDetails[id].hitPoints = getMaxHp(id);
+    }
+
+    function addTreatTokens(address user, uint256 count) public isShibaWars(msg.sender) {
+        shibaTreatTokens[user] = shibaTreatTokens[user].add(count);
     }
 
 }

@@ -51,6 +51,24 @@ contract ShibaWarsFactory {
         shibaWars.mintNFT(msg.sender, tokenId);
     }
 
+    // BUY SHIBA TREAT TOKENS
+    function buyTreatTokens() public {
+        uint256 cost = 150000 * 10 ** 18;
+        // does the buyer has enough shib?
+        require(shibaInu.balanceOf(msg.sender) >= cost, "Shiba Wars: INSUFFICIENT SHIB BALANCE");
+        require(shibaInu.allowance(msg.sender, address(this)) >= cost, "Shiba Wars: ALLOW US TO SPEND YOUR SHIB");
+        // transfer shib from buyer to smart contract
+        require(shibaInu.transferFrom(msg.sender, address(this), cost), "Shiba Wars: Can not transfer tokens to the smart contract");
+        // burn shib
+        shibaInu.burn(cost.div(4));
+        // send shib to deployer
+        require(shibaInu.transfer(devAddress, cost.div(4)),"Shiba Wars: Can not send to dev");
+        // 3% to matchmaking
+        matchmakerReward += cost.ratio(3, 100);
+
+        shibaWars.addTreatTokens(msg.sender, 1500000);
+    } 
+
     // OPEN LUCKY DOGE PACK
     function openPack(uint256 id) public {
         // open pack

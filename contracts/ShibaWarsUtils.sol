@@ -20,7 +20,6 @@ library ShibaWarsUtils {
     uint constant DOGE_FATHER = 14;
     uint constant GOLDEN_DOGE = 15;
     uint constant RYOSHI = 16;
-    uint constant POWER_TREAT = 17;
 
     function getName(uint tokenId) public pure returns (string memory)  {
         if (tokenId == BOJAR_DA_KILLA){
@@ -57,8 +56,6 @@ library ShibaWarsUtils {
             return "Golden Doge";
         } else if (tokenId == RYOSHI) {
             return "Ryoshi";
-        } else if (tokenId == POWER_TREAT) {
-            return "Power Treat";
         }
         return "";
     }
@@ -98,9 +95,7 @@ library ShibaWarsUtils {
             return "We all are in it. AND THIS ONE IS GOLDEN!";
         } else if (tokenId == RYOSHI) {
             return "The one who took us under their wings. Ryoshi.";
-        } else if (tokenId == POWER_TREAT) {
-            return "Feed this to your doge to increase its level.";
-        }
+        } 
         return "";
     }
 
@@ -137,9 +132,7 @@ library ShibaWarsUtils {
             return 225;
         } else if (tokenId == GOLDEN_DOGE) {
             return 200;
-        } else if (tokenId == POWER_TREAT) {
-            return 0;
-        }
+        } 
         return 0;
     }
 
@@ -170,15 +163,6 @@ library ShibaWarsUtils {
             return tokens(thousand(500));
         } else if (tokenId == LUCKY_DOGE_PACK_GEN_1) {
             return tokens(millions(4));
-        } else if (tokenId == POWER_TREAT) {
-            return tokens(thousand(150));
-        }
-        return 0;
-    }
-
-    function getTokenPriceSTT(uint tokenId) public pure returns (uint256) {
-        if(tokenId == POWER_TREAT) {
-            return 1000;
         }
         return 0;
     }

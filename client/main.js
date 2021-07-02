@@ -236,10 +236,6 @@ $("#btn-buy-13").click( () => {
     buyShiba(13);
 });
 
-$("#btn-buy-17").click( () => { 
-    buyShiba(17);
-});
-
 $("#btn-approve-shib").click( () => { 
     approveShib();
 })
