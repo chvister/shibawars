@@ -183,20 +183,4 @@ library ShibaWarsUtils {
         return 0;
     }
 
-    function getDamage(uint minDamage, uint maxDamage, uint seed) public view returns (uint) {
-        return (uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, seed, minDamage, maxDamage))) % (maxDamage - minDamage + 1)) + minDamage;
-    }
-
-    function hit(uint aim, uint dodge, uint seed) public view returns (bool) {
-        uint aimValue = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, aim, seed))) % aim;
-        uint dodgeValue = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, dodge, seed))) % dodge;
-        return aimValue > dodgeValue;
-    }
-
-    function criticalHit(uint critAim, uint critDodge, uint seed) public view returns (bool) {
-        uint aimValue = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, critAim, seed))) % critAim;
-        uint dodgeValue = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, critDodge, seed))) % (critDodge * 10);
-        return aimValue > dodgeValue;
-    }
-
 }

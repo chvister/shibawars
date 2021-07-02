@@ -23,7 +23,13 @@ library ShibaWarsEntity {
         string description; // description
 
         uint hitPoints;     // hitpoints
+        bool inArena;       // if is in arena
         ATTRIBUTE primary;   // 1 - strength, 2- agility, 3- dexterity
+    }
+
+    struct ArenaQueue {
+        uint minScore;
+        uint maxScore;
     }
 
 }
