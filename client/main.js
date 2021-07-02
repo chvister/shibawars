@@ -1,7 +1,10 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const CONTRACT_ADDRESS = "0xaA8bae81D421E139d473D1464583C750d73A74cE";
+const SHIBA_WARS = "0x3e656b220262127A984bCD5763F4a92e2e889543";
+const ARENA = "0xfe30caCCC0975798A44B026ea59b5b5991AdbbE6";
+const FACTORY = "0x0e0D024b4b3F9cf92560CAF759E15C27C05c8Cd8";
+
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const SHIB_SUPPLY = "1000000000000000000000000000000000";
 
@@ -37,35 +40,36 @@ async function renderGame(){
 
     let shibContrat = await getShibContract();
 
-    let contract = await getContract();
+    let shibaWars = await getContract();
+    let factoryContract = await getFactoryContract();
     
     let userBalance = await shibContrat.methods.balanceOf(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
     if(userBalance != 0) {
         $("#shib-balance").html(numberWithCommas(userBalance.substring(0, userBalance.length - 18)));
     }
 
-    let prizepool = await contract.methods.getPrizePool().call({from: ethereum.selectedAddress});
+    let prizepool = await factoryContract.methods.getPrizePool().call({from: ethereum.selectedAddress});
     if(prizepool != 0) {
         $("#shib-prizepool").html(numberWithCommas(prizepool.substring(0, prizepool.length - 18)));
     }
 
-    let matchmaker = await contract.methods.getMatchMakerReward().call({from: ethereum.selectedAddress});
+    let matchmaker = await factoryContract.methods.getMatchMakerReward().call({from: ethereum.selectedAddress});
     if(matchmaker != 0) {
         $("#shib-matchmaker").html(numberWithCommas(matchmaker.substring(0, matchmaker.length - 18)));
     }
 
     $("#login_button").hide();
 
-    let userShibas = await contract.methods.getUserTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
+    let userShibas = await shibaWars.methods.getUserTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
     if(Array.length == 0){
         return;
     }
 
-    let userPowerTreats = await contract.methods.userPowerTreatTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
+    let userPowerTreats = await shibaWars.methods.userPowerTreatTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
 
     userShibas.forEach(async (shibaId) => {
-        let data = await contract.methods.getTokenDetails(shibaId).call({from: ethereum.selectedAddress});
-        let shibaMaxHp = await contract.methods.getMaxHp(shibaId).call({from: ethereum.selectedAddress});
+        let data = await shibaWars.methods.getTokenDetails(shibaId).call({from: ethereum.selectedAddress});
+        let shibaMaxHp = await shibaWars.methods.getMaxHp(shibaId).call({from: ethereum.selectedAddress});
         renderShiba(shibaId, data, userPowerTreats, shibaMaxHp);
     });
 }
@@ -113,13 +117,44 @@ function numberWithCommas(x) {
 }
 
 async function getContract(){
-    let abi = await getAbi();
-    return new web3.eth.Contract(abi, CONTRACT_ADDRESS);
+    let abi = await shibaWarsAbi();
+    return new web3.eth.Contract(abi, SHIBA_WARS);
 }
 
-function getAbi(){
+async function getArenaContract(){
+    let abi = await arenaAbi();
+    return new web3.eth.Contract(abi, ARENA);
+}
+
+async function getFactoryContract(){
+    let abi = await factoryAbi();
+    return new web3.eth.Contract(abi, FACTORY);
+}
+
+async function getShibContract(){
+    let abi = await shibaAbi();
+    return new web3.eth.Contract(abi, SHIB_ADDRESS);
+}
+
+function shibaWarsAbi(){
     return new Promise((res)=>{
         $.getJSON("ShibaWars.json", ((json) => {
+            res(json.abi);
+        }))
+    })
+}
+
+function arenaAbi(){
+    return new Promise((res)=>{
+        $.getJSON("ShibaWarsArena.json", ((json) => {
+            res(json.abi);
+        }))
+    })
+}
+
+function factoryAbi(){
+    return new Promise((res)=>{
+        $.getJSON("ShibaWarsFactory.json", ((json) => {
             res(json.abi);
         }))
     })
@@ -131,11 +166,6 @@ function shibaAbi(){
             res(json.abi);
         }))
     })
-}
-
-async function getShibContract(){
-    let abi = await shibaAbi();
-    return new web3.eth.Contract(abi, SHIB_ADDRESS);
 }
 
 async function levelUp(shibaId) {
@@ -157,7 +187,7 @@ async function openPack(shibaId) {
 }
 
 async function buyShiba(tokenId){
-    let contract = await getContract();
+    let contract = await getFactoryContract();
     contract.methods.buyShiba(tokenId).send({from:  ethereum.selectedAddress})
         .on("receipt", (() => {
             renderGame();
@@ -166,7 +196,7 @@ async function buyShiba(tokenId){
 
 async function approveShib(){
     let contract = await getShibContract();
-    contract.methods.approve(CONTRACT_ADDRESS, SHIB_SUPPLY).send({from: ethereum.selectedAddress})
+    contract.methods.approve(FACTORY, SHIB_SUPPLY).send({from: ethereum.selectedAddress})
         .on("receipt", (() => {
             renderGame();
         }));
@@ -174,7 +204,7 @@ async function approveShib(){
 
 async function getAllowance() {
     let contract = await getShibContract();
-    let allowance = await contract.methods.allowance(ethereum.selectedAddress, CONTRACT_ADDRESS).call({from: ethereum.selectedAddress});
+    let allowance = await contract.methods.allowance(ethereum.selectedAddress, FACTORY).call({from: ethereum.selectedAddress});
     return allowance;
 }
 
