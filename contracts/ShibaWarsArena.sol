@@ -149,4 +149,10 @@ contract ShibaWarsArena {
         return aimValue > dodgeValue;
     }
 
+    // RETURN TRUE IF THIS DOGE CAN FIGHT IN ARENA
+    function canFight(uint tokenId) public view returns (bool) {
+        uint id =  shibaWars.getTokenDetails(tokenId).tokenId;
+        return id > 1 && id != 13;
+    }
+
 }

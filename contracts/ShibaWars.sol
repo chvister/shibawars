@@ -79,12 +79,6 @@ contract ShibaWars is ERC721 {
         factoryAddress = factoryAddress_;
     }
 
-    // RETURN TRUE IF THIS DOGE CAN FIGHT IN ARENA
-    function canFight(uint tokenId) public view returns (bool) {
-        uint id =  _tokenDetails[tokenId].tokenId;
-        return id > 1 && ShibaWarsUtils.getStatsMultiplier(id) != 0;
-    }
-
     // COST OF LEVEL UP IN POWER TREATS
     function levelUpCost(uint256 id) public view returns (uint) {
         return _tokenDetails[id].level.mul(1500000);
@@ -196,6 +190,10 @@ contract ShibaWars is ERC721 {
 
     function addTreatTokens(address user, uint256 count) public isShibaWars(msg.sender) {
         shibaTreatTokens[user] = shibaTreatTokens[user].add(count);
+    }
+
+    function getUserTreatTokens(address user) public view returns (uint) {
+        return shibaTreatTokens[user];
     }
 
 }

@@ -1,9 +1,9 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const SHIBA_WARS = "0x3e656b220262127A984bCD5763F4a92e2e889543";
-const ARENA = "0xfe30caCCC0975798A44B026ea59b5b5991AdbbE6";
-const FACTORY = "0x0e0D024b4b3F9cf92560CAF759E15C27C05c8Cd8";
+const SHIBA_WARS = "0xFBCc3a32d1Fd797475e8FE1A3872d19325fD35b5";
+const ARENA = "0x881ed6274e19dF8094168945303De75A0dbB72Aa";
+const FACTORY = "0xd291551CD05e42259125c622A4e55f7Dd49b30b5";
 
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const SHIB_SUPPLY = "1000000000000000000000000000000000";
@@ -59,13 +59,14 @@ async function renderGame(){
     }
 
     $("#login_button").hide();
+    
+    let userPowerTreats = await shibaWars.methods.getUserTreatTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
+    $("#stt-balance").html(numberWithCommas(userPowerTreats));
 
     let userShibas = await shibaWars.methods.getUserTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
     if(Array.length == 0){
         return;
     }
-
-    let userPowerTreats = await shibaWars.methods.userPowerTreatTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
 
     userShibas.forEach(async (shibaId) => {
         let data = await shibaWars.methods.getTokenDetails(shibaId).call({from: ethereum.selectedAddress});
@@ -76,7 +77,6 @@ async function renderGame(){
 
 function renderShiba(id, data, userPowerTreats, shibaMaxHp){
     // 13 doge pack
-    // 17 power treat
     let card = 
     `<div class="col-md-4 card id="pet-${id}">
     <img class="card-img-top" src="img/token-${data.tokenId}.png">
@@ -84,13 +84,13 @@ function renderShiba(id, data, userPowerTreats, shibaMaxHp){
         <div>Id: <span class="shiba-id">${id}</span></div>
         <div>Name: <span class="shiba-name">${data.name}</span></div>
         <div>Description: <span class="shiba-description">${data.description}</span></div>`;
-    if(data.tokenId != 13 && data.tokenId != 17) {
+    if(data.tokenId != 13) {
         card += `<div>Level: <span class="shiba-level">${data.level}</span></div>
         <div>Strength: <span class="shiba-strength">${parseFloat (data.strength) / 100}</span></div>
         <div>Agility: <span class="shiba-agility">${parseFloat (data.agility) / 100}</span></div>
         <div>Dexterity: <span idclass="shiba-dexterity">${parseFloat (data.dexterity) / 100}</span></div>
         <div>Hitpoints: <span idclass="shiba-hp">${parseFloat (data.hitPoints) / 100} / ${parseFloat (shibaMaxHp) / 100}</span></div>`;
-        if(userPowerTreats == data.level) {
+        if(userPowerTreats >= data.level * 1500000) {
             card += `<button id="btn-level-up-${id}" class="btn btn-primary btn-block">Level up</button>`;
         }
     } else if (data.tokenId == 13) {
@@ -101,7 +101,7 @@ function renderShiba(id, data, userPowerTreats, shibaMaxHp){
     let element = $.parseHTML(card);
     $("#shibas-row").append(element);
 
-    if(data.tokenId != 13 && data.tokenId != 17) {
+    if(data.tokenId != 13) {
         $(`#btn-level-up-${id}`).click( () => { 
             levelUp(id);
         });
@@ -178,7 +178,7 @@ async function levelUp(shibaId) {
 }
 
 async function openPack(shibaId) {
-    let contract = await getContract();
+    let contract = await getFactoryContract();
     contract.methods.openPack(shibaId).send({from: ethereum.selectedAddress})
         .on("receipt", (() => {
             console.log("level up");
@@ -189,6 +189,14 @@ async function openPack(shibaId) {
 async function buyShiba(tokenId){
     let contract = await getFactoryContract();
     contract.methods.buyShiba(tokenId).send({from:  ethereum.selectedAddress})
+        .on("receipt", (() => {
+            renderGame();
+        }));
+}
+
+async function buyTreatTokens(){
+    let contract = await getFactoryContract();
+    contract.methods.buyTreatTokens().send({from:  ethereum.selectedAddress})
         .on("receipt", (() => {
             renderGame();
         }));
@@ -234,6 +242,10 @@ $("#btn-buy-12").click( () => {
 
 $("#btn-buy-13").click( () => { 
     buyShiba(13);
+});
+
+$("#btn-buy-treat-tokens").click( () => { 
+    buyTreatTokens();
 });
 
 $("#btn-approve-shib").click( () => { 
