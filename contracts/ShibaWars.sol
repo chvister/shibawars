@@ -16,7 +16,7 @@ contract ShibaWars is ERC721 {
     // info about tokens
     uint256 private nextId = 0;
     mapping(uint256 => ShibaWarsEntity.Shiba) private _tokenDetails;
-    mapping(address => uint256) private shibaTreatTokens;
+    mapping(address => uint256) private shibaTreats;
 
     // addresses
     address private devAddress;
@@ -141,10 +141,10 @@ contract ShibaWars is ERC721 {
 
     // LEVEL UP SHIBA
     function levelUp(uint256 id) public {
-        // level up if power treat
+        // level up if enough shiba treats
         require(ownerOf(id) == msg.sender, "Shiba Wars: YOU DO NOT OWN THIS TOKEN");
-        require(shibaTreatTokens[msg.sender] >= levelUpCost(id), "Shiba Wars: NOT ENOUGH POWER TREATS TO UPGRADE THIS SHIBA");
-        shibaTreatTokens[msg.sender] = shibaTreatTokens[msg.sender].sub(levelUpCost(id));
+        require(shibaTreats[msg.sender] >= levelUpCost(id), "Shiba Wars: NOT ENOUGH POWER TREATS TO UPGRADE THIS SHIBA");
+        shibaTreats[msg.sender] = shibaTreats[msg.sender].sub(levelUpCost(id));
         ++_tokenDetails[id].level;
         _tokenDetails[id].strength += _tokenDetails[id].strengthGain;
         _tokenDetails[id].hitPoints = getMaxHpFromStrength(_tokenDetails[id].strength);
@@ -180,20 +180,19 @@ contract ShibaWars is ERC721 {
 
     // FEED YOUR SHIBA
     function feed(uint256 id) public {
-        // need allowance for treat token
         uint treatTokensNeeded = getMaxHp(id).sub(_tokenDetails[id].hitPoints);
         require(treatTokensNeeded > 0, "Shiba Wars: This Shiba is not hungry");
-        require(shibaTreatTokens[msg.sender] >= treatTokensNeeded, "Shiba Wars: Not enough treat tokens to feed this Shiba");
-        shibaTreatTokens[msg.sender] = shibaTreatTokens[msg.sender].sub(treatTokensNeeded);
+        require(shibaTreats[msg.sender] >= treatTokensNeeded, "Shiba Wars: Not enough treat tokens to feed this Shiba");
+        shibaTreats[msg.sender] = shibaTreats[msg.sender].sub(treatTokensNeeded);
         _tokenDetails[id].hitPoints = getMaxHp(id);
     }
 
-    function addTreatTokens(address user, uint256 count) public isShibaWars(msg.sender) {
-        shibaTreatTokens[user] = shibaTreatTokens[user].add(count);
+    function addTreats(address user, uint256 count) public isShibaWars(msg.sender) {
+        shibaTreats[user] = shibaTreats[user].add(count);
     }
 
     function getUserTreatTokens(address user) public view returns (uint) {
-        return shibaTreatTokens[user];
+        return shibaTreats[user];
     }
 
 }

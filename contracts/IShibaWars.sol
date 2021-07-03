@@ -18,6 +18,6 @@ interface IShibaWars {
 
     function openPack(uint256 id, address caller) external;
 
-    function addTreatTokens(address user, uint256 count) external;
+    function addTreats(address user, uint256 count) external;
 
 }

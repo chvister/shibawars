@@ -15,7 +15,10 @@ contract ShibaWarsFactory {
 
     address private devAddress;
 
+    uint256 private arenaReward;
     uint256 private matchmakerReward;
+    uint256 private devReward;
+    uint256 private burnAmount;
 
     constructor(address shibaWars_) {
         devAddress = msg.sender;
@@ -32,41 +35,45 @@ contract ShibaWarsFactory {
         return matchmakerReward;
     }
 
-    // BUY DOGE FROM SHOP
-    function buyShiba(uint tokenId) public {
-        uint256 cost = ShibaWarsUtils.getTokenPrice(tokenId);
+    // SEND DEV REWARD AND BURNS BURN AMOUNT
+    function redeemDevReward() public {
+        // burn shib
+        shibaInu.burn(burnAmount);
+        // pay the dev
+        shibaInu.transfer(devAddress, devReward);
+    }
+
+    function payTheContract(uint256 cost) public {
         require(cost > 0, "Shiba Wars: THIS TOKEN CAN NOT BE BOUGHT");
         // does the buyer has enough shib?
         require(shibaInu.balanceOf(msg.sender) >= cost, "Shiba Wars: INSUFFICIENT SHIB BALANCE");
         require(shibaInu.allowance(msg.sender, address(this)) >= cost, "Shiba Wars: ALLOW US TO SPEND YOUR SHIB");
         // transfer shib from buyer to smart contract
         require(shibaInu.transferFrom(msg.sender, address(this), cost), "Shiba Wars: Can not transfer tokens to the smart contract");
-        // burn shib
-        shibaInu.burn(cost.div(4));
-        // send shib to deployer
-        require(shibaInu.transfer(devAddress, cost.div(4)),"Shiba Wars: Can not send to dev");
+        // 25% burn
+        uint256 newBurn = cost.ratio(25, 100);
         // 3% to matchmaking
-        matchmakerReward += cost.ratio(3, 100);
+        uint256 newMatchmakerReward = cost.ratio(3, 100);
+        // 22% to dev
+        uint256 newDevReward = cost.ratio(22, 100);
+        // rest to arena winners
+        uint256 newArenaReward = cost.sub(newBurn).sub(newMatchmakerReward).sub(newDevReward);  
+        arenaReward = arenaReward.add(newArenaReward);
+        matchmakerReward = matchmakerReward.add(newMatchmakerReward);
+        devReward = devReward.add(newDevReward);
+        burnAmount = burnAmount.add(newBurn);
+    }
 
+    // BUY DOGE FROM SHOP
+    function buyShiba(uint tokenId) public {
+        payTheContract(ShibaWarsUtils.getTokenPrice(tokenId));
         shibaWars.mintNFT(msg.sender, tokenId);
     }
 
     // BUY SHIBA TREAT TOKENS
-    function buyTreatTokens() public {
-        uint256 cost = 150000 * 10 ** 18;
-        // does the buyer has enough shib?
-        require(shibaInu.balanceOf(msg.sender) >= cost, "Shiba Wars: INSUFFICIENT SHIB BALANCE");
-        require(shibaInu.allowance(msg.sender, address(this)) >= cost, "Shiba Wars: ALLOW US TO SPEND YOUR SHIB");
-        // transfer shib from buyer to smart contract
-        require(shibaInu.transferFrom(msg.sender, address(this), cost), "Shiba Wars: Can not transfer tokens to the smart contract");
-        // burn shib
-        shibaInu.burn(cost.div(4));
-        // send shib to deployer
-        require(shibaInu.transfer(devAddress, cost.div(4)),"Shiba Wars: Can not send to dev");
-        // 3% to matchmaking
-        matchmakerReward += cost.ratio(3, 100);
-
-        shibaWars.addTreatTokens(msg.sender, 1500000);
+    function buyTreats() public {
+        payTheContract(150000 * 10 ** 18);
+        shibaWars.addTreats(msg.sender, 1500000);
     } 
 
     // OPEN LUCKY DOGE PACK
