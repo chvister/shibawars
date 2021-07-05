@@ -1,9 +1,9 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const SHIBA_WARS = "0x9A46eD235296e33Dd5703B461Bd76B9603d0AD47";
-const ARENA = "0xEc83690E24608b92b753C91ecA2b9331f19F24c6";
-const FACTORY = "0xE5E6cd6b9Ad9624AdeB8282CDCC6f886C1cf1eB8";
+const SHIBA_WARS = "0x0364b756546727b8f1c6E6d9d4c74EE70e5f8eb7";
+const ARENA = "0xF2BdcdF18f3BD4A9b2F5E327e1d74f930Da9FD55";
+const FACTORY = "0x04C5634fEd068E82980b38b338B698E98dDFB1c2";
 
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const SHIB_SUPPLY = "1000000000000000000000000000000000";
@@ -194,7 +194,7 @@ async function buyShiba(tokenId){
 
 async function buyTreatTokens(){
     let contract = await getFactoryContract();
-    contract.methods.buyTreatTokens().send({from:  ethereum.selectedAddress})
+    contract.methods.buyTreats().send({from:  ethereum.selectedAddress})
         .on("receipt", (() => {
             renderGame();
         }));

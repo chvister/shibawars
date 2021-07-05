@@ -8,6 +8,7 @@ contract ShibaWarsArena {
 
     using ShibaWarsEntity for ShibaWarsEntity.ArenaQueue;
     using ShibaMath for uint;
+    using ShibaMath for bytes;
 
     uint256[] private arenaQueue;
     mapping(uint256 => ShibaWarsEntity.ArenaQueue) private _tolerances;
@@ -134,18 +135,18 @@ contract ShibaWarsArena {
     }
 
     function getDamage(uint minDamage, uint maxDamage, uint seed) private view returns (uint) {
-        return (uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, seed, minDamage, maxDamage))) % (maxDamage - minDamage + 1)) + minDamage;
+        return abi.encodePacked(block.difficulty, block.timestamp, seed, minDamage, maxDamage).random(minDamage, maxDamage);
     }
 
     function hit(uint aim, uint dodge, uint seed) private view returns (bool) {
-        uint aimValue = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, aim, seed))) % aim;
-        uint dodgeValue = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, dodge, seed))) % dodge;
+        (uint aimValue, uint dodgeValue) = (abi.encodePacked(block.difficulty, block.timestamp, aim, seed).random(0, aim),
+            abi.encodePacked(block.difficulty, block.timestamp, dodge, seed).random(0, dodge));
         return aimValue > dodgeValue;
     }
 
     function criticalHit(uint critAim, uint critDodge, uint seed) private view returns (bool) {
-        uint aimValue = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, critAim, seed))) % critAim;
-        uint dodgeValue = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, critDodge, seed))) % (critDodge * 10);
+        (uint aimValue, uint dodgeValue) = (abi.encodePacked(block.difficulty, block.timestamp, critAim, seed).random(0, critAim),
+            abi.encodePacked(block.difficulty, block.timestamp, critDodge, seed).random(0, critDodge * 10));
         return aimValue > dodgeValue;
     }
 
