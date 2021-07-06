@@ -2,34 +2,31 @@ pragma solidity ^0.8.0;
 
 library ShibaWarsEntity {
 
-    enum ATTRIBUTE { STRENGTH, AGILITY, DEXTERITY }
-
     struct Shiba {
-        uint id;            // uinque id of token
+        uint256 id;            // uinque id of token
 
-        uint strength;      // HP, armor
-        uint agility;       // evasion, crit chance
-        uint dexterity;     // aim, crit chance decrease
+        uint64 strength;      // HP, armor
+        uint64 agility;       // evasion, crit chance
+        uint64 dexterity;     // aim, crit chance decrease
 
-        uint strengthGain;  // strength gain per level
-        uint agilityGain;   // agility gain per level
-        uint dexterityGain; // dexterity gain per level
+        uint32 tokenId;       // id of shiba    
+        uint16 primary;         // 1 - strength, 2- agility, 3- dexterity
+        uint16 inArena;         // 0 false 1 true
 
-        uint level;         // level
-        uint arenaScore;    // score in arena
+        uint64 strengthGain;  // strength gain per level
+        uint64 agilityGain;   // agility gain per level
+        uint64 dexterityGain; // dexterity gain per level
 
-        uint tokenId;       // id of shiba    
-        string name;        // name
-        string description; // description
+        uint64 level;         // level
 
-        uint hitPoints;     // hitpoints
-        bool inArena;       // if is in arena
-        ATTRIBUTE primary;   // 1 - strength, 2- agility, 3- dexterity
+        uint256 arenaScore;    // score in arena
+        uint256 hitPoints;     // hitpoints
+        
     }
 
     struct ArenaQueue {
-        uint minScore;
-        uint maxScore;
+        uint256 minScore;
+        uint256 maxScore;
     }
 
 }

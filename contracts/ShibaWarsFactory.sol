@@ -10,8 +10,8 @@ contract ShibaWarsFactory {
     using ShibaMath for uint;
     using ShibaMath for bytes;
 
-    IShibaInu constant shibaInu = IShibaInu(0xAC27f67D1D2321FBa609107d41Ff603c43fF6931);
-    IShibaWars private shibaWars;
+    address constant shibaInu = 0xAC27f67D1D2321FBa609107d41Ff603c43fF6931;
+    address immutable shibaWars;
 
     address private devAddress;
 
@@ -22,12 +22,12 @@ contract ShibaWarsFactory {
 
     constructor(address shibaWars_) {
         devAddress = msg.sender;
-        shibaWars = IShibaWars(shibaWars_);
+        shibaWars = shibaWars_;
     }
     
     // RETURN TOTAL PRIZE POOL TO BE WON BY PLAYERS
     function getPrizePool() public view returns (uint256) {
-        return shibaInu.balanceOf(address(this)).sub(matchmakerReward);
+        return IShibaInu(shibaInu).balanceOf(address(this)).sub(matchmakerReward);
     }
 
     // RETURN REWARD FOR CREATING MATCHES
@@ -37,79 +37,61 @@ contract ShibaWarsFactory {
 
     // SEND DEV REWARD AND BURNS BURN AMOUNT
     function redeemDevReward() public {
+        IShibaInu _shibaInu = IShibaInu(shibaInu);
         // burn shib
-        shibaInu.burn(burnAmount);
+        _shibaInu.burn(burnAmount);
         // pay the dev
-        shibaInu.transfer(devAddress, devReward);
+        _shibaInu.transfer(devAddress, devReward);
     }
 
     function payTheContract(uint256 cost) public {
+        address factory = address(this);
+        IShibaInu _shibaInu = IShibaInu(shibaInu);
         require(cost > 0, "Shiba Wars: THIS TOKEN CAN NOT BE BOUGHT");
         // does the buyer has enough shib?
-        require(shibaInu.balanceOf(msg.sender) >= cost, "Shiba Wars: INSUFFICIENT SHIB BALANCE");
-        require(shibaInu.allowance(msg.sender, address(this)) >= cost, "Shiba Wars: ALLOW US TO SPEND YOUR SHIB");
+        require(_shibaInu.balanceOf(msg.sender) >= cost, "Shiba Wars: INSUFFICIENT SHIB BALANCE");
+        require(_shibaInu.allowance(msg.sender, factory) >= cost, "Shiba Wars: ALLOW US TO SPEND YOUR SHIB");
         // transfer shib from buyer to smart contract
-        require(shibaInu.transferFrom(msg.sender, address(this), cost), "Shiba Wars: Can not transfer tokens to the smart contract");
-        // 25% burn
-        uint256 newBurn = cost.ratio(25, 100);
+        require(_shibaInu.transferFrom(msg.sender, factory, cost), "Shiba Wars: Can not transfer tokens to the smart contract");
+        (uint256 _burn, uint256 _mmkr, uint256 _dev, uint256 _arena) = getFees(cost);
+        arenaReward = arenaReward.add(_arena);
+        matchmakerReward = matchmakerReward.add(_mmkr);
+        devReward = devReward.add(_dev);
+        burnAmount = burnAmount.add(_burn);
+    }
+
+    function getFees(uint256 cost) public pure returns (uint256 _burn, uint256 _mmkr, uint256 _dev, uint256 _arena) {
+        //25% burn
+        _burn = cost.ratio(25, 100);
         // 3% to matchmaking
-        uint256 newMatchmakerReward = cost.ratio(3, 100);
+        _mmkr = cost.ratio(3, 100);
         // 22% to dev
-        uint256 newDevReward = cost.ratio(22, 100);
+        _dev = cost.ratio(22, 100);
         // rest to arena winners
-        uint256 newArenaReward = cost.sub(newBurn).sub(newMatchmakerReward).sub(newDevReward);  
-        arenaReward = arenaReward.add(newArenaReward);
-        matchmakerReward = matchmakerReward.add(newMatchmakerReward);
-        devReward = devReward.add(newDevReward);
-        burnAmount = burnAmount.add(newBurn);
+        _arena = cost.sub(_burn).sub(_mmkr).sub(_dev);
     }
 
     // BUY DOGE FROM SHOP
     function buyShiba(uint tokenId) public {
         payTheContract(ShibaWarsUtils.getTokenPrice(tokenId));
-        shibaWars.mintNFT(msg.sender, tokenId);
+        IShibaWars(shibaWars).mintNFT(msg.sender, tokenId);
     }
 
     // BUY SHIBA TREAT TOKENS
     function buyTreats() public {
         payTheContract(150000 * 10 ** 18);
-        shibaWars.addTreats(msg.sender, 1500000);
+        IShibaWars(shibaWars).addTreats(msg.sender, 1500000);
     } 
 
     // OPEN LUCKY DOGE PACK
     function openPack(uint256 id) public {
+        IShibaWars _shibaWars = IShibaWars(shibaWars);
         // open pack
         // burn the token
-        shibaWars.openPack(id, msg.sender);
+        _shibaWars.openPack(id, msg.sender);
         // mint random token
-        uint number = abi.encodePacked(block.difficulty, block.timestamp).random(0, 10000);
-        uint tokenId = 0;
-        if (number < 1) {
-            // woofmeister
-            tokenId = ShibaWarsUtils.WOOFMEISTER;
-        } else if (number < 11) {
-            // doge father
-            tokenId = ShibaWarsUtils.DOGE_FATHER;
-        } else if (number < 100) {
-            // ryoshi
-            tokenId = ShibaWarsUtils.RYOSHI;
-        } else if (number < 500) {
-            // golden doge
-            tokenId = ShibaWarsUtils.GOLDEN_DOGE;
-        } else if (number < 1500) {
-            // shiba inu
-            tokenId = ShibaWarsUtils.SHIBA_INU;
-        } else if (number < 3000) {
-            // akita inu
-            tokenId = ShibaWarsUtils.AKITA_INU; 
-        } else if (number < 5500) {
-            // sanshu inu
-            tokenId = ShibaWarsUtils.SANSHU_INU;
-        } else {
-            // shiba pup
-            tokenId = ShibaWarsUtils.SHIBA_PUP;
-        }
-        shibaWars.mintNFT(msg.sender, tokenId);
+        uint tokenId = ShibaWarsUtils.getRandomId(abi.encodePacked(block.difficulty, block.timestamp).random(0, 10000));
+        _shibaWars.mintNFT(msg.sender, tokenId);
     }
 
 

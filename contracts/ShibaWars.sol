@@ -8,9 +8,9 @@ import "./ShibaWarsEntity.sol";
 contract ShibaWars is ERC721 {
 
     using ShibaWarsEntity for ShibaWarsEntity.Shiba;
-    using ShibaWarsEntity for ShibaWarsEntity.ATTRIBUTE;
 
-    using ShibaMath for uint;
+    using ShibaMath for uint64;
+    using ShibaMath for uint256;
     using ShibaMath for bytes;
 
     // info about tokens
@@ -39,34 +39,33 @@ contract ShibaWars is ERC721 {
     }
 
     // MINT NEW TOKEN
-    function _mint(address owner, uint tokenId, uint strength, uint agility, uint dexterity, ShibaWarsEntity.ATTRIBUTE primary) private {
+    function _mint(address owner, uint tokenId, uint strength, uint agility, uint dexterity, uint primary) private {
         _tokenDetails[nextId] = 
             ShibaWarsEntity.Shiba(
                 nextId,
-                strength, 
-                agility, 
-                dexterity, 
-                strength.div(10), 
-                agility.div(10), 
-                dexterity.div(10), 
-                1, 0, tokenId, 
-                ShibaWarsUtils.getName(tokenId), 
-                ShibaWarsUtils.getDescription(tokenId), 
-                getMaxHpFromStrength(strength),
-                false,
-                primary);
+                (uint64)(strength), 
+                (uint64)(agility), 
+                (uint64)(dexterity), 
+                (uint32)(tokenId),
+                (uint16)(primary),
+                0,
+                (uint64)(strength.div(10)), 
+                (uint64)(agility.div(10)), 
+                (uint64)(dexterity.div(10)), 
+                1, 0, 
+                getMaxHpFromStrength((uint64)(strength)));
         _safeMint(owner, nextId);
         ++nextId;
     }
 
-    function mint(address owner, uint tokenId, uint strength, uint agility, uint dexterity, ShibaWarsEntity.ATTRIBUTE primary) public isShibaWars(msg.sender) {
+    function mint(address owner, uint tokenId, uint strength, uint agility, uint dexterity, uint primary) public isShibaWars(msg.sender) {
         _mint(owner, tokenId, strength, agility, dexterity, primary);
     }
 
     // MINTS FIRST TWO TOKENS. CAN ONLY BE CALLED BY DEV BUT THESE DOGES CAN NOT FIGHT IN ARENA
     function initialMint() public isDev(msg.sender) {
-        _mint(msg.sender, 0, 10000, 10000, 10000, ShibaWarsEntity.ATTRIBUTE.STRENGTH);
-        _mint(msg.sender, 1, 10000, 10000, 10000, ShibaWarsEntity.ATTRIBUTE.AGILITY);
+        _mint(msg.sender, 0, 10000, 10000, 10000, 1);
+        _mint(msg.sender, 1, 10000, 10000, 10000, 2);
     }
 
     // SETS ADDRESS OF ARENA CONTRACT. CAN ONLY BE CALLED BY DEV
@@ -81,7 +80,7 @@ contract ShibaWars is ERC721 {
 
     // COST OF LEVEL UP IN POWER TREATS
     function levelUpCost(uint256 id) public view returns (uint) {
-        return _tokenDetails[id].level.mul(1500000);
+        return getTokenDetails(id).level.mul(1500000);
     }
 
     // MAX HP OF DOGE
@@ -90,8 +89,8 @@ contract ShibaWars is ERC721 {
     }
 
     // MAX HP FROM STRENGTH
-    function getMaxHpFromStrength(uint strength) private pure returns(uint) {
-        return strength.mul(5).add(5000);
+    function getMaxHpFromStrength(uint64 strength) private pure returns(uint) {
+        return (uint64)(strength.mul(5).add(5000));
     }
 
     // USER'S TOKENS
@@ -127,16 +126,7 @@ contract ShibaWars is ERC721 {
         uint intl = multiplier.mul(10).add(abi.encodePacked(block.difficulty, tokenId).random(0, 6).mul(multiplier));
 
         uint primary = abi.encodePacked(str, agi, intl, block.timestamp).random(0, 3);
-        ShibaWarsEntity.ATTRIBUTE primaryAttribute = ShibaWarsEntity.ATTRIBUTE.STRENGTH;
-        if(primary == 0) {
-            primaryAttribute = ShibaWarsEntity.ATTRIBUTE.STRENGTH;
-        } else if (primary == 1) {
-            primaryAttribute = ShibaWarsEntity.ATTRIBUTE.AGILITY;
-        } else if (primary == 2) {
-            primaryAttribute = ShibaWarsEntity.ATTRIBUTE.DEXTERITY;
-        }
-
-        mint(owner, tokenId, str, agi, intl, primaryAttribute);
+        mint(owner, tokenId, str, agi, intl, primary);
     }
 
     // LEVEL UP SHIBA
@@ -145,11 +135,12 @@ contract ShibaWars is ERC721 {
         require(ownerOf(id) == msg.sender, "Shiba Wars: YOU DO NOT OWN THIS TOKEN");
         require(shibaTreats[msg.sender] >= levelUpCost(id), "Shiba Wars: NOT ENOUGH POWER TREATS TO UPGRADE THIS SHIBA");
         shibaTreats[msg.sender] = shibaTreats[msg.sender].sub(levelUpCost(id));
+        ShibaWarsEntity.Shiba memory _shiba = getTokenDetails(id);
         ++_tokenDetails[id].level;
-        _tokenDetails[id].strength += _tokenDetails[id].strengthGain;
-        _tokenDetails[id].hitPoints = getMaxHpFromStrength(_tokenDetails[id].strength);
-        _tokenDetails[id].agility += _tokenDetails[id].agilityGain;
-        _tokenDetails[id].dexterity += _tokenDetails[id].dexterityGain;
+        _tokenDetails[id].strength += _shiba.strengthGain;
+        _tokenDetails[id].hitPoints = getMaxHpFromStrength(_shiba.strength);
+        _tokenDetails[id].agility += _shiba.agilityGain;
+        _tokenDetails[id].dexterity += _shiba.dexterityGain;
     }
 
     // OPEN LUCKY DOGE PACK
@@ -163,7 +154,7 @@ contract ShibaWars is ERC721 {
 
     // PUTS DOGE IN ARENA
     function putInArena(uint256 id) public isShibaWars(msg.sender) {
-        _tokenDetails[id].inArena = true;
+        _tokenDetails[id].inArena = 1;
     }
 
     // DECREASES HP 

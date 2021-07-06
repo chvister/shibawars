@@ -21,84 +21,6 @@ library ShibaWarsUtils {
     uint constant GOLDEN_DOGE = 15;
     uint constant RYOSHI = 16;
 
-    function getName(uint tokenId) public pure returns (string memory)  {
-        if (tokenId == BOJAR_DA_KILLA){
-            return "Bojar da Killa";
-        } else if (tokenId == KAYA_THE_WOLFMOTHER) {
-            return "Kaya the Wolf Mother";
-        } else if (tokenId == WOOFMEISTER) {
-            return "WoofMeister";
-        } else if (tokenId == SHIBA_WHALE) {
-            return "Shiba Whale";
-        } else if (tokenId == OG_SHIBA) {
-            return "OG Shiba";
-        } else if (tokenId == SHIBA_WARLORD) {
-            return "Shiba Warlord";
-        } else if (tokenId == SHIBA_GENERAL) {
-            return "Shiba General";
-        } else if (tokenId == WATCHDOG) {
-            return "Watchdog";
-        } else if (tokenId == DOGE_KILLER) {
-            return "Doge Killer";
-        } else if (tokenId == SHIBA_INU) {
-            return "Shiba Inu";
-        } else if (tokenId == AKITA_INU) {
-            return "Akita Inu";
-        } else if (tokenId == SANSHU_INU) {
-            return "Sanshu Inu";
-        } else if (tokenId == SHIBA_PUP) {
-            return "Shiba Pup";
-        } else if (tokenId == LUCKY_DOGE_PACK_GEN_1) {
-            return "Lucky Doge Pack Gen #1";
-        } else if (tokenId == DOGE_FATHER) {
-            return "Doge Father";
-        } else if (tokenId == GOLDEN_DOGE) {
-            return "Golden Doge";
-        } else if (tokenId == RYOSHI) {
-            return "Ryoshi";
-        }
-        return "";
-    }
-
-    function getDescription(uint tokenId) public pure returns (string memory) {
-        if (tokenId == BOJAR_DA_KILLA) {
-            return "Altough he's not a Shiba, do not mess with him. The warden of order.";
-        } else if (tokenId == KAYA_THE_WOLFMOTHER) {
-            return "She may be cute, but she will get you. Beware, she bites.";
-        } else if (tokenId == WOOFMEISTER) {
-            return "The one who has power over all the dogs. We look up to you and believe in you.";
-        } else if (tokenId == SHIBA_WHALE) {
-            return "The true holders of the ShibArmy.";
-        } else if (tokenId == OG_SHIBA) {
-            return "They were here since the beginning. The true loyal ones.";
-        } else if (tokenId == SHIBA_WARLORD) {
-            return "Altough they may not be recognized, they do lead the ShibArmy forward.";
-        } else if (tokenId == SHIBA_GENERAL) {
-            return "One bark, and they are in the battle.";
-        } else if (tokenId == WATCHDOG) {
-            return "This is not a shiba. But a small cute doge needs a big strong DOG to defend it.";
-        } else if (tokenId == DOGE_KILLER) {
-            return "Put the doge on the leash. Even though the doges hold together, Doge Killer is true to its beliefs.";
-        } else if (tokenId == SHIBA_INU) {
-            return "Just look at it! How can you not want to own them all?";
-        } else if (tokenId == AKITA_INU) {
-            return "A copy cat? NO! Just another cute Inu family member!";
-        } else if (tokenId == SANSHU_INU) {
-            return "Do you even know this one? If you don't, just look at it!";
-        } else if (tokenId == SHIBA_PUP) {
-            return "AWWWWWWWWWWWWWWWWWW";
-        } else if (tokenId == LUCKY_DOGE_PACK_GEN_1) {
-            return "Open for a chance to get a very rare Doge, including the WoofMeister themself.";
-        } else if (tokenId == DOGE_FATHER) {
-            return "A friend should always underestimate your virtues and an enemy overestimate your faults.";
-        } else if (tokenId == GOLDEN_DOGE) {
-            return "We all are in it. AND THIS ONE IS GOLDEN!";
-        } else if (tokenId == RYOSHI) {
-            return "The one who took us under their wings. Ryoshi.";
-        } 
-        return "";
-    }
-
     function getStatsMultiplier(uint tokenId) public pure returns (uint) {
         if (tokenId == BOJAR_DA_KILLA || tokenId == KAYA_THE_WOLFMOTHER) {
             return 1000;
@@ -165,6 +87,34 @@ library ShibaWarsUtils {
             return tokens(millions(4));
         }
         return 0;
+    }
+
+    function getRandomId(uint256 number) public pure returns (uint256 tokenId) {
+        if (number < 1) {
+            // woofmeister
+            tokenId = ShibaWarsUtils.WOOFMEISTER;
+        } else if (number < 11) {
+            // doge father
+            tokenId = ShibaWarsUtils.DOGE_FATHER;
+        } else if (number < 100) {
+            // ryoshi
+            tokenId = ShibaWarsUtils.RYOSHI;
+        } else if (number < 500) {
+            // golden doge
+            tokenId = ShibaWarsUtils.GOLDEN_DOGE;
+        } else if (number < 1500) {
+            // shiba inu
+            tokenId = ShibaWarsUtils.SHIBA_INU;
+        } else if (number < 3000) {
+            // akita inu
+            tokenId = ShibaWarsUtils.AKITA_INU; 
+        } else if (number < 5500) {
+            // sanshu inu
+            tokenId = ShibaWarsUtils.SANSHU_INU;
+        } else {
+            // shiba pup
+            tokenId = ShibaWarsUtils.SHIBA_PUP;
+        }
     }
 
 }

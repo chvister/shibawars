@@ -1,9 +1,9 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const SHIBA_WARS = "0x0364b756546727b8f1c6E6d9d4c74EE70e5f8eb7";
-const ARENA = "0xF2BdcdF18f3BD4A9b2F5E327e1d74f930Da9FD55";
-const FACTORY = "0x04C5634fEd068E82980b38b338B698E98dDFB1c2";
+const SHIBA_WARS = "0x264148801f0bFC4AB398F494E316Ac747e5d5545";
+const ARENA = "0xbF3B8f0828477180C30149B3712b8c302D3a4aeE";
+const FACTORY = "0x3fc34d0be77e0d42e227ace62792392985aeC868";
 
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const SHIB_SUPPLY = "1000000000000000000000000000000000";
@@ -82,8 +82,8 @@ function renderShiba(id, data, userPowerTreats, shibaMaxHp){
     <img class="card-img-top" src="img/token-${data.tokenId}.png">
     <div class="card-body">
         <div>Id: <span class="shiba-id">${id}</span></div>
-        <div>Name: <span class="shiba-name">${data.name}</span></div>
-        <div>Description: <span class="shiba-description">${data.description}</span></div>`;
+        <div>Name: <span class="shiba-name">${getName(data.tokenId)}</span></div>
+        <div>Description: <span class="shiba-description">${getDescription(data.tokenId)}</span></div>`;
     if(data.tokenId != 13) {
         card += `<div>Level: <span class="shiba-level">${data.level}</span></div>
         <div>Strength: <span class="shiba-strength">${parseFloat (data.strength) / 100}</span></div>
@@ -212,6 +212,84 @@ async function getAllowance() {
     let contract = await getShibContract();
     let allowance = await contract.methods.allowance(ethereum.selectedAddress, FACTORY).call({from: ethereum.selectedAddress});
     return allowance;
+}
+
+function getDescription(tokenId) {
+    if (tokenId == 0) {
+        return "Altough he's not a Shiba, do not mess with him. The warden of order.";
+    } else if (tokenId == 1) {
+        return "She may be cute, but she will get you. Beware, she bites.";
+    } else if (tokenId == 2) {
+            return "The one who has power over all the dogs. We look up to you and believe in you.";
+    } else if (tokenId == 3) {
+        return "The true holders of the ShibArmy.";
+    } else if (tokenId == 4) {
+        return "They were here since the beginning. The true loyal ones.";
+    } else if (tokenId == 5) {
+        return "Altough they may not be recognized, they do lead the ShibArmy forward.";
+    } else if (tokenId == 6) {
+        return "One bark, and they are in the battle.";
+    } else if (tokenId == 7) {
+        return "This is not a shiba. But a small cute doge needs a big strong DOG to defend it.";
+    } else if (tokenId == 8) {
+        return "Put the doge on the leash. Even though the doges hold together, Doge Killer is true to its beliefs.";
+    } else if (tokenId == 9) {
+        return "Just look at it! How can you not want to own them all?";
+    } else if (tokenId == 10) {
+        return "A copy cat? NO! Just another cute Inu family member!";
+    } else if (tokenId == 11) {
+        return "Do you even know this one? If you don't, just look at it!";
+    } else if (tokenId == 12) {
+        return "AWWWWWWWWWWWWWWWWWW";
+    } else if (tokenId == 13) {
+        return "Open for a chance to get a very rare Doge, including the WoofMeister themself.";
+    } else if (tokenId == 14) {
+        return "A friend should always underestimate your virtues and an enemy overestimate your faults.";
+    } else if (tokenId == 15) {
+        return "We all are in it. AND THIS ONE IS GOLDEN!";
+    } else if (tokenId == 16) {
+        return "The one who took us under their wings. Ryoshi.";
+    } 
+    return "";
+}
+
+function getName(tokenId) {
+    if (tokenId == 0){
+        return "Bojar da Killa";
+    } else if (tokenId == 1) {
+        return "Kaya the Wolf Mother";
+    } else if (tokenId == 2) {
+        return "WoofMeister";
+    } else if (tokenId == 3) {
+        return "Shiba Whale";
+    } else if (tokenId == 4) {
+        return "OG Shiba";
+    } else if (tokenId == 5) {
+        return "Shiba Warlord";
+    } else if (tokenId == 6) {
+        return "Shiba General";
+    } else if (tokenId == 7) {
+        return "Watchdog";
+    } else if (tokenId == 8) {
+        return "Doge Killer";
+    } else if (tokenId == 9) {
+        return "Shiba Inu";
+    } else if (tokenId == 10) {
+        return "Akita Inu";
+    } else if (tokenId == 11) {
+        return "Sanshu Inu";
+    } else if (tokenId == 12) {
+        return "Shiba Pup";
+    } else if (tokenId == 13) {
+        return "Lucky Doge Pack Gen #1";
+    } else if (tokenId == 14) {
+        return "Doge Father";
+    } else if (tokenId == 15) {
+        return "Golden Doge";
+    } else if (tokenId == 16) {
+        return "Ryoshi";
+    }
+    return "";
 }
 
 $("#btn-buy-7").click( () => { 

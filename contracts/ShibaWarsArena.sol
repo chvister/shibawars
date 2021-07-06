@@ -8,6 +8,7 @@ contract ShibaWarsArena {
 
     using ShibaWarsEntity for ShibaWarsEntity.ArenaQueue;
     using ShibaMath for uint;
+    using ShibaMath for uint64;
     using ShibaMath for bytes;
 
     uint256[] private arenaQueue;
@@ -20,23 +21,27 @@ contract ShibaWarsArena {
     }
         
     function queueToArena(uint tokenId, uint tolerance) public {
+        ShibaWarsEntity.Shiba memory _shiba = shibaWars.getTokenDetails(tokenId);
         // must be my shiba
         require(shibaWars.ownerOf(tokenId) == msg.sender, "Shiba Wars: YOU DO NOT OWN THIS TOKEN");
         // can not be in arena
-        require(!shibaWars.getTokenDetails(tokenId).inArena, "Shiba Wars: THIS SHIBA IS IN ARENA ALREADY");
+        require(_shiba.inArena == 0, "Shiba Wars: THIS SHIBA IS IN ARENA ALREADY");
         shibaWars.putInArena(tokenId);
-        uint score = shibaWars.getTokenDetails(tokenId).arenaScore;
-        uint scoreDiff = score.ratio(tolerance, 100);
+        uint256 score = _shiba.arenaScore;
+        uint256 scoreDiff = score.ratio(tolerance, 100);
         arenaQueue.push(tokenId);
         _tolerances[tokenId] = ShibaWarsEntity.ArenaQueue(score.add(scoreDiff) , score.add(scoreDiff));
     }
 
     function fight(uint256 firstShiba, uint256 secondShiba) private {
+        ShibaWarsEntity.Shiba memory attacker;
+        ShibaWarsEntity.Shiba memory defender;
+        {
+        ShibaWarsEntity.Shiba memory _first = shibaWars.getTokenDetails(firstShiba);
+        ShibaWarsEntity.Shiba memory _second = shibaWars.getTokenDetails(secondShiba);
         // the one with higher agility attacks first
-        (ShibaWarsEntity.Shiba memory attacker, ShibaWarsEntity.Shiba memory defender) =
-            shibaWars.getTokenDetails(firstShiba).agility >= shibaWars.getTokenDetails(secondShiba).agility ?
-            (shibaWars.getTokenDetails(firstShiba), shibaWars.getTokenDetails(secondShiba)) : 
-            (shibaWars.getTokenDetails(secondShiba), shibaWars.getTokenDetails(firstShiba));
+        (attacker, defender) = _first.agility >= _second.agility ? (_first, _second) : (_second, _first);
+        }
         require(shibaWars.ownerOf(firstShiba) != shibaWars.ownerOf(secondShiba), "Shiba Wars: CAN NOT FIGHT YOUR OWN SHIBA");
         uint damageAttacker = 0;
         uint damageDefender = 0;
@@ -117,9 +122,9 @@ contract ShibaWarsArena {
     }
 
     function getPrimary(uint id)  private view returns (uint) {
-        if(shibaWars.getTokenDetails(id).primary == ShibaWarsEntity.ATTRIBUTE.STRENGTH) {
+        if(shibaWars.getTokenDetails(id).primary == 1) {
             return shibaWars.getTokenDetails(id).strength;    
-        } else if(shibaWars.getTokenDetails(id).primary == ShibaWarsEntity.ATTRIBUTE.AGILITY) {
+        } else if(shibaWars.getTokenDetails(id).primary == 2) {
             return shibaWars.getTokenDetails(id).agility;    
         }  else {
             return shibaWars.getTokenDetails(id).dexterity;    
