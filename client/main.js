@@ -1,9 +1,9 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const SHIBA_WARS = "0x376b947250a59fd698a25CF8ee77fc9c6cE95C38";
-const ARENA = "0x106b682de347525F1960ae99569948650DDFf2Bb";
-const FACTORY = "0xBf0d6BcF01c597C5277E88B78c6dD0fFE50720a6";
+const SHIBA_WARS = "0x651f1AecF282Bc0fFfF548A5a49E937216526ee2";
+const ARENA = "0x8356B3947640b85E9dbdF6797A63F67Cf5a29EC9";
+const FACTORY = "0x3e710832CE9a94A8D25db0Cd835279dcDd53cdcb";
 
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const SHIB_SUPPLY = "1000000000000000000000000000000000";
@@ -57,6 +57,8 @@ async function renderGame(){
     let matchmaker = await factoryContract.methods.getMatchMakerReward().call({from: ethereum.selectedAddress});
     if(matchmaker != 0) {
         $("#shib-matchmaker").html(numberWithCommas(matchmaker.substring(0, matchmaker.length - 18)));
+    } else {
+        $("#shib-matchmaker").html(0);
     }
 
     $("#login_button").hide();
@@ -67,6 +69,8 @@ async function renderGame(){
     let arenaQueueLength = await arenaContract.methods.getArenaQueueLength().call({from: ethereum.selectedAddress});
     if(arenaQueueLength <= 1) {
         $("#btn-matchmake").hide();
+    } else {
+        $("#btn-matchmake").show();
     }
 
     let userShibas = await shibaWars.methods.getUserTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});

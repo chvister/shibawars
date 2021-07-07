@@ -177,7 +177,7 @@ contract ShibaWarsArena {
             uint defNewScore = score <= defender.arenaScore - 1 ? defender.arenaScore.sub(score) : 1;
             setScore(attacker.id, attNewScore, defender.id, defNewScore);
         } else {
-            uint256 score = scoreReward(attacker.arenaScore, defender.arenaScore);
+            uint256 score = scoreReward(defender.arenaScore, attacker.arenaScore);
             uint defNewScore = defender.arenaScore.add(score);
             uint attNewScore = score <= attacker.arenaScore - 1 ? attacker.arenaScore.sub(score) : 1;
             setScore(attacker.id, attNewScore, defender.id, defNewScore);
