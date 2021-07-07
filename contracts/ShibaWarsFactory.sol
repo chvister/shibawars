@@ -32,7 +32,8 @@ contract ShibaWarsFactory {
 
     // RETURN REWARD FOR CREATING MATCHES
     function getMatchMakerReward() public view returns (uint256) {
-        return matchmakerReward;
+        uint256 divisor = IShibaWars(shibaWars).getArenaQueueLength().max(1);
+        return matchmakerReward.div(divisor);
     }
 
     // SEND DEV REWARD AND BURNS BURN AMOUNT
@@ -58,6 +59,13 @@ contract ShibaWarsFactory {
         matchmakerReward = matchmakerReward.add(_mmkr);
         devReward = devReward.add(_dev);
         burnAmount = burnAmount.add(_burn);
+    }
+
+    function payMatchmaker(address matchmaker) public {
+        require(msg.sender == shibaWars, "Shiba Wars: ONLY ARENA CAN PAY MATCHMAKER");
+        uint256 reward = getMatchMakerReward();
+        matchmakerReward = matchmakerReward.sub(reward);
+        IShibaInu(shibaInu).transfer(matchmaker, reward);
     }
 
     function getFees(uint256 cost) public pure returns (uint256 _burn, uint256 _mmkr, uint256 _dev, uint256 _arena) {

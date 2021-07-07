@@ -11,16 +11,22 @@ contract ShibaWarsArena {
     using ShibaMath for bytes;
 
     uint256[] private arenaQueue;
+    uint256 private inArena;
 
     IShibaWars private shibaWars;
 
     constructor (address shibaWars_) {
         shibaWars = IShibaWars(shibaWars_);
+        inArena = 0;
+    }
+
+    function getArenaQueueLength() public view returns (uint256) {
+        return inArena;
     }
         
     function queueToArena(uint tokenId) public {
         checkCanFight(tokenId);
-        shibaWars.putInArena(tokenId);
+        shibaWars.setInArena(tokenId, 1);
         bool pushed = false;
         for(uint i = 0; i < arenaQueue.length; ++i){
             if(arenaQueue[i] == 0) {
@@ -32,6 +38,7 @@ contract ShibaWarsArena {
         if(!pushed) {
             arenaQueue.push(tokenId);
         }
+        ++inArena;
     }
 
     function checkCanFight(uint tokenId) private view returns (ShibaWarsEntity.Shiba memory _shiba) {
@@ -46,7 +53,8 @@ contract ShibaWarsArena {
     }
 
     function matchmake(uint tokenId) public {
-        (ShibaWarsEntity.Shiba memory _shiba) = checkCanFight(tokenId);
+        require(inArena > 0, "Shiba Wars: NO MATCH CAN BE STARTED");
+        checkCanFight(tokenId);
         uint256[] memory _arenaQueue = arenaQueue;
         uint256 foundId = 0;
         uint index = 0;
@@ -62,11 +70,44 @@ contract ShibaWarsArena {
         // remove from queue
         arenaQueue[index] = 0;
         // do the fight
-        shibaWars.retrieveFromArena(foundId);
-        fight(tokenId, foundId);
+        shibaWars.setInArena(foundId, 0);
+        fight(tokenId, foundId, msg.sender, 1);
     }
 
-    function fight(uint256 firstShiba, uint256 secondShiba) private {
+    function matchmake() public {
+        // find tokens
+        require(inArena > 1, "Shiba Wars: NO MATCH CAN BE STARTED");
+        (uint256 id1, uint256 id2, uint index1, uint index2) = getMatch();
+        require(id1 != 0 && id2 != 0, "Shiba Wars: NO MATCH CAN BE STARTED");
+        // remove from queue
+        arenaQueue[index1] = 0;
+        arenaQueue[index2] = 0;
+        // do the fight
+        shibaWars.setInArena(id1, 0);
+        shibaWars.setInArena(id2, 0);
+        fight(id1, id2, msg.sender, 2);
+    }
+
+    function getMatch() private view returns (uint256 id1, uint256 id2, uint index1, uint index2) {
+        uint256[] memory _arenaQueue = arenaQueue;
+        id1 = 0;
+        id2 = 0;
+        index1 = 0;
+        index2 = 0;
+        // find the best match
+        for(; index2 < _arenaQueue.length; ++index2) {
+            uint256 id = _arenaQueue[index2];
+            if(id != 0 && id1 == 0) {
+                id1 = id;
+                index1 = index2;
+            } else if (id != 0 && id1 != 0 && shibaWars.ownerOf(id1) != shibaWars.ownerOf(id)) {
+                id2 = id;
+                break;
+            }
+        }
+    }
+
+    function fight(uint256 firstShiba, uint256 secondShiba, address matchmaker, uint8 matches) private {
         require(shibaWars.ownerOf(firstShiba) != shibaWars.ownerOf(secondShiba), "Shiba Wars: CAN NOT FIGHT YOUR OWN DOGE");
         ShibaWarsEntity.Shiba memory attacker;
         ShibaWarsEntity.Shiba memory defender;
@@ -126,15 +167,20 @@ contract ShibaWarsArena {
         }
         shibaWars.decreaseHp(attacker.id, damageDefender);
         shibaWars.decreaseHp(defender.id, damageAttacker);
+        // pay fee to matchmaker
+        shibaWars.payMatchmaker(matchmaker);
+        inArena -= matches;
         // attacker wins if defender fainted or attacker did more damage
         if(defenderHp == 1 || damageAttacker > damageDefender) {
             uint256 score = scoreReward(attacker.arenaScore, defender.arenaScore);
-            shibaWars.addScore(attacker.id, score);
-            shibaWars.decreaseScore(defender.id, score);
+            uint attNewScore = attacker.arenaScore.add(score);
+            uint defNewScore = score <= defender.arenaScore - 1 ? defender.arenaScore.sub(score) : 1;
+            setScore(attacker.id, attNewScore, defender.id, defNewScore);
         } else {
             uint256 score = scoreReward(attacker.arenaScore, defender.arenaScore);
-            shibaWars.addScore(defender.id, score);
-            shibaWars.decreaseScore(attacker.id, score);
+            uint defNewScore = defender.arenaScore.add(score);
+            uint attNewScore = score <= attacker.arenaScore - 1 ? attacker.arenaScore.sub(score) : 1;
+            setScore(attacker.id, attNewScore, defender.id, defNewScore);
         }
     }
 
@@ -143,7 +189,12 @@ contract ShibaWarsArena {
         uint256 score = multiplier.mul(25).div(100);
         return score.trim(1, 50);
     }
-    
+
+    function setScore(uint256 attackerId, uint256 attackerScore, uint256 defenderId, uint256 defenderScore) private {
+        shibaWars.setScore(attackerId, attackerScore);
+        shibaWars.setScore(defenderId, defenderScore);
+    }
+
     function getArmor(uint id) public view returns (uint) {
         return shibaWars.getTokenDetails(id).strength;
     }

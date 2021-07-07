@@ -3,6 +3,8 @@ pragma solidity ^0.8.0;
 import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./ShibaMath.sol";
 import "./ShibaWarsUtils.sol";
+import "./IShibaWarsArena.sol";
+import "./IShibaWarsFactory.sol";
 import "./ShibaWarsEntity.sol";
 
 contract ShibaWars is ERC721 {
@@ -13,15 +15,15 @@ contract ShibaWars is ERC721 {
     using ShibaMath for uint256;
     using ShibaMath for bytes;
 
-    // info about tokens
-    uint256 private nextId = 0;
-    mapping(uint256 => ShibaWarsEntity.Shiba) private _tokenDetails;
-    mapping(address => uint256) private shibaTreats;
-
     // addresses
     address private devAddress;
     address private shibaWarsArena;
     address private factoryAddress;
+    
+    // info about tokens
+    uint256 private nextId = 0;
+    mapping(uint256 => ShibaWarsEntity.Shiba) private _tokenDetails;
+    mapping(address => uint256) private shibaTreats;
 
     modifier isDev(address caller) {
         require(caller == devAddress, "Shiba Wars: Caller is not a dev");
@@ -148,14 +150,8 @@ contract ShibaWars is ERC721 {
         delete _tokenDetails[id];
     }
 
-    // PUTS DOGE IN ARENA
-    function putInArena(uint256 id) public isShibaWars(msg.sender) {
-        _tokenDetails[id].inArena = 1;
-    }
-
-    // RETRIEVES DOGE FROM ARENA
-    function retrieveFromArena(uint256 id) public isShibaWars(msg.sender) {
-        _tokenDetails[id].inArena = 0;
+    function setInArena(uint256 id, uint16 inArena) public isShibaWars(msg.sender) {
+        _tokenDetails[id].inArena = inArena;
     }
 
     // DECREASES HP 
@@ -164,16 +160,9 @@ contract ShibaWars is ERC721 {
         _tokenDetails[id].hitPoints = newHp;
     }
 
-    // ADD SCORE FOR DOGE
-    function addScore(uint256 id, uint score) public isShibaWars(msg.sender) {
-        uint newScore = _tokenDetails[id].arenaScore.add(score);
-        _tokenDetails[id].arenaScore = newScore;
-    }
-
-    // DECREASE SCORE FOR DOGE
-    function decreaseScore(uint256 id, uint score) public isShibaWars(msg.sender) {
-        ShibaWarsEntity.Shiba memory _shib = getTokenDetails(id);
-        _tokenDetails[id].arenaScore = score <= _shib.arenaScore - 1 ? _shib.arenaScore.sub(score) : 1;
+    // SET SCORE FOR DOGE
+    function setScore(uint256 id, uint score) public isShibaWars(msg.sender) {
+        _tokenDetails[id].arenaScore = score;
     }
 
     // FEED YOUR SHIBA
@@ -191,6 +180,14 @@ contract ShibaWars is ERC721 {
 
     function getUserTreatTokens(address user) public view returns (uint) {
         return shibaTreats[user];
+    }
+
+    function getArenaQueueLength() public view returns (uint256 out) {
+        return IShibaWarsArena(shibaWarsArena).getArenaQueueLength();
+    }
+
+    function payMatchmaker(address matchmaker) public isShibaWars(msg.sender) {
+        IShibaWarsFactory(factoryAddress).payMatchmaker(matchmaker);
     }
 
 }

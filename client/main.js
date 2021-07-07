@@ -1,9 +1,9 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const SHIBA_WARS = "0xfA624559a5213e36b7e987A74a77DCfCd459a89b";
-const ARENA = "0xb95c180198bf7a6ab82265600974059641b4E876";
-const FACTORY = "0x92CC9852015afabc3E9235feB7B82c080305439A";
+const SHIBA_WARS = "0x376b947250a59fd698a25CF8ee77fc9c6cE95C38";
+const ARENA = "0x106b682de347525F1960ae99569948650DDFf2Bb";
+const FACTORY = "0xBf0d6BcF01c597C5277E88B78c6dD0fFE50720a6";
 
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const SHIB_SUPPLY = "1000000000000000000000000000000000";
@@ -63,6 +63,11 @@ async function renderGame(){
     
     let userPowerTreats = await shibaWars.methods.getUserTreatTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
     $("#stt-balance").html(numberWithCommas(userPowerTreats));
+
+    let arenaQueueLength = await arenaContract.methods.getArenaQueueLength().call({from: ethereum.selectedAddress});
+    if(arenaQueueLength <= 1) {
+        $("#btn-matchmake").hide();
+    }
 
     let userShibas = await shibaWars.methods.getUserTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
     if(Array.length == 0){
@@ -215,6 +220,15 @@ async function matchmake(shibaId) {
         }));
 }
 
+async function createMatch() {
+    let contract = await getArenaContract();
+    contract.methods.matchmake().send({from: ethereum.selectedAddress, gasLimit: "6000000"})
+        .on("receipt", (() => {
+            renderGame();
+        }));
+}
+
+
 async function openPack(shibaId) {
     let contract = await getFactoryContract();
     contract.methods.openPack(shibaId).send({from: ethereum.selectedAddress})
@@ -365,6 +379,10 @@ $("#btn-buy-treat-tokens").click( () => {
 
 $("#btn-approve-shib").click( () => { 
     approveShib();
+})
+
+$("#btn-matchmake").click( () => { 
+    createMatch();
 })
 
 init();

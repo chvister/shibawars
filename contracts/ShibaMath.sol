@@ -45,6 +45,10 @@ library ShibaMath {
         return a > b ? b : a;
     }
 
+    function max(uint256 a, uint256 b) external pure returns (uint256) {
+        return a < b ? b : a;
+    }
+
     function trim(uint256 number_, uint256 min_, uint256 max_) external pure returns (uint256) {
         return number_ > min_ ? (number_ < max_ ? number_ : max_) : min_;
     }
