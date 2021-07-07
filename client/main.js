@@ -202,7 +202,7 @@ function shibaAbi(){
 
 async function levelUp(shibaId) {
     let contract = await getContract();
-    contract.methods.levelUp(shibaId).send({from: ethereum.selectedAddress})
+    contract.methods.levelUp(shibaId).send({from: ethereum.selectedAddress, gasLimit: 125000})
         .on("receipt", (() => {
             renderGame();
         }));
@@ -210,7 +210,7 @@ async function levelUp(shibaId) {
 
 async function queueToArena(shibaId) {
     let contract = await getArenaContract();
-    contract.methods.queueToArena(shibaId).send({from: ethereum.selectedAddress})
+    contract.methods.queueToArena(shibaId).send({from: ethereum.selectedAddress, gasLimit: 125000})
         .on("receipt", (() => {
             renderGame();
         }));
@@ -218,7 +218,7 @@ async function queueToArena(shibaId) {
 
 async function matchmake(shibaId) {
     let contract = await getArenaContract();
-    contract.methods.matchmake(shibaId).send({from: ethereum.selectedAddress})
+    contract.methods.matchmake(shibaId).send({from: ethereum.selectedAddress, gasLimit: 300000})
         .on("receipt", (() => {
             renderGame();
         }));
@@ -226,7 +226,7 @@ async function matchmake(shibaId) {
 
 async function createMatch() {
     let contract = await getArenaContract();
-    contract.methods.matchmake().send({from: ethereum.selectedAddress})
+    contract.methods.matchmake().send({from: ethereum.selectedAddress, gasLimit: 300000})
         .on("receipt", (() => {
             renderGame();
         }));
@@ -235,7 +235,7 @@ async function createMatch() {
 
 async function openPack(shibaId) {
     let contract = await getFactoryContract();
-    contract.methods.openPack(shibaId).send({from: ethereum.selectedAddress})
+    contract.methods.openPack(shibaId).send({from: ethereum.selectedAddress, gasLimit: 350000})
         .on("receipt", (() => {
             renderGame();
         }));
@@ -243,7 +243,7 @@ async function openPack(shibaId) {
 
 async function buyShiba(tokenId){
     let contract = await getFactoryContract();
-    contract.methods.buyShiba(tokenId).send({from:  ethereum.selectedAddress})
+    contract.methods.buyShiba(tokenId).send({from:  ethereum.selectedAddress, gasLimit: 400000})
         .on("receipt", (() => {
             renderGame();
         }));
@@ -251,7 +251,7 @@ async function buyShiba(tokenId){
 
 async function buyTreatTokens(){
     let contract = await getFactoryContract();
-    contract.methods.buyTreats().send({from:  ethereum.selectedAddress})
+    contract.methods.buyTreats().send({from:  ethereum.selectedAddress, gasLimit: 150000})
         .on("receipt", (() => {
             renderGame();
         }));
@@ -259,7 +259,7 @@ async function buyTreatTokens(){
 
 async function approveShib(){
     let contract = await getShibContract();
-    contract.methods.approve(FACTORY, SHIB_SUPPLY).send({from: ethereum.selectedAddress})
+    contract.methods.approve(FACTORY, SHIB_SUPPLY).send({from: ethereum.selectedAddress, gasLimit: 50000})
         .on("receipt", (() => {
             renderGame();
         }));
