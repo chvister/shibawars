@@ -89,9 +89,15 @@ function renderShiba(id, data, userPowerTreats, shibaMaxHp){
         <div>Strength: <span class="shiba-strength">${parseFloat (data.strength) / 100}</span></div>
         <div>Agility: <span class="shiba-agility">${parseFloat (data.agility) / 100}</span></div>
         <div>Dexterity: <span idclass="shiba-dexterity">${parseFloat (data.dexterity) / 100}</span></div>
-        <div>Hitpoints: <span idclass="shiba-hp">${parseFloat (data.hitPoints) / 100} / ${parseFloat (shibaMaxHp) / 100}</span></div>`;
+        <div>Hitpoints: <span idclass="shiba-hp">${parseFloat (data.hitPoints) / 100} / ${parseFloat (shibaMaxHp) / 100}</span></div>
+        <div>Score: <span idclass="arena-score">${data.arenaScore}</span></div>`;
         if(userPowerTreats >= data.level * 1500000) {
             card += `<button id="btn-level-up-${id}" class="btn btn-primary btn-block">Level up</button>`;
+        }
+        if(data.inArena == 0) {
+            card += `<button id="btn-queue-${id}" class="btn btn-primary btn-block">Queue to arena</button>`;
+        } else {
+            card += `This doge is waiting for a match.`;
         }
     } else if (data.tokenId == 13) {
         card += `<button id="btn-open-${id}" class="btn btn-primary btn-block">Open</button>`;
@@ -105,6 +111,11 @@ function renderShiba(id, data, userPowerTreats, shibaMaxHp){
         $(`#btn-level-up-${id}`).click( () => { 
             levelUp(id);
         });
+        if(data.inArena == 0) {
+            $(`#btn-queue-${id}`).click( () => { 
+                queueToArena(id);
+            });
+        }
     } else if (data.tokenId == 13) {
         $(`#btn-open-${id}`).click( () => { 
             openPack(id);
@@ -171,6 +182,14 @@ function shibaAbi(){
 async function levelUp(shibaId) {
     let contract = await getContract();
     contract.methods.levelUp(shibaId).send({from: ethereum.selectedAddress})
+        .on("receipt", (() => {
+            renderGame();
+        }));
+}
+
+async function queueToArena(shibaId) {
+    let contract = await getArenaContract();
+    contract.methods.queueToArena(shibaId, 100).send({from: ethereum.selectedAddress})
         .on("receipt", (() => {
             renderGame();
         }));

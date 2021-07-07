@@ -12,7 +12,9 @@ interface IShibaWars {
 
     function decreaseHp(uint256 id, uint damage) external;
 
-    function addSCore(uint256 id, uint score) external;
+    function addScore(uint256 id, uint score) external;
+
+    function decreaseScore(uint256 id, uint score) external;
 
     function mintNFT(address owner, uint tokenId) external;
 

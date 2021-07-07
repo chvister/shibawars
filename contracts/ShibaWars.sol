@@ -39,7 +39,7 @@ contract ShibaWars is ERC721 {
     }
 
     // MINT NEW TOKEN
-    function _mint(address owner, uint tokenId, uint strength, uint agility, uint dexterity, uint primary) private {
+    function mint(address owner, uint tokenId, uint strength, uint agility, uint dexterity, uint primary) private {
         _tokenDetails[nextId] = 
             ShibaWarsEntity.Shiba(
                 nextId,
@@ -58,14 +58,10 @@ contract ShibaWars is ERC721 {
         ++nextId;
     }
 
-    function mint(address owner, uint tokenId, uint strength, uint agility, uint dexterity, uint primary) public isShibaWars(msg.sender) {
-        _mint(owner, tokenId, strength, agility, dexterity, primary);
-    }
-
     // MINTS FIRST TWO TOKENS. CAN ONLY BE CALLED BY DEV BUT THESE DOGES CAN NOT FIGHT IN ARENA
     function initialMint() public isDev(msg.sender) {
-        _mint(msg.sender, 0, 10000, 10000, 10000, 1);
-        _mint(msg.sender, 1, 10000, 10000, 10000, 2);
+        mint(msg.sender, 0, 10000, 10000, 10000, 1);
+        mint(msg.sender, 1, 10000, 10000, 10000, 2);
     }
 
     // SETS ADDRESS OF ARENA CONTRACT. CAN ONLY BE CALLED BY DEV
@@ -164,9 +160,15 @@ contract ShibaWars is ERC721 {
     }
 
     // ADD SCORE FOR DOGE
-    function addSCore(uint256 id, uint score) public isShibaWars(msg.sender) {
+    function addScore(uint256 id, uint score) public isShibaWars(msg.sender) {
         uint newScore = _tokenDetails[id].arenaScore.add(score);
         _tokenDetails[id].arenaScore = newScore;
+    }
+
+    // DECREASE SCORE FOR DOGE
+    function decreaseScore(uint256 id, uint score) public isShibaWars(msg.sender) {
+        ShibaWarsEntity.Shiba memory _shib = getTokenDetails(id);
+        _tokenDetails[id].arenaScore = score <= _shib.arenaScore - 1 ? _shib.arenaScore.sub(score) : 1;
     }
 
     // FEED YOUR SHIBA

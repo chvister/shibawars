@@ -24,8 +24,11 @@ contract ShibaWarsArena {
         ShibaWarsEntity.Shiba memory _shiba = shibaWars.getTokenDetails(tokenId);
         // must be my shiba
         require(shibaWars.ownerOf(tokenId) == msg.sender, "Shiba Wars: YOU DO NOT OWN THIS TOKEN");
+        // must be doge
+        require(canFight(tokenId), "Shiba Wars: THIS DOGE CAN NOT FIGHT!");
         // can not be in arena
-        require(_shiba.inArena == 0, "Shiba Wars: THIS SHIBA IS IN ARENA ALREADY");
+        require(_shiba.inArena == 0, "Shiba Wars: THIS DOGE IS IN ARENA ALREADY");
+        require(_shiba.hitPoints > 1, "Shiba Wars: THIS DOGE IS TOO EXHAUSTED");
         shibaWars.putInArena(tokenId);
         uint256 score = _shiba.arenaScore;
         uint256 scoreDiff = score.ratio(tolerance, 100);
@@ -34,6 +37,7 @@ contract ShibaWarsArena {
     }
 
     function fight(uint256 firstShiba, uint256 secondShiba) private {
+        require(shibaWars.ownerOf(firstShiba) != shibaWars.ownerOf(secondShiba), "Shiba Wars: CAN NOT FIGHT YOUR OWN DOGE");
         ShibaWarsEntity.Shiba memory attacker;
         ShibaWarsEntity.Shiba memory defender;
         {
@@ -42,7 +46,6 @@ contract ShibaWarsArena {
         // the one with higher agility attacks first
         (attacker, defender) = _first.agility >= _second.agility ? (_first, _second) : (_second, _first);
         }
-        require(shibaWars.ownerOf(firstShiba) != shibaWars.ownerOf(secondShiba), "Shiba Wars: CAN NOT FIGHT YOUR OWN SHIBA");
         uint damageAttacker = 0;
         uint damageDefender = 0;
         uint attackerHp = attacker.hitPoints;
@@ -95,10 +98,20 @@ contract ShibaWarsArena {
         shibaWars.decreaseHp(defender.id, damageAttacker);
         // attacker wins if defender fainted or attacker did more damage
         if(defenderHp == 1 || damageAttacker > damageDefender) {
-            shibaWars.addSCore(attacker.id, shibaWars.getTokenDetails(defender.id).arenaScore.add(1));
+            uint256 score = scoreReward(attacker.arenaScore, defender.arenaScore);
+            shibaWars.addScore(attacker.id, score);
+            shibaWars.decreaseScore(defender.id, score);
         } else {
-            shibaWars.addSCore(defender.id, shibaWars.getTokenDetails(attacker.id).arenaScore.add(1));
+            uint256 score = scoreReward(attacker.arenaScore, defender.arenaScore);
+            shibaWars.addScore(defender.id, score);
+            shibaWars.decreaseScore(attacker.id, score);
         }
+    }
+
+    function scoreReward(uint256 winnerScore, uint256 loserScore) private pure returns (uint256) {
+        uint256 multiplier = loserScore.mul(100).div(winnerScore);
+        uint256 score = multiplier.mul(25).div(100);
+        return score.trim(1, 50);
     }
     
     function getArmor(uint id) public view returns (uint) {
