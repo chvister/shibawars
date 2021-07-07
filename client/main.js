@@ -209,7 +209,7 @@ async function queueToArena(shibaId) {
 
 async function matchmake(shibaId) {
     let contract = await getArenaContract();
-    contract.methods.matchmake(shibaId).send({from: ethereum.selectedAddress})
+    contract.methods.matchmake(shibaId).send({from: ethereum.selectedAddress, gasLimit: "3000000"})
         .on("receipt", (() => {
             renderGame();
         }));
