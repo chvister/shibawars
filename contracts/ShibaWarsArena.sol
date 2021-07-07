@@ -117,69 +117,59 @@ contract ShibaWarsArena {
         // the one with higher agility attacks first
         (attacker, defender) = _first.agility >= _second.agility ? (_first, _second) : (_second, _first);
         }
-        uint damageAttacker = 0;
-        uint damageDefender = 0;
-        uint attackerHp = attacker.hitPoints;
-        uint defenderHp = defender.hitPoints;
-        // 8 rounds
-        uint round = 0;
-        while(round < 8 && attackerHp > 1 && defenderHp > 1) {
-            // attacker attacks
-            if(hit(getAim(attacker.id), getDodge(defender.id), round)) {
-                // if hit damage is dealt
-                uint damage = getDamage(getMinDamage(attacker.id), getMaxDamage(attacker.id), round);
-                bool isCritical = criticalHit(getCritAim(attacker.id), getCritDodge(defender.id), round);
-                if (isCritical) {
-                    damage = damage.mul(3).div(2);
-                }
-                uint armor = getArmor(defender.id);
-                damage = armor > damage ? 0 : damage.sub(armor);
-                damage = damage.min(defenderHp.sub(1));
-                defenderHp = defenderHp.sub(damage);
-                damageAttacker = damageAttacker.add(damage);
-                // if dead -> end
-                if(defenderHp == 1) {
-                    break;
-                }
-            }
-            // defender attacks
-            if(hit(getAim(defender.id), getDodge(attacker.id), round + 8)) {
-                // if hit damage is dealt
-                uint damage = getDamage(getMinDamage(defender.id), getMaxDamage(defender.id), round + 8);
-                bool isCritical = criticalHit(getCritAim(defender.id), getCritDodge(attacker.id), round + 8);
-                if (isCritical) {
-                    damage = damage.mul(3).div(2);
-                }
-                uint armor = getArmor(attacker.id);
-
-                damage = armor > damage ? 0 : damage.sub(armor);
-                damage = damage.min(attackerHp.sub(1));
-                attackerHp = attackerHp.sub(damage);
-                damageDefender = damageDefender.add(damage);
-
-                // if dead -> end
-                if(attackerHp == 1) {
-                    break;
-                }
-            }
-            // next round
-            ++round;
+        uint128 winner = 0;
+        // pick random skill for attacker
+        uint128 skill = (uint128)(abi.encodePacked(block.timestamp, block.difficulty, firstShiba).random(0, 2));
+        uint damageAttacker = skill == 0 ? attacker.strength : (skill == 1 ? attacker.agility : attacker.dexterity);
+        skill = (uint128)(abi.encodePacked(block.timestamp, block.difficulty, secondShiba).random(0, 2));
+        uint damageDefender = skill == 0 ? defender.strength : (skill == 1 ? defender.agility : defender.dexterity);
+        if(damageAttacker > defender.hitPoints - 1) {
+            // defender fainted
+            shibaWars.decreaseHp(defender.id, defender.hitPoints - 1);
+            winner = 1;
+        } else {
+            shibaWars.decreaseHp(defender.id, damageAttacker);
         }
-        shibaWars.decreaseHp(attacker.id, damageDefender);
-        shibaWars.decreaseHp(defender.id, damageAttacker);
+        if (winner == 0) {
+            // defender attacks as well
+            if(damageDefender > attacker.hitPoints - 1) {
+                // defender fainted
+                shibaWars.decreaseHp(attacker.id, attacker.hitPoints - 1);
+                winner = 2;
+            } else {
+                shibaWars.decreaseHp(attacker.id, damageDefender);
+            }
+        }
+        if(winner == 0) {
+            // nobody fainted
+            if (damageAttacker > damageDefender) {
+                // attacker did more damage
+                winner = 1;
+            } else if (damageDefender > damageAttacker) {
+                // defender did more damage
+                winner = 2;
+            }
+        }
         // pay fee to matchmaker
         shibaWars.payMatchmaker(matchmaker);
         inArena -= matches;
-        // attacker wins if defender fainted or attacker did more damage
-        if(defenderHp == 1 || damageAttacker > damageDefender) {
+        if(winner == 1) {
             uint256 score = scoreReward(attacker.arenaScore, defender.arenaScore);
             uint attNewScore = attacker.arenaScore.add(score);
             uint defNewScore = score <= defender.arenaScore - 1 ? defender.arenaScore.sub(score) : 1;
             setScore(attacker.id, attNewScore, defender.id, defNewScore);
-        } else {
+        } else if (winner == 2) {
             uint256 score = scoreReward(defender.arenaScore, attacker.arenaScore);
             uint defNewScore = defender.arenaScore.add(score);
             uint attNewScore = score <= attacker.arenaScore - 1 ? attacker.arenaScore.sub(score) : 1;
+            setScore(attacker.id, attNewScore, defender.id, defNewScore);
+        } else {
+            uint256 score = scoreReward(attacker.arenaScore, defender.arenaScore);
+            uint attNewScore = attacker.arenaScore.add(score);
+            uint defNewScore = score <= defender.arenaScore - 1 ? defender.arenaScore.sub(score) : 1;
+            score = scoreReward(defender.arenaScore, attacker.arenaScore);
+            defNewScore = defNewScore.add(score);
+            attNewScore = score <= attNewScore - 1 ? attNewScore.sub(score) : 1;
             setScore(attacker.id, attNewScore, defender.id, defNewScore);
         }
     }
@@ -193,60 +183,6 @@ contract ShibaWarsArena {
     function setScore(uint256 attackerId, uint256 attackerScore, uint256 defenderId, uint256 defenderScore) private {
         shibaWars.setScore(attackerId, attackerScore);
         shibaWars.setScore(defenderId, defenderScore);
-    }
-
-    function getArmor(uint id) public view returns (uint) {
-        return shibaWars.getTokenDetails(id).strength;
-    }
-
-    function getAim(uint id) public view returns (uint) {
-        return shibaWars.getTokenDetails(id).dexterity.add(5);
-    }
-
-    function getDodge(uint id) public view returns (uint) {
-        return shibaWars.getTokenDetails(id).agility.add(5);
-    }
-
-    function getCritAim(uint id) public view returns (uint) {
-        return shibaWars.getTokenDetails(id).agility.add(5);
-    }
-
-    function getCritDodge(uint id) public view returns (uint) {
-        return shibaWars.getTokenDetails(id).dexterity.add(5);
-    }
-
-    function getPrimary(uint id)  private view returns (uint) {
-        if(shibaWars.getTokenDetails(id).primary == 1) {
-            return shibaWars.getTokenDetails(id).strength;    
-        } else if(shibaWars.getTokenDetails(id).primary == 2) {
-            return shibaWars.getTokenDetails(id).agility;    
-        }  else {
-            return shibaWars.getTokenDetails(id).dexterity;    
-        }
-    } 
-
-    function getMinDamage(uint id) public view returns (uint) {
-        return getPrimary(id);
-    }
-
-    function getMaxDamage(uint id) public view returns (uint) {
-        return getPrimary(id).mul(3);
-    }
-
-    function getDamage(uint minDamage, uint maxDamage, uint seed) private view returns (uint) {
-        return abi.encodePacked(block.difficulty, block.timestamp, seed, minDamage, maxDamage).random(minDamage, maxDamage);
-    }
-
-    function hit(uint aim, uint dodge, uint seed) private view returns (bool) {
-        (uint aimValue, uint dodgeValue) = (abi.encodePacked(block.difficulty, block.timestamp, aim, seed).random(0, aim),
-            abi.encodePacked(block.difficulty, block.timestamp, dodge, seed).random(0, dodge));
-        return aimValue > dodgeValue;
-    }
-
-    function criticalHit(uint critAim, uint critDodge, uint seed) private view returns (bool) {
-        (uint aimValue, uint dodgeValue) = (abi.encodePacked(block.difficulty, block.timestamp, critAim, seed).random(0, critAim),
-            abi.encodePacked(block.difficulty, block.timestamp, critDodge, seed).random(0, critDodge * 10));
-        return aimValue > dodgeValue;
     }
 
     // RETURN TRUE IF THIS DOGE CAN FIGHT IN ARENA

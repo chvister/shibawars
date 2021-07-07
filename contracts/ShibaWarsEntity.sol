@@ -10,8 +10,7 @@ library ShibaWarsEntity {
         uint64 dexterity;     // aim, crit chance decrease
 
         uint32 tokenId;       // id of shiba    
-        uint16 primary;         // 1 - strength, 2- agility, 3- dexterity
-        uint16 inArena;         // 0 false 1 true
+        uint32 inArena;         // 0 false 1 true
 
         uint64 strengthGain;  // strength gain per level
         uint64 agilityGain;   // agility gain per level

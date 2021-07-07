@@ -1,9 +1,9 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const SHIBA_WARS = "0x651f1AecF282Bc0fFfF548A5a49E937216526ee2";
-const ARENA = "0x8356B3947640b85E9dbdF6797A63F67Cf5a29EC9";
-const FACTORY = "0x3e710832CE9a94A8D25db0Cd835279dcDd53cdcb";
+const SHIBA_WARS = "0x7c39943972E74f4956d7Fd7CEFBc9d2a2d81d04E";
+const ARENA = "0x237dd1b9b852841c87E83fc647f130117e9004e7";
+const FACTORY = "0xB17b70255Bd3D61a7a4096CD3174b0c5ACe34a88";
 
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const SHIB_SUPPLY = "1000000000000000000000000000000000";
@@ -218,7 +218,7 @@ async function queueToArena(shibaId) {
 
 async function matchmake(shibaId) {
     let contract = await getArenaContract();
-    contract.methods.matchmake(shibaId).send({from: ethereum.selectedAddress, gasLimit: "3000000"})
+    contract.methods.matchmake(shibaId).send({from: ethereum.selectedAddress})
         .on("receipt", (() => {
             renderGame();
         }));
@@ -226,7 +226,7 @@ async function matchmake(shibaId) {
 
 async function createMatch() {
     let contract = await getArenaContract();
-    contract.methods.matchmake().send({from: ethereum.selectedAddress, gasLimit: "6000000"})
+    contract.methods.matchmake().send({from: ethereum.selectedAddress})
         .on("receipt", (() => {
             renderGame();
         }));

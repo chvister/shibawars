@@ -41,7 +41,7 @@ contract ShibaWars is ERC721 {
     }
 
     // MINT NEW TOKEN
-    function mint(address owner, uint tokenId, uint strength, uint agility, uint dexterity, uint primary) private {
+    function mint(address owner, uint tokenId, uint strength, uint agility, uint dexterity) private {
         _tokenDetails[nextId] = 
             ShibaWarsEntity.Shiba(
                 nextId,
@@ -49,7 +49,6 @@ contract ShibaWars is ERC721 {
                 (uint64)(agility), 
                 (uint64)(dexterity), 
                 (uint32)(tokenId),
-                (uint16)(primary),
                 0,
                 (uint64)(strength.div(10)), 
                 (uint64)(agility.div(10)), 
@@ -62,8 +61,8 @@ contract ShibaWars is ERC721 {
 
     // MINTS FIRST TWO TOKENS. CAN ONLY BE CALLED BY DEV BUT THESE DOGES CAN NOT FIGHT IN ARENA
     function initialMint() public isDev(msg.sender) {
-        mint(msg.sender, 0, 10000, 10000, 10000, 1);
-        mint(msg.sender, 1, 10000, 10000, 10000, 2);
+        mint(msg.sender, 0, 10000, 10000, 10000);
+        mint(msg.sender, 1, 10000, 10000, 10000);
     }
 
     // SETS ADDRESS OF ARENA CONTRACT. CAN ONLY BE CALLED BY DEV
@@ -121,10 +120,9 @@ contract ShibaWars is ERC721 {
 
         uint str = multiplier.mul(10).add(abi.encodePacked(block.difficulty, block.timestamp).random(0, 6).mul(multiplier));
         uint agi = multiplier.mul(10).add(abi.encodePacked(tokenId, block.timestamp).random(0, 6).mul(multiplier));
-        uint intl = multiplier.mul(10).add(abi.encodePacked(block.difficulty, tokenId).random(0, 6).mul(multiplier));
+        uint dex = multiplier.mul(10).add(abi.encodePacked(block.difficulty, tokenId).random(0, 6).mul(multiplier));
 
-        uint primary = abi.encodePacked(str, agi, intl, block.timestamp).random(0, 3);
-        mint(owner, tokenId, str, agi, intl, primary);
+        mint(owner, tokenId, str, agi, dex);
     }
 
     // LEVEL UP SHIBA
