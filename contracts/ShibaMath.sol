@@ -49,4 +49,8 @@ library ShibaMath {
         return number_ > min_ ? (number_ < max_ ? number_ : max_) : min_;
     }
 
+    function inRange(uint256 number, uint256 min_, uint256 max_) external pure returns (bool) {
+        return number >= min_ && number <= max_;
+    }
+
 }

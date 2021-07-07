@@ -1,9 +1,9 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const SHIBA_WARS = "0x98b5A62a1AfAf918645451415Ee7B458aD2e257f";
-const ARENA = "0x82Bdec542D04a9117a800bC78f7A470137E834e0";
-const FACTORY = "0xf28A520Edd122a09f77569022d1C68e241C66Dea";
+const SHIBA_WARS = "0xc659Cf3cfFf81f6bFCb43eb3A3b64F38cFeb5238";
+const ARENA = "0xFAFFea560e734270ddD58Db9Be93505BdA435e21";
+const FACTORY = "0xC3454AD2e4ba9fdf2fe0a2568c80C1b7738e9965";
 
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const SHIB_SUPPLY = "1000000000000000000000000000000000";

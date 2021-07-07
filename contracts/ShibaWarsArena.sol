@@ -30,10 +30,61 @@ contract ShibaWarsArena {
         require(_shiba.inArena == 0, "Shiba Wars: THIS DOGE IS IN ARENA ALREADY");
         require(_shiba.hitPoints > 1, "Shiba Wars: THIS DOGE IS TOO EXHAUSTED");
         shibaWars.putInArena(tokenId);
-        uint256 score = _shiba.arenaScore;
+        (uint256 min_, uint256 max_) = getMinAndMaxScore(_shiba.arenaScore, tolerance);
+        bool pushed = false;
+        for(uint i = 0; i < arenaQueue.length; ++i){
+            if(arenaQueue[i] == 0) {
+                arenaQueue[i] = tokenId;
+                pushed = true;
+                break;
+            }
+        }
+        if(!pushed) {
+            arenaQueue.push(tokenId);
+        }
+        _tolerances[tokenId] = ShibaWarsEntity.ArenaQueue(min_, max_);
+    }
+
+    function getMinAndMaxScore(uint256 score, uint256 tolerance) private pure returns (uint256 min_, uint256 max_) {
         uint256 scoreDiff = score.ratio(tolerance, 100);
-        arenaQueue.push(tokenId);
-        _tolerances[tokenId] = ShibaWarsEntity.ArenaQueue(score.add(scoreDiff) , score.add(scoreDiff));
+        min_ = scoreDiff > score - 1 ? 1 : score.sub(scoreDiff) ;
+        max_ = score.add(scoreDiff);
+    }
+
+    function matchmake(uint tokenId, uint tolerance) public {
+         ShibaWarsEntity.Shiba memory _shiba = shibaWars.getTokenDetails(tokenId);
+        // must be my shiba
+        require(shibaWars.ownerOf(tokenId) == msg.sender, "Shiba Wars: YOU DO NOT OWN THIS TOKEN");
+        // must be doge
+        require(canFight(tokenId), "Shiba Wars: THIS DOGE CAN NOT FIGHT!");
+        // can not be in arena
+        require(_shiba.inArena == 0, "Shiba Wars: THIS DOGE IS IN ARENA ALREADY");
+        require(_shiba.hitPoints > 1, "Shiba Wars: THIS DOGE IS TOO EXHAUSTED");
+        (uint256 min_, uint256 max_) = getMinAndMaxScore(_shiba.arenaScore, tolerance);
+        uint256[] memory _arenaQueue = arenaQueue;
+        uint256 foundId = 0;
+        uint index = 0;
+        // find the best match
+        for(; index < _arenaQueue.length; ++index) {
+            uint256 id = _arenaQueue[index];
+            if(id != 0) {
+                ShibaWarsEntity.ArenaQueue memory queue = _tolerances[id];
+                if(_shiba.arenaScore.inRange(queue.minScore, queue.maxScore)) {
+                    ShibaWarsEntity.Shiba memory _otherDoge = shibaWars.getTokenDetails(id);
+                    if(_otherDoge.arenaScore.inRange(min_, max_)) {
+                        foundId = id;
+                        break;
+                    }
+                }
+            }
+        }
+        require(foundId != 0, "Shiba Wars: NO APPROPRIATE MATCH FOUND");
+        // remove from queue
+        arenaQueue[index] = 0;
+        // remove from mapping
+        delete _tolerances[foundId];
+        // do the fight
+        fight(tokenId, foundId);
     }
 
     function fight(uint256 firstShiba, uint256 secondShiba) private {
