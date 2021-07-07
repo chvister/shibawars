@@ -23,10 +23,5 @@ library ShibaWarsEntity {
         uint256 hitPoints;     // hitpoints
         
     }
-
-    struct ArenaQueue {
-        uint256 minScore;
-        uint256 maxScore;
-    }
-
+    
 }

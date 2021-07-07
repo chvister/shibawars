@@ -6,13 +6,11 @@ import "./IShibaWars.sol";
 
 contract ShibaWarsArena {
 
-    using ShibaWarsEntity for ShibaWarsEntity.ArenaQueue;
     using ShibaMath for uint;
     using ShibaMath for uint64;
     using ShibaMath for bytes;
 
     uint256[] private arenaQueue;
-    mapping(uint256 => ShibaWarsEntity.ArenaQueue) private _tolerances;
 
     IShibaWars private shibaWars;
 
@@ -20,17 +18,9 @@ contract ShibaWarsArena {
         shibaWars = IShibaWars(shibaWars_);
     }
         
-    function queueToArena(uint tokenId, uint tolerance) public {
-        ShibaWarsEntity.Shiba memory _shiba = shibaWars.getTokenDetails(tokenId);
-        // must be my shiba
-        require(shibaWars.ownerOf(tokenId) == msg.sender, "Shiba Wars: YOU DO NOT OWN THIS TOKEN");
-        // must be doge
-        require(canFight(tokenId), "Shiba Wars: THIS DOGE CAN NOT FIGHT!");
-        // can not be in arena
-        require(_shiba.inArena == 0, "Shiba Wars: THIS DOGE IS IN ARENA ALREADY");
-        require(_shiba.hitPoints > 1, "Shiba Wars: THIS DOGE IS TOO EXHAUSTED");
+    function queueToArena(uint tokenId) public {
+        checkCanFight(tokenId);
         shibaWars.putInArena(tokenId);
-        (uint256 min_, uint256 max_) = getMinAndMaxScore(_shiba.arenaScore, tolerance);
         bool pushed = false;
         for(uint i = 0; i < arenaQueue.length; ++i){
             if(arenaQueue[i] == 0) {
@@ -42,17 +32,10 @@ contract ShibaWarsArena {
         if(!pushed) {
             arenaQueue.push(tokenId);
         }
-        _tolerances[tokenId] = ShibaWarsEntity.ArenaQueue(min_, max_);
     }
 
-    function getMinAndMaxScore(uint256 score, uint256 tolerance) private pure returns (uint256 min_, uint256 max_) {
-        uint256 scoreDiff = score.ratio(tolerance, 100);
-        min_ = scoreDiff > score - 1 ? 1 : score.sub(scoreDiff) ;
-        max_ = score.add(scoreDiff);
-    }
-
-    function matchmake(uint tokenId, uint tolerance) public {
-         ShibaWarsEntity.Shiba memory _shiba = shibaWars.getTokenDetails(tokenId);
+    function checkCanFight(uint tokenId) private view returns (ShibaWarsEntity.Shiba memory _shiba) {
+        _shiba = shibaWars.getTokenDetails(tokenId);
         // must be my shiba
         require(shibaWars.ownerOf(tokenId) == msg.sender, "Shiba Wars: YOU DO NOT OWN THIS TOKEN");
         // must be doge
@@ -60,7 +43,10 @@ contract ShibaWarsArena {
         // can not be in arena
         require(_shiba.inArena == 0, "Shiba Wars: THIS DOGE IS IN ARENA ALREADY");
         require(_shiba.hitPoints > 1, "Shiba Wars: THIS DOGE IS TOO EXHAUSTED");
-        (uint256 min_, uint256 max_) = getMinAndMaxScore(_shiba.arenaScore, tolerance);
+    }
+
+    function matchmake(uint tokenId) public {
+        (ShibaWarsEntity.Shiba memory _shiba) = checkCanFight(tokenId);
         uint256[] memory _arenaQueue = arenaQueue;
         uint256 foundId = 0;
         uint index = 0;
@@ -68,21 +54,13 @@ contract ShibaWarsArena {
         for(; index < _arenaQueue.length; ++index) {
             uint256 id = _arenaQueue[index];
             if(id != 0) {
-                ShibaWarsEntity.ArenaQueue memory queue = _tolerances[id];
-                if(_shiba.arenaScore.inRange(queue.minScore, queue.maxScore)) {
-                    ShibaWarsEntity.Shiba memory _otherDoge = shibaWars.getTokenDetails(id);
-                    if(_otherDoge.arenaScore.inRange(min_, max_)) {
-                        foundId = id;
-                        break;
-                    }
-                }
+                foundId = id;
+                break;
             }
         }
-        require(foundId != 0, "Shiba Wars: NO APPROPRIATE MATCH FOUND");
+        require(foundId != 0, "Shiba Wars: NO MATCH FOUND");
         // remove from queue
         arenaQueue[index] = 0;
-        // remove from mapping
-        delete _tolerances[foundId];
         // do the fight
         shibaWars.retrieveFromArena(foundId);
         fight(tokenId, foundId);
