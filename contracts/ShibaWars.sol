@@ -52,7 +52,7 @@ contract ShibaWars is ERC721 {
                 (uint64)(strength.div(10)), 
                 (uint64)(agility.div(10)), 
                 (uint64)(dexterity.div(10)), 
-                1, 0, 
+                1, 1, 
                 getMaxHpFromStrength((uint64)(strength)));
         _safeMint(owner, nextId);
         ++nextId;

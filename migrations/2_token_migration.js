@@ -1,6 +1,5 @@
 const ShibaWars = artifacts.require("ShibaWars");
 const ShibaInu = artifacts.require("ShibaInu");
-const STT = artifacts.require("ShibaTreatToken");
 const ShibaWarsUtils = artifacts.require("ShibaWarsUtils");
 const ShibaWarsEntity = artifacts.require("ShibaWarsEntity");
 const ShibaMath = artifacts.require("ShibaMath");
@@ -39,11 +38,6 @@ module.exports = async function (deployer, networks, accounts) {
   let shibaWarsFactory = await ShibaWarsFactory.deployed();
   let factoryAddress = shibaWarsFactory['address'];
   shibaWars.setFactoryAddress(factoryAddress, {from : accounts[0]});
-
-  // create shiba treat token
-  await deployer.deploy(STT, shibaWarsAddress);
-  let stt = await STT.deployed();
-  await stt.transferOwnership(shibaWarsAddress);
 
   console.log("wars: " + shibaWarsAddress);
   console.log("arena: " + arenaAddress);

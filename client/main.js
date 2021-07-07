@@ -1,9 +1,9 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const SHIBA_WARS = "0x264148801f0bFC4AB398F494E316Ac747e5d5545";
-const ARENA = "0xbF3B8f0828477180C30149B3712b8c302D3a4aeE";
-const FACTORY = "0x3fc34d0be77e0d42e227ace62792392985aeC868";
+const SHIBA_WARS = "0x98b5A62a1AfAf918645451415Ee7B458aD2e257f";
+const ARENA = "0x82Bdec542D04a9117a800bC78f7A470137E834e0";
+const FACTORY = "0xf28A520Edd122a09f77569022d1C68e241C66Dea";
 
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const SHIB_SUPPLY = "1000000000000000000000000000000000";
@@ -42,6 +42,7 @@ async function renderGame(){
 
     let shibaWars = await getContract();
     let factoryContract = await getFactoryContract();
+    let arenaContract = await getArenaContract();
     
     let userBalance = await shibContrat.methods.balanceOf(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
     if(userBalance != 0) {
@@ -71,11 +72,12 @@ async function renderGame(){
     userShibas.forEach(async (shibaId) => {
         let data = await shibaWars.methods.getTokenDetails(shibaId).call({from: ethereum.selectedAddress});
         let shibaMaxHp = await shibaWars.methods.getMaxHp(shibaId).call({from: ethereum.selectedAddress});
-        renderShiba(shibaId, data, userPowerTreats, shibaMaxHp);
+        let canFight = await arenaContract.methods.canFight(shibaId).call({from: ethereum.selectedAddress});
+        renderShiba(shibaId, data, userPowerTreats, shibaMaxHp, canFight);
     });
 }
 
-function renderShiba(id, data, userPowerTreats, shibaMaxHp){
+function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight){
     // 13 doge pack
     let card = 
     `<div class="col-md-4 card id="pet-${id}">
@@ -94,10 +96,16 @@ function renderShiba(id, data, userPowerTreats, shibaMaxHp){
         if(userPowerTreats >= data.level * 1500000) {
             card += `<button id="btn-level-up-${id}" class="btn btn-primary btn-block">Level up</button>`;
         }
-        if(data.inArena == 0) {
+        if(data.inArena == 0 && data.hitPoints > 1 && canFight) {
             card += `<button id="btn-queue-${id}" class="btn btn-primary btn-block">Queue to arena</button>`;
         } else {
-            card += `This doge is waiting for a match.`;
+            if(data.hitPoints == 1) {
+                card += `This doge is too exhausted to fight.`;
+            } else if (!canFight) {
+                card += `This doge can not fight.`;
+            } else {
+                card += `This doge is waiting for a match.`;
+            }
         }
     } else if (data.tokenId == 13) {
         card += `<button id="btn-open-${id}" class="btn btn-primary btn-block">Open</button>`;
