@@ -153,6 +153,11 @@ contract ShibaWars is ERC721 {
         _tokenDetails[id].inArena = 1;
     }
 
+    // RETRIEVES DOGE FROM ARENA
+    function retrieveFromArena(uint256 id) public isShibaWars(msg.sender) {
+        _tokenDetails[id].inArena = 0;
+    }
+
     // DECREASES HP 
     function decreaseHp(uint256 id, uint damage) public isShibaWars(msg.sender) {
         uint newHp = _tokenDetails[id].hitPoints.sub(damage); 

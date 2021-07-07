@@ -84,6 +84,7 @@ contract ShibaWarsArena {
         // remove from mapping
         delete _tolerances[foundId];
         // do the fight
+        shibaWars.retrieveFromArena(foundId);
         fight(tokenId, foundId);
     }
 

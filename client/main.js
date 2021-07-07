@@ -1,9 +1,9 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const SHIBA_WARS = "0xc659Cf3cfFf81f6bFCb43eb3A3b64F38cFeb5238";
-const ARENA = "0xFAFFea560e734270ddD58Db9Be93505BdA435e21";
-const FACTORY = "0xC3454AD2e4ba9fdf2fe0a2568c80C1b7738e9965";
+const SHIBA_WARS = "0xCb7D374C6585113303fa203862C0F02A3B31f051";
+const ARENA = "0xEA793ba5090d68672387d2597139600B046FC53F";
+const FACTORY = "0xC03B8F464F76524f6c27E565AAaAee40120cc640";
 
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const SHIB_SUPPLY = "1000000000000000000000000000000000";
@@ -98,6 +98,7 @@ function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight){
         }
         if(data.inArena == 0 && data.hitPoints > 1 && canFight) {
             card += `<button id="btn-queue-${id}" class="btn btn-primary btn-block">Queue to arena</button>`;
+            card += `<button id="btn-matchmake-${id}" class="btn btn-primary btn-block">Find a match</button>`;
         } else {
             if(data.hitPoints == 1) {
                 card += `This doge is too exhausted to fight.`;
@@ -119,9 +120,12 @@ function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight){
         $(`#btn-level-up-${id}`).click( () => { 
             levelUp(id);
         });
-        if(data.inArena == 0) {
+        if(data.inArena == 0 && data.hitPoints > 1 && canFight) {
             $(`#btn-queue-${id}`).click( () => { 
                 queueToArena(id);
+            });
+            $(`#btn-matchmake-${id}`).click( () => { 
+                matchmake(id);
             });
         }
     } else if (data.tokenId == 13) {
@@ -198,6 +202,14 @@ async function levelUp(shibaId) {
 async function queueToArena(shibaId) {
     let contract = await getArenaContract();
     contract.methods.queueToArena(shibaId, 100).send({from: ethereum.selectedAddress})
+        .on("receipt", (() => {
+            renderGame();
+        }));
+}
+
+async function matchmake(shibaId) {
+    let contract = await getArenaContract();
+    contract.methods.matchmake(shibaId, 100).send({from: ethereum.selectedAddress})
         .on("receipt", (() => {
             renderGame();
         }));

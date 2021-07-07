@@ -10,6 +10,8 @@ interface IShibaWars {
 
     function putInArena(uint256 id) external;
 
+    function retrieveFromArena(uint256 id) external;
+
     function decreaseHp(uint256 id, uint damage) external;
 
     function addScore(uint256 id, uint score) external;
