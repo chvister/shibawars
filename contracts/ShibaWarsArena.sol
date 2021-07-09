@@ -41,9 +41,9 @@ contract ShibaWarsArena {
         ++inArena;
     }
 
-    function checkCanFight(uint tokenId) private view returns (ShibaWarsEntity.Shiba memory _shiba) {
+    function checkCanFight(uint tokenId) private view returns (ShibaWarsEntity.Doge memory _shiba) {
         _shiba = shibaWars.getTokenDetails(tokenId);
-        // must be my shiba
+        // must be my doge
         require(shibaWars.ownerOf(tokenId) == msg.sender, "Shiba Wars: YOU DO NOT OWN THIS TOKEN");
         // must be doge
         require(canFight(tokenId), "Shiba Wars: THIS DOGE CAN NOT FIGHT!");
@@ -109,11 +109,11 @@ contract ShibaWarsArena {
 
     function fight(uint256 firstShiba, uint256 secondShiba, address matchmaker, uint8 matches) private {
         require(shibaWars.ownerOf(firstShiba) != shibaWars.ownerOf(secondShiba), "Shiba Wars: CAN NOT FIGHT YOUR OWN DOGE");
-        ShibaWarsEntity.Shiba memory attacker;
-        ShibaWarsEntity.Shiba memory defender;
+        ShibaWarsEntity.Doge memory attacker;
+        ShibaWarsEntity.Doge memory defender;
         {
-        ShibaWarsEntity.Shiba memory _first = shibaWars.getTokenDetails(firstShiba);
-        ShibaWarsEntity.Shiba memory _second = shibaWars.getTokenDetails(secondShiba);
+        ShibaWarsEntity.Doge memory _first = shibaWars.getTokenDetails(firstShiba);
+        ShibaWarsEntity.Doge memory _second = shibaWars.getTokenDetails(secondShiba);
         // the one with higher agility attacks first
         (attacker, defender) = _first.agility >= _second.agility ? (_first, _second) : (_second, _first);
         }

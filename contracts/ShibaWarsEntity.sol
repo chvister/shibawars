@@ -2,7 +2,7 @@ pragma solidity ^0.8.0;
 
 library ShibaWarsEntity {
 
-    struct Shiba {
+    struct Doge {
         uint256 id;            // uinque id of token
 
         uint64 strength;      // HP, armor

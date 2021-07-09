@@ -1,9 +1,9 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const SHIBA_WARS = "0x7c39943972E74f4956d7Fd7CEFBc9d2a2d81d04E";
-const ARENA = "0x237dd1b9b852841c87E83fc647f130117e9004e7";
-const FACTORY = "0xB17b70255Bd3D61a7a4096CD3174b0c5ACe34a88";
+const SHIBA_WARS = "0x46059e0845b2B0390cc970550694E46176315121";
+const ARENA = "0x5492ED91F7544b40cb7afDC138BC6D9AfD840C6e";
+const FACTORY = "0x694623574DEa6C4D92fC381e3F8663924600A132";
 
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const SHIB_SUPPLY = "1000000000000000000000000000000000";
@@ -24,7 +24,7 @@ async function init() {
 
 async function renderGame(){
     $("#game").show();
-    $("#shibas-row").html("");
+    $("#doges-row").html("");
 
     window.web3 = await Moralis.Web3.enable();
 
@@ -32,10 +32,10 @@ async function renderGame(){
     if (allowance > 0) {
         console.log(allowance);
         $("#approve-row").hide();
-        $("#buy-shiba-row").show();
+        $("#buy-doge-row").show();
     } else {
         $("#approve-row").show();
-        $("#buy-shiba-row").hide();
+        $("#buy-doge-row").hide();
     }
 
     let shibContrat = await getShibContract();
@@ -92,15 +92,15 @@ function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight){
     `<div class="col-md-4 card id="pet-${id}">
     <img class="card-img-top" src="img/token-${data.tokenId}.png">
     <div class="card-body">
-        <div>Id: <span class="shiba-id">${id}</span></div>
-        <div>Name: <span class="shiba-name">${getName(data.tokenId)}</span></div>
-        <div>Description: <span class="shiba-description">${getDescription(data.tokenId)}</span></div>`;
+        <div>Id: <span class="doge-id">${id}</span></div>
+        <div>Name: <span class="doge-name">${getName(data.tokenId)}</span></div>
+        <div>Description: <span class="doge-description">${getDescription(data.tokenId)}</span></div>`;
     if(data.tokenId != 13) {
-        card += `<div>Level: <span class="shiba-level">${data.level}</span></div>
-        <div>Strength: <span class="shiba-strength">${parseFloat (data.strength) / 100}</span></div>
-        <div>Agility: <span class="shiba-agility">${parseFloat (data.agility) / 100}</span></div>
-        <div>Dexterity: <span idclass="shiba-dexterity">${parseFloat (data.dexterity) / 100}</span></div>
-        <div>Hitpoints: <span idclass="shiba-hp">${parseFloat (data.hitPoints) / 100} / ${parseFloat (shibaMaxHp) / 100}</span></div>
+        card += `<div>Level: <span class="doge-level">${data.level}</span></div>
+        <div>Strength: <span class="doge-strength">${parseFloat (data.strength) / 100}</span></div>
+        <div>Agility: <span class="doge-agility">${parseFloat (data.agility) / 100}</span></div>
+        <div>Dexterity: <span idclass="doge-dexterity">${parseFloat (data.dexterity) / 100}</span></div>
+        <div>Hitpoints: <span idclass="doge-hp">${parseFloat (data.hitPoints) / 100} / ${parseFloat (shibaMaxHp) / 100}</span></div>
         <div>Score: <span idclass="arena-score">${data.arenaScore}</span></div>`;
         if(userPowerTreats >= data.level * 1500000) {
             card += `<button id="btn-level-up-${id}" class="btn btn-primary btn-block">Level up</button>`;
@@ -123,7 +123,7 @@ function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight){
     card += `</div></div>`;
 
     let element = $.parseHTML(card);
-    $("#shibas-row").append(element);
+    $("#doges-row").append(element);
 
     if(data.tokenId != 13) {
         $(`#btn-level-up-${id}`).click( () => { 
@@ -210,7 +210,7 @@ async function levelUp(shibaId) {
 
 async function queueToArena(shibaId) {
     let contract = await getArenaContract();
-    contract.methods.queueToArena(shibaId).send({from: ethereum.selectedAddress, gasLimit: 125000})
+    contract.methods.queueToArena(shibaId).send({from: ethereum.selectedAddress, gasLimit: 150000})
         .on("receipt", (() => {
             renderGame();
         }));
@@ -241,9 +241,9 @@ async function openPack(shibaId) {
         }));
 }
 
-async function buyShiba(tokenId){
+async function buyDoge(tokenId){
     let contract = await getFactoryContract();
-    contract.methods.buyShiba(tokenId).send({from:  ethereum.selectedAddress, gasLimit: 400000})
+    contract.methods.buyDoge(tokenId).send({from:  ethereum.selectedAddress, gasLimit: 500000})
         .on("receipt", (() => {
             renderGame();
         }));
@@ -273,7 +273,7 @@ async function getAllowance() {
 
 function getDescription(tokenId) {
     if (tokenId == 0) {
-        return "Altough he's not a Shiba, do not mess with him. The warden of order.";
+        return "Altough he's not a doge, do not mess with him. The warden of order.";
     } else if (tokenId == 1) {
         return "She may be cute, but she will get you. Beware, she bites.";
     } else if (tokenId == 2) {
@@ -287,7 +287,7 @@ function getDescription(tokenId) {
     } else if (tokenId == 6) {
         return "One bark, and they are in the battle.";
     } else if (tokenId == 7) {
-        return "This is not a shiba. But a small cute doge needs a big strong DOG to defend it.";
+        return "This is not a doge. But a small cute doge needs a big strong DOG to defend it.";
     } else if (tokenId == 8) {
         return "Put the doge on the leash. Even though the doges hold together, Doge Killer is true to its beliefs.";
     } else if (tokenId == 9) {
@@ -318,25 +318,25 @@ function getName(tokenId) {
     } else if (tokenId == 2) {
         return "WoofMeister";
     } else if (tokenId == 3) {
-        return "Shiba Whale";
+        return "doge Whale";
     } else if (tokenId == 4) {
-        return "OG Shiba";
+        return "OG doge";
     } else if (tokenId == 5) {
-        return "Shiba Warlord";
+        return "doge Warlord";
     } else if (tokenId == 6) {
-        return "Shiba General";
+        return "doge General";
     } else if (tokenId == 7) {
         return "Watchdog";
     } else if (tokenId == 8) {
         return "Doge Killer";
     } else if (tokenId == 9) {
-        return "Shiba Inu";
+        return "doge Inu";
     } else if (tokenId == 10) {
         return "Akita Inu";
     } else if (tokenId == 11) {
         return "Sanshu Inu";
     } else if (tokenId == 12) {
-        return "Shiba Pup";
+        return "doge Pup";
     } else if (tokenId == 13) {
         return "Lucky Doge Pack Gen #1";
     } else if (tokenId == 14) {
@@ -350,31 +350,31 @@ function getName(tokenId) {
 }
 
 $("#btn-buy-7").click( () => { 
-    buyShiba(7);
+    buyDoge(7);
 });
 
 $("#btn-buy-8").click( () => { 
-    buyShiba(8);
+    buyDoge(8);
 });
 
 $("#btn-buy-9").click( () => { 
-    buyShiba(9);
+    buyDoge(9);
 });
 
 $("#btn-buy-10").click( () => { 
-    buyShiba(10);
+    buyDoge(10);
 });
 
 $("#btn-buy-11").click( () => { 
-    buyShiba(11);
+    buyDoge(11);
 });
 
 $("#btn-buy-12").click( () => { 
-    buyShiba(12);
+    buyDoge(12);
 });
 
 $("#btn-buy-13").click( () => { 
-    buyShiba(13);
+    buyDoge(13);
 });
 
 $("#btn-buy-treat-tokens").click( () => { 

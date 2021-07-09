@@ -9,7 +9,7 @@ import "./ShibaWarsEntity.sol";
 
 contract ShibaWars is ERC721 {
 
-    using ShibaWarsEntity for ShibaWarsEntity.Shiba;
+    using ShibaWarsEntity for ShibaWarsEntity.Doge;
 
     using ShibaMath for uint64;
     using ShibaMath for uint256;
@@ -22,7 +22,7 @@ contract ShibaWars is ERC721 {
     
     // info about tokens
     uint256 private nextId = 0;
-    mapping(uint256 => ShibaWarsEntity.Shiba) private _tokenDetails;
+    mapping(uint256 => ShibaWarsEntity.Doge) private _tokenDetails;
     mapping(address => uint256) private shibaTreats;
 
     modifier isDev(address caller) {
@@ -43,7 +43,7 @@ contract ShibaWars is ERC721 {
     // MINT NEW TOKEN
     function mint(address owner, uint tokenId, uint strength, uint agility, uint dexterity) private {
         _tokenDetails[nextId] = 
-            ShibaWarsEntity.Shiba(
+            ShibaWarsEntity.Doge(
                 nextId,
                 (uint64)(strength), 
                 (uint64)(agility), 
@@ -110,7 +110,7 @@ contract ShibaWars is ERC721 {
     }
 
     // DETAILS OF TOKEN
-    function getTokenDetails(uint256 id) public view returns (ShibaWarsEntity.Shiba memory){
+    function getTokenDetails(uint256 id) public view returns (ShibaWarsEntity.Doge memory){
         return _tokenDetails[id];
     }
 
@@ -125,13 +125,13 @@ contract ShibaWars is ERC721 {
         mint(owner, tokenId, str, agi, dex);
     }
 
-    // LEVEL UP SHIBA
+    // LEVEL UP DOGE
     function levelUp(uint256 id) public {
         // level up if enough shiba treats
         require(ownerOf(id) == msg.sender, "Shiba Wars: YOU DO NOT OWN THIS TOKEN");
         require(shibaTreats[msg.sender] >= levelUpCost(id), "Shiba Wars: NOT ENOUGH POWER TREATS TO UPGRADE THIS SHIBA");
         shibaTreats[msg.sender] = shibaTreats[msg.sender].sub(levelUpCost(id));
-        ShibaWarsEntity.Shiba memory _shiba = getTokenDetails(id);
+        ShibaWarsEntity.Doge memory _shiba = getTokenDetails(id);
         ++_tokenDetails[id].level;
         _tokenDetails[id].strength += _shiba.strengthGain;
         _tokenDetails[id].hitPoints = getMaxHpFromStrength(_shiba.strength);

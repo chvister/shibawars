@@ -36,7 +36,7 @@ contract ShibaWarsFactory {
         return matchmakerReward.div(divisor);
     }
 
-    // SEND DEV REWARD AND BURNS BURN AMOUNT
+    // SEND DEV REWARD AND BURN BURN AMOUNT
     function redeemDevReward() public {
         IShibaInu _shibaInu = IShibaInu(shibaInu);
         // burn shib
@@ -80,7 +80,7 @@ contract ShibaWarsFactory {
     }
 
     // BUY DOGE FROM SHOP
-    function buyShiba(uint tokenId) public {
+    function buyDoge(uint tokenId) public {
         payTheContract(ShibaWarsUtils.getTokenPrice(tokenId));
         IShibaWars(shibaWars).mintNFT(msg.sender, tokenId);
     }
