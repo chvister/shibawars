@@ -1,9 +1,9 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const SHIBA_WARS = "0x46059e0845b2B0390cc970550694E46176315121";
-const ARENA = "0x5492ED91F7544b40cb7afDC138BC6D9AfD840C6e";
-const FACTORY = "0x694623574DEa6C4D92fC381e3F8663924600A132";
+const SHIBA_WARS = "0x0ff4E42970b27ba50888FE4fA13Ab6e5E63078C4";
+const ARENA = "0x6Df0b1F9Dc1D1425Ba2f7873df6DBF9656A7686b";
+const FACTORY = "0xEE440FB0d7c7EE15b884FDAeF346Ac7b3B28c0F2";
 
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const SHIB_SUPPLY = "1000000000000000000000000000000000";
@@ -73,6 +73,8 @@ async function renderGame(){
         $("#btn-matchmake").show();
     }
 
+    $("#in-arena").html(arenaQueueLength);
+
     let userShibas = await shibaWars.methods.getUserTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
     if(Array.length == 0){
         return;
@@ -86,7 +88,7 @@ async function renderGame(){
     });
 }
 
-function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight){
+async function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight){
     // 13 doge pack
     let card = 
     `<div class="col-md-4 card id="pet-${id}">
@@ -107,7 +109,12 @@ function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight){
         }
         if(data.inArena == 0 && data.hitPoints > 1 && canFight) {
             card += `<button id="btn-queue-${id}" class="btn btn-primary btn-block">Queue to arena</button>`;
-            card += `<button id="btn-matchmake-${id}" class="btn btn-primary btn-block">Find a match</button>`;
+            let arenaContract = await getArenaContract();
+            let dogesInArena = await arenaContract.methods.getArenaQueueLength().call({from: ethereum.selectedAddress});
+            let myDoges = await arenaContract.methods.myDogesInArena().call({from: ethereum.selectedAddress})
+            if(dogesInArena > myDoges) {
+                card += `<button id="btn-matchmake-${id}" class="btn btn-primary btn-block">Find a match</button>`;
+            }
         } else {
             if(data.hitPoints == 1) {
                 card += `This doge is too exhausted to fight.`;

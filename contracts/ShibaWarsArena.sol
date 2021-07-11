@@ -23,7 +23,18 @@ contract ShibaWarsArena {
     function getArenaQueueLength() public view returns (uint256) {
         return inArena;
     }
-        
+
+    function myDogesInArena() public view returns (uint256 out) {
+        out = 0;
+        for(uint256 i = 0; i < arenaQueue.length; ++i) {
+            if(arenaQueue[i] != 0) {
+                if(shibaWars.ownerOf(arenaQueue[i]) == msg.sender) {
+                    ++out;
+                }
+            }
+        }
+    }
+
     function queueToArena(uint tokenId) public {
         checkCanFight(tokenId);
         shibaWars.setInArena(tokenId, 1);
