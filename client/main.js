@@ -1,11 +1,12 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const SHIBA_WARS = "0x0ff4E42970b27ba50888FE4fA13Ab6e5E63078C4";
-const ARENA = "0x6Df0b1F9Dc1D1425Ba2f7873df6DBF9656A7686b";
-const FACTORY = "0xEE440FB0d7c7EE15b884FDAeF346Ac7b3B28c0F2";
+const SHIBA_WARS = "0x50F844DE2a9f0fa3b8504f789F4e70fd6A71a2b3";
+const ARENA = "0x80b9387345506584bB1D7F191c10334650C67CD2";
+const FACTORY = "0xD0598e34B21146030456c5a5fD56f33e35f1fB5b";
 
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
+const LEASH_ADDRESS = "0x70bE14767cC790a668BCF6d0E6B4bC815A1bCf05";
 const SHIB_SUPPLY = "1000000000000000000000000000000000";
 
 async function init() {
@@ -30,12 +31,16 @@ async function renderGame(){
 
     let allowance = await getAllowance();
     if (allowance > 0) {
-        console.log(allowance);
-        $("#approve-row").hide();
-        $("#buy-doge-row").show();
+        $("#btn-approve-shib").hide();
     } else {
-        $("#approve-row").show();
-        $("#buy-doge-row").hide();
+        $("#btn-approve-shib").show();
+    }
+
+    allowance = await getLeashAllowance();
+    if (allowance > 0) {
+        $("#btn-approve-leash").hide();
+    } else {
+        $("#btn-approve-leash").show();
     }
 
     let shibContrat = await getShibContract();
@@ -107,6 +112,16 @@ async function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight){
         if(userPowerTreats >= data.level * 1500000) {
             card += `<button id="btn-level-up-${id}" class="btn btn-primary btn-block">Level up</button>`;
         }
+        let shibaWars = await getContract();
+        let maxHp = await shibaWars.methods.getMaxHp(id).call({from: ethereum.selectedAddress});
+        if(data.hitPoints < maxHp) {
+            let sttNeeded = maxHp - data.hitPoints;
+            if(userPowerTreats >= sttNeeded) {
+                card += `<button id="btn-feed-${id}" class="btn btn-primary btn-block">Feed this doge (${sttNeeded} Treats)</button>`;
+            } else {
+                card += `<button id="btn-feed-blocked" class="btn btn-primary btn-block">Need (${sttNeeded} Treats) to feed</button>`;
+            }
+        }
         if(data.inArena == 0 && data.hitPoints > 1 && canFight) {
             card += `<button id="btn-queue-${id}" class="btn btn-primary btn-block">Queue to arena</button>`;
             let arenaContract = await getArenaContract();
@@ -131,6 +146,10 @@ async function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight){
 
     let element = $.parseHTML(card);
     $("#doges-row").append(element);
+
+    $(`#btn-feed-${id}`).click( () => { 
+        feed(id);
+    });
 
     if(data.tokenId != 13) {
         $(`#btn-level-up-${id}`).click( () => { 
@@ -175,6 +194,11 @@ async function getShibContract(){
     return new web3.eth.Contract(abi, SHIB_ADDRESS);
 }
 
+async function getLeashContract(){
+    let abi = await leashAbi();
+    return new web3.eth.Contract(abi, LEASH_ADDRESS);
+}
+
 function shibaWarsAbi(){
     return new Promise((res)=>{
         $.getJSON("ShibaWars.json", ((json) => {
@@ -207,9 +231,25 @@ function shibaAbi(){
     })
 }
 
+function leashAbi(){
+    return new Promise((res)=>{
+        $.getJSON("Leash.json", ((json) => {
+            res(json.abi);
+        }))
+    })
+}
+
 async function levelUp(shibaId) {
     let contract = await getContract();
     contract.methods.levelUp(shibaId).send({from: ethereum.selectedAddress, gasLimit: 125000})
+        .on("receipt", (() => {
+            renderGame();
+        }));
+}
+
+async function feed(shibaId) {
+    let contract = await getContract();
+    contract.methods.feed(shibaId).send({from: ethereum.selectedAddress})
         .on("receipt", (() => {
             renderGame();
         }));
@@ -256,9 +296,17 @@ async function buyDoge(tokenId){
         }));
 }
 
+async function buyLeash(tokenId){
+    let contract = await getFactoryContract();
+    contract.methods.buyLeash(tokenId).send({from:  ethereum.selectedAddress})
+        .on("receipt", (() => {
+            renderGame();
+        }));
+}
+
 async function buyTreatTokens(){
     let contract = await getFactoryContract();
-    contract.methods.buyTreats().send({from:  ethereum.selectedAddress, gasLimit: 150000})
+    contract.methods.buyTreats().send({from:  ethereum.selectedAddress, gasLimit: 200000})
         .on("receipt", (() => {
             renderGame();
         }));
@@ -272,8 +320,23 @@ async function approveShib(){
         }));
 }
 
+async function approveLeash(){
+    let contract = await getLeashContract();
+    contract.methods.approve(FACTORY, "100000000000000000000000").send({from: ethereum.selectedAddress, gasLimit: 50000})
+        .on("receipt", (() => {
+            renderGame();
+        }));
+}
+
+
 async function getAllowance() {
     let contract = await getShibContract();
+    let allowance = await contract.methods.allowance(ethereum.selectedAddress, FACTORY).call({from: ethereum.selectedAddress});
+    return allowance;
+}
+
+async function getLeashAllowance() {
+    let contract = await getLeashContract();
     let allowance = await contract.methods.allowance(ethereum.selectedAddress, FACTORY).call({from: ethereum.selectedAddress});
     return allowance;
 }
@@ -313,7 +376,15 @@ function getDescription(tokenId) {
         return "We all are in it. AND THIS ONE IS GOLDEN!";
     } else if (tokenId == 16) {
         return "The one who took us under their wings. Ryoshi.";
-    } 
+    } else if (tokenId == 17) {
+        return "Increases the stats of your doge in fight by 15%";
+    } else if (tokenId == 18) {
+        return "Increases the stats of your doge in fight by 20%";
+    } else if (tokenId == 19) {
+        return "Increases the stats of your doge in fight by 25%";
+    }  else if (tokenId == 20) {
+        return "Increases the stats of your doge in fight by 30%";
+    }
     return "";
 }
 
@@ -352,6 +423,14 @@ function getName(tokenId) {
         return "Golden Doge";
     } else if (tokenId == 16) {
         return "Ryoshi";
+    } else if (tokenId == 17) {
+        return "Iron Leash";
+    } else if (tokenId == 18) {
+        return "Silver Leash";
+    } else if (tokenId == 19) {
+        return "Golden Leash";
+    }  else if (tokenId == 20) {
+        return "Diamond Leash";
     }
     return "";
 }
@@ -384,12 +463,32 @@ $("#btn-buy-13").click( () => {
     buyDoge(13);
 });
 
+$("#btn-buy-17").click( () => { 
+    buyLeash(17);
+});
+
+$("#btn-buy-18").click( () => { 
+    buyLeash(18);
+});
+
+$("#btn-buy-19").click( () => { 
+    buyLeash(19);
+});
+
+$("#btn-buy-20").click( () => { 
+    buyLeash(20);
+});
+
 $("#btn-buy-treat-tokens").click( () => { 
     buyTreatTokens();
 });
 
 $("#btn-approve-shib").click( () => { 
     approveShib();
+})
+
+$("#btn-approve-leash").click( () => { 
+    approveLeash();
 })
 
 $("#btn-matchmake").click( () => { 

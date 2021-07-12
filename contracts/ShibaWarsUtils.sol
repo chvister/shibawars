@@ -21,6 +21,11 @@ library ShibaWarsUtils {
     uint constant GOLDEN_DOGE = 15;
     uint constant RYOSHI = 16;
 
+    uint constant IRON = 17;
+    uint constant SILVER = 18;
+    uint constant GOLDEN = 19;
+    uint constant DIAMOND = 20;
+
     function getStatsMultiplier(uint tokenId) public pure returns (uint) {
         if (tokenId == BOJAR_DA_KILLA || tokenId == KAYA_THE_WOLFMOTHER) {
             return 1000;
@@ -46,15 +51,21 @@ library ShibaWarsUtils {
             return 120;
         } else if (tokenId == SHIBA_PUP) {
             return 100;
-        } else if (tokenId == LUCKY_DOGE_PACK_GEN_1) {
-            return 0;
         } else if (tokenId == DOGE_FATHER) {
             return 250;
         } else if (tokenId == RYOSHI) {
             return 225;
         } else if (tokenId == GOLDEN_DOGE) {
             return 200;
-        } 
+        } else if (tokenId == IRON) {
+            return 15;
+        } else if (tokenId == SILVER) {
+            return 20;
+        } else if (tokenId == GOLDEN) {
+            return 25;
+        } else if (tokenId == DIAMOND) {
+            return 30;
+        }
         return 0;
     }
 
@@ -85,6 +96,19 @@ library ShibaWarsUtils {
             return tokens(thousand(500));
         } else if (tokenId == LUCKY_DOGE_PACK_GEN_1) {
             return tokens(millions(4));
+        }
+        return 0;
+    }
+
+    function getTokenPriceLeash(uint tokenId) public pure returns (uint256) {
+        if (tokenId == IRON) {
+            return tokens(10);
+        } else if (tokenId == SILVER) {
+            return tokens(1);
+        } else if (tokenId == GOLDEN) {
+            return tokens(1) / 10;
+        } else if (tokenId == DIAMOND) {
+            return tokens(1) / 100;
         }
         return 0;
     }

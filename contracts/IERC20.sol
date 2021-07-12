@@ -1,6 +1,6 @@
 pragma solidity ^0.8.0;
 
-interface IShibaInu {
+interface IERC20 {
 
     function burn(uint256 value) external;
 

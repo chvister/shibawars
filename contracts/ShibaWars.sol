@@ -118,9 +118,11 @@ contract ShibaWars is ERC721 {
     function mintNFT(address owner, uint tokenId) public isShibaWars(msg.sender) {
         uint multiplier = ShibaWarsUtils.getStatsMultiplier(tokenId);
 
-        uint str = multiplier.mul(10).add(abi.encodePacked(block.difficulty, block.timestamp).random(0, 6).mul(multiplier));
-        uint agi = multiplier.mul(10).add(abi.encodePacked(tokenId, block.timestamp).random(0, 6).mul(multiplier));
-        uint dex = multiplier.mul(10).add(abi.encodePacked(block.difficulty, tokenId).random(0, 6).mul(multiplier));
+        (uint str, uint agi, uint dex) = (tokenId < 17) ?
+            (multiplier.mul(10).add(abi.encodePacked(block.difficulty, block.timestamp).random(0, 6).mul(multiplier)),
+            multiplier.mul(10).add(abi.encodePacked(tokenId, block.timestamp).random(0, 6).mul(multiplier)),
+            multiplier.mul(10).add(abi.encodePacked(block.difficulty, tokenId).random(0, 6).mul(multiplier))) :
+            (multiplier, multiplier, multiplier); 
 
         mint(owner, tokenId, str, agi, dex);
     }
@@ -166,9 +168,10 @@ contract ShibaWars is ERC721 {
     // FEED YOUR SHIBA
     function feed(uint256 id) public {
         uint treatTokensNeeded = getMaxHp(id).sub(_tokenDetails[id].hitPoints);
+        uint256 userTreats = shibaTreats[msg.sender];
         require(treatTokensNeeded > 0, "Shiba Wars: This Shiba is not hungry");
-        require(shibaTreats[msg.sender] >= treatTokensNeeded, "Shiba Wars: Not enough treat tokens to feed this Shiba");
-        shibaTreats[msg.sender] = shibaTreats[msg.sender].sub(treatTokensNeeded);
+        require(userTreats >= treatTokensNeeded, "Shiba Wars: Not enough treat tokens to feed this Shiba");
+        shibaTreats[msg.sender] = userTreats.sub(treatTokensNeeded);
         _tokenDetails[id].hitPoints = getMaxHp(id);
     }
 

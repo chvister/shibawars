@@ -1,5 +1,6 @@
 const ShibaWars = artifacts.require("ShibaWars");
 const ShibaInu = artifacts.require("ShibaInu");
+const Leash = artifacts.require("Leash");
 const ShibaWarsUtils = artifacts.require("ShibaWarsUtils");
 const ShibaWarsEntity = artifacts.require("ShibaWarsEntity");
 const ShibaMath = artifacts.require("ShibaMath");
@@ -45,4 +46,7 @@ module.exports = async function (deployer, networks, accounts) {
 
   /*await deployer.deploy(ShibaInu, {from : accounts[0]});
   let tokenInstance2 = await ShibaInu.deployed();*/
+
+  /*await deployer.deploy(Leash, {from : accounts[0]});
+  let tokenInstance2 = await Leash.deployed();*/
 };
