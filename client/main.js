@@ -1,9 +1,9 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const SHIBA_WARS = "0x50F844DE2a9f0fa3b8504f789F4e70fd6A71a2b3";
-const ARENA = "0x80b9387345506584bB1D7F191c10334650C67CD2";
-const FACTORY = "0xD0598e34B21146030456c5a5fD56f33e35f1fB5b";
+const SHIBA_WARS = "0xc7043EE1867e8D6F3a6F837bCaa8069D78524138";
+const ARENA = "0x28Fc3C8CfA90EBfC687Dd99bbEbB62FEaf342648";
+const FACTORY = "0x8b7f6e42b966F671CFC8B14ff873c031EDa6EA6E";
 
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const LEASH_ADDRESS = "0x70bE14767cC790a668BCF6d0E6B4bC815A1bCf05";
@@ -44,6 +44,7 @@ async function renderGame(){
     }
 
     let shibContrat = await getShibContract();
+    let leashContract = await getLeashContract();
 
     let shibaWars = await getContract();
     let factoryContract = await getFactoryContract();
@@ -54,9 +55,22 @@ async function renderGame(){
         $("#shib-balance").html(numberWithCommas(userBalance.substring(0, userBalance.length - 18)));
     }
 
+    let userLeash = await leashContract.methods.balanceOf(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
+    if(userLeash != 0) {
+        $("#leash-balance").html(numberWithCommas(userLeash.substring(0, userLeash.length - 18)));
+    }
+
     let prizepool = await factoryContract.methods.getPrizePool().call({from: ethereum.selectedAddress});
     if(prizepool != 0) {
         $("#shib-prizepool").html(numberWithCommas(prizepool.substring(0, prizepool.length - 18)));
+    }
+    prizepool = await factoryContract.methods.getPrizePoolLeash().call({from: ethereum.selectedAddress});
+    console.log(prizepool)
+    if(prizepool != 0) {
+        var first = numberWithCommas(prizepool.substring(0, prizepool.length - 18));
+        $("#leash-prizepool").html((first.length == 0 ? "0" : first) +","+ prizepool.substring(prizepool.length - 18, prizepool.length - 14));
+    } else {
+        $("#leash-prizepool").html(0)
     }
 
     let matchmaker = await factoryContract.methods.getMatchMakerReward().call({from: ethereum.selectedAddress});
@@ -64,6 +78,14 @@ async function renderGame(){
         $("#shib-matchmaker").html(numberWithCommas(matchmaker.substring(0, matchmaker.length - 18)));
     } else {
         $("#shib-matchmaker").html(0);
+    }
+
+    matchmaker = await factoryContract.methods.getMatchMakerRewardLeash().call({from: ethereum.selectedAddress});
+    if(matchmaker != 0) {
+        var first = numberWithCommas(matchmaker.substring(0, matchmaker.length - 18));
+        $("#leash-matchmaker").html((first.length == 0 ? "0" : first) +","+ matchmaker.substring(matchmaker.length - 18, matchmaker.length - 14));
+    } else {
+        $("#leash-matchmaker").html(0);
     }
 
     $("#login_button").hide();
@@ -102,7 +124,7 @@ async function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight){
         <div>Id: <span class="doge-id">${id}</span></div>
         <div>Name: <span class="doge-name">${getName(data.tokenId)}</span></div>
         <div>Description: <span class="doge-description">${getDescription(data.tokenId)}</span></div>`;
-    if(data.tokenId != 13) {
+    if(data.tokenId != 13 && data.tokenId < 17) {
         card += `<div>Level: <span class="doge-level">${data.level}</span></div>
         <div>Strength: <span class="doge-strength">${parseFloat (data.strength) / 100}</span></div>
         <div>Agility: <span class="doge-agility">${parseFloat (data.agility) / 100}</span></div>
@@ -141,6 +163,8 @@ async function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight){
         }
     } else if (data.tokenId == 13) {
         card += `<button id="btn-open-${id}" class="btn btn-primary btn-block">Open</button>`;
+    } else {
+        // leash
     }
     card += `</div></div>`;
 
@@ -151,7 +175,7 @@ async function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight){
         feed(id);
     });
 
-    if(data.tokenId != 13) {
+    if(data.tokenId != 13 && data.tokenId < 17) {
         $(`#btn-level-up-${id}`).click( () => { 
             levelUp(id);
         });

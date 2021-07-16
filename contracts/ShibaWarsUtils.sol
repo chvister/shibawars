@@ -74,11 +74,11 @@ library ShibaWarsUtils {
     }
 
     function thousand(uint count) private pure returns (uint) {
-        return count * 10 ** 3;
+        return count * (10 ** 3);
     }
 
     function tokens(uint count) private pure returns (uint) {
-        return count * 10 ** 18;
+        return count * (10 ** 18);
     }
 
     function getTokenPrice(uint tokenId) public pure returns (uint256) {
@@ -102,13 +102,13 @@ library ShibaWarsUtils {
 
     function getTokenPriceLeash(uint tokenId) public pure returns (uint256) {
         if (tokenId == IRON) {
-            return tokens(10);
-        } else if (tokenId == SILVER) {
-            return tokens(1);
-        } else if (tokenId == GOLDEN) {
-            return tokens(1) / 10;
-        } else if (tokenId == DIAMOND) {
             return tokens(1) / 100;
+        } else if (tokenId == SILVER) {
+            return tokens(1) / 10;
+        } else if (tokenId == GOLDEN) {
+            return tokens(1);
+        } else if (tokenId == DIAMOND) {
+            return tokens(10);
         }
         return 0;
     }
