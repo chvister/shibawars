@@ -1,9 +1,9 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const SHIBA_WARS = "0xc7043EE1867e8D6F3a6F837bCaa8069D78524138";
-const ARENA = "0x28Fc3C8CfA90EBfC687Dd99bbEbB62FEaf342648";
-const FACTORY = "0x8b7f6e42b966F671CFC8B14ff873c031EDa6EA6E";
+const SHIBA_WARS = "0x64EB4e72aE75C6257Fa2726711043506476c0BfD";
+const ARENA = "0xaC6657AcE4695Fe0124f0688f70ca1CbbE4Aef8f";
+const FACTORY = "0xF806C7Dd3cc9394B4eDA2fb3d585d5e99bFDC9e8";
 
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const LEASH_ADDRESS = "0x70bE14767cC790a668BCF6d0E6B4bC815A1bCf05";
@@ -102,20 +102,20 @@ async function renderGame(){
 
     $("#in-arena").html(arenaQueueLength);
 
-    let userShibas = await shibaWars.methods.getUserTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
-    if(Array.length == 0){
-        return;
-    }
+    let userTokens = await shibaWars.methods.getUserTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
 
-    userShibas.forEach(async (shibaId) => {
-        let data = await shibaWars.methods.getTokenDetails(shibaId).call({from: ethereum.selectedAddress});
-        let shibaMaxHp = await shibaWars.methods.getMaxHp(shibaId).call({from: ethereum.selectedAddress});
-        let canFight = await arenaContract.methods.canFight(shibaId).call({from: ethereum.selectedAddress});
-        renderShiba(shibaId, data, userPowerTreats, shibaMaxHp, canFight);
+    userTokens.forEach(async (dogeId) => {
+        let data = await shibaWars.methods.getTokenDetails(dogeId).call({from: ethereum.selectedAddress});
+        let shibaMaxHp = await shibaWars.methods.getMaxHp(dogeId).call({from: ethereum.selectedAddress});
+        let canFight = await arenaContract.methods.canFight(dogeId).call({from: ethereum.selectedAddress});
+        await renderShiba(dogeId, data, userPowerTreats, shibaMaxHp, canFight, userTokens);
     });
 }
 
-async function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight){
+async function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight, userTokens){
+    let leashedDogeId = 0;
+    let arenaContract = await getArenaContract();
+    let shibaWars = await getContract();
     // 13 doge pack
     let card = 
     `<div class="col-md-4 card id="pet-${id}">
@@ -134,7 +134,6 @@ async function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight){
         if(userPowerTreats >= data.level * 1500000) {
             card += `<button id="btn-level-up-${id}" class="btn btn-primary btn-block">Level up</button>`;
         }
-        let shibaWars = await getContract();
         let maxHp = await shibaWars.methods.getMaxHp(id).call({from: ethereum.selectedAddress});
         if(data.hitPoints < maxHp) {
             let sttNeeded = maxHp - data.hitPoints;
@@ -146,7 +145,6 @@ async function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight){
         }
         if(data.inArena == 0 && data.hitPoints > 1 && canFight) {
             card += `<button id="btn-queue-${id}" class="btn btn-primary btn-block">Queue to arena</button>`;
-            let arenaContract = await getArenaContract();
             let dogesInArena = await arenaContract.methods.getArenaQueueLength().call({from: ethereum.selectedAddress});
             let myDoges = await arenaContract.methods.myDogesInArena().call({from: ethereum.selectedAddress})
             if(dogesInArena > myDoges) {
@@ -161,10 +159,36 @@ async function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight){
                 card += `This doge is waiting for a match.`;
             }
         }
+        let isLeashed = await arenaContract.methods.isLeashed(id).call({from : ethereum.selectedAddress});
+        if(isLeashed) {
+            let leashUsed = await arenaContract.methods.getLeashId(id).call({from : ethereum.selectedAddress});
+            leashUsed = await shibaWars.methods.getTokenDetails(leashUsed).call({from : ethereum.selectedAddress});
+            card += `Leashed by ${getName(leashUsed.tokenId)}`;
+            card += `<button id="btn-unleash-${id}" class="btn btn-primary btn-block">Unleash</button>`;
+        }
     } else if (data.tokenId == 13) {
         card += `<button id="btn-open-${id}" class="btn btn-primary btn-block">Open</button>`;
     } else {
-        // leash
+        // leash 
+        let leashUsed = await arenaContract.methods.isLeashUsed(id).call({from : ethereum.selectedAddress});
+        if(leashUsed) {
+            leashedDogeId = await arenaContract.methods.getDoge(id).call({from : ethereum.selectedAddress});
+            card += `<button id="btn-unleash-${id}" class="btn btn-primary btn-block">Unleash</button>`;
+        } else {
+            card += `<div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Leash your doge
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">`;
+            for (dogeId of userTokens) {
+                let dogeData = await shibaWars.methods.getTokenDetails(dogeId).call({from: ethereum.selectedAddress});
+                if(dogeData.tokenId < 17 && dogeData.tokenId != 13) {
+                    card += `<a class="dropdown-item" href="#" onclick="leashDoge(${dogeId}, ${id})">Leash ${getName(dogeData.tokenId)}</a>`;
+                }
+            }
+            card += `</div>
+          </div>`;
+        }
     }
     card += `</div></div>`;
 
@@ -187,9 +211,16 @@ async function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight){
                 matchmake(id);
             });
         }
+        $(`#btn-unleash-${id}`).click( () => { 
+            unleash(id);
+        });
     } else if (data.tokenId == 13) {
         $(`#btn-open-${id}`).click( () => { 
             openPack(id);
+        });
+    } else {
+        $(`#btn-unleash-${id}`).click( () => { 
+            unleash(leashedDogeId);
         });
     }
 }
@@ -271,9 +302,17 @@ async function levelUp(shibaId) {
         }));
 }
 
+async function leashDoge(dogeId, leashId) {
+    let contract = await getArenaContract();
+    contract.methods.putDogeOnLeash(dogeId, leashId).send({from: ethereum.selectedAddress, gasLimit: 500000})
+        .on("receipt", (() => {
+            renderGame();
+        }));
+}
+
 async function feed(shibaId) {
     let contract = await getContract();
-    contract.methods.feed(shibaId).send({from: ethereum.selectedAddress})
+    contract.methods.feed(shibaId).send({from: ethereum.selectedAddress, gasLimit: 75000})
         .on("receipt", (() => {
             renderGame();
         }));
@@ -289,7 +328,15 @@ async function queueToArena(shibaId) {
 
 async function matchmake(shibaId) {
     let contract = await getArenaContract();
-    contract.methods.matchmake(shibaId).send({from: ethereum.selectedAddress, gasLimit: 300000})
+    contract.methods.matchmake(shibaId).send({from: ethereum.selectedAddress, gasLimit: 400000})
+        .on("receipt", (() => {
+            renderGame();
+        }));
+}
+
+async function unleash(shibaId) {
+    let contract = await getArenaContract();
+    contract.methods.unleashDoge(shibaId).send({from: ethereum.selectedAddress, gasLimit: 30000})
         .on("receipt", (() => {
             renderGame();
         }));
@@ -297,7 +344,7 @@ async function matchmake(shibaId) {
 
 async function createMatch() {
     let contract = await getArenaContract();
-    contract.methods.matchmake().send({from: ethereum.selectedAddress, gasLimit: 300000})
+    contract.methods.matchmake().send({from: ethereum.selectedAddress, gasLimit: 400000})
         .on("receipt", (() => {
             renderGame();
         }));
@@ -322,7 +369,7 @@ async function buyDoge(tokenId){
 
 async function buyLeash(tokenId){
     let contract = await getFactoryContract();
-    contract.methods.buyLeash(tokenId).send({from:  ethereum.selectedAddress})
+    contract.methods.buyLeash(tokenId).send({from:  ethereum.selectedAddress, gasLimit: 500000})
         .on("receipt", (() => {
             renderGame();
         }));
@@ -367,11 +414,11 @@ async function getLeashAllowance() {
 
 function getDescription(tokenId) {
     if (tokenId == 0) {
-        return "Altough he's not a doge, do not mess with him. The warden of order.";
+        return "Altough he's not a shiba, do not mess with him. The warden of order.";
     } else if (tokenId == 1) {
         return "She may be cute, but she will get you. Beware, she bites.";
     } else if (tokenId == 2) {
-            return "The one who has power over all the dogs. We look up to you and believe in you.";
+        return "The one who has power over all the dogs. We look up to you and believe in you.";
     } else if (tokenId == 3) {
         return "The true holders of the ShibArmy.";
     } else if (tokenId == 4) {
@@ -381,7 +428,7 @@ function getDescription(tokenId) {
     } else if (tokenId == 6) {
         return "One bark, and they are in the battle.";
     } else if (tokenId == 7) {
-        return "This is not a doge. But a small cute doge needs a big strong DOG to defend it.";
+        return "This is not a shiba. But a small cute doge needs a big strong DOG to defend it.";
     } else if (tokenId == 8) {
         return "Put the doge on the leash. Even though the doges hold together, Doge Killer is true to its beliefs.";
     } else if (tokenId == 9) {
@@ -420,25 +467,25 @@ function getName(tokenId) {
     } else if (tokenId == 2) {
         return "WoofMeister";
     } else if (tokenId == 3) {
-        return "doge Whale";
+        return "Shib Whale";
     } else if (tokenId == 4) {
         return "OG doge";
     } else if (tokenId == 5) {
-        return "doge Warlord";
+        return "Shib Warlord";
     } else if (tokenId == 6) {
-        return "doge General";
+        return "Shib General";
     } else if (tokenId == 7) {
         return "Watchdog";
     } else if (tokenId == 8) {
         return "Doge Killer";
     } else if (tokenId == 9) {
-        return "doge Inu";
+        return "Shiba Inu";
     } else if (tokenId == 10) {
         return "Akita Inu";
     } else if (tokenId == 11) {
         return "Sanshu Inu";
     } else if (tokenId == 12) {
-        return "doge Pup";
+        return "Shib Pup";
     } else if (tokenId == 13) {
         return "Lucky Doge Pack Gen #1";
     } else if (tokenId == 14) {

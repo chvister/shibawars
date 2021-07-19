@@ -54,7 +54,7 @@ contract ShibaWars is ERC721 {
                 (uint64)(agility.div(10)), 
                 (uint64)(dexterity.div(10)), 
                 1, 1, 
-                getMaxHpFromStrength((uint64)(strength)));
+                ShibaWarsUtils.getMaxHpFromStrength((uint64)(strength)));
         _safeMint(owner, nextId);
         ++nextId;
     }
@@ -82,12 +82,7 @@ contract ShibaWars is ERC721 {
 
     // MAX HP OF DOGE
     function getMaxHp(uint id) public view returns (uint) {
-        return getMaxHpFromStrength(_tokenDetails[id].strength);
-    }
-
-    // MAX HP FROM STRENGTH
-    function getMaxHpFromStrength(uint64 strength) private pure returns(uint) {
-        return (uint64)(strength.mul(5).add(5000));
+        return ShibaWarsUtils.getMaxHpFromStrength(_tokenDetails[id].strength);
     }
 
     // USER'S TOKENS
@@ -132,11 +127,13 @@ contract ShibaWars is ERC721 {
         // level up if enough shiba treats
         require(ownerOf(id) == msg.sender, "Shiba Wars: YOU DO NOT OWN THIS TOKEN");
         require(shibaTreats[msg.sender] >= levelUpCost(id), "Shiba Wars: NOT ENOUGH POWER TREATS TO UPGRADE THIS SHIBA");
+        // only can level up doges
+        require(ShibaWarsUtils.isDoge(id), "Shiba Wars: ONLY DOGES CAN BE LEVELLED UP");
         shibaTreats[msg.sender] = shibaTreats[msg.sender].sub(levelUpCost(id));
         ShibaWarsEntity.Doge memory _shiba = getTokenDetails(id);
         ++_tokenDetails[id].level;
         _tokenDetails[id].strength += _shiba.strengthGain;
-        _tokenDetails[id].hitPoints = getMaxHpFromStrength(_shiba.strength);
+        _tokenDetails[id].hitPoints = ShibaWarsUtils.getMaxHpFromStrength(_shiba.strength);
         _tokenDetails[id].agility += _shiba.agilityGain;
         _tokenDetails[id].dexterity += _shiba.dexterityGain;
     }

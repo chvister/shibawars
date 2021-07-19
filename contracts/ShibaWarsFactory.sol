@@ -26,6 +26,9 @@ contract ShibaWarsFactory {
     uint256 private matchmakerRewardLeash;
     uint256 private devRewardLeash;
     uint256 private burnAmountLeash;
+    // max rewards so first does not take all
+    uint256 constant maxShibMMReward = 10000000 * 10 ** 18;
+    uint256 constant maxLeashMMReward = 3 * 10 ** 16;
 
     constructor(address shibaWars_) {
         devAddress = msg.sender;
@@ -34,24 +37,24 @@ contract ShibaWarsFactory {
     
     // RETURN TOTAL PRIZE POOL TO BE WON BY PLAYERS
     function getPrizePool() public view returns (uint256) {
-        return IERC20(shibaInu).balanceOf(address(this)).sub(matchmakerReward);
+        return IERC20(shibaInu).balanceOf(address(this)).sub(getMatchMakerReward()).sub(devReward).sub(burnAmount);
     }
 
     // RETURN TOTAL PRIZE POOL LEASH TO BE WON BY PLAYERS
     function getPrizePoolLeash() public view returns (uint256) {
-        return IERC20(leash).balanceOf(address(this)).sub(matchmakerRewardLeash);
+        return IERC20(leash).balanceOf(address(this)).sub(getMatchMakerRewardLeash()).sub(devRewardLeash).sub(burnAmountLeash);
     }
 
     // RETURN REWARD FOR CREATING MATCHES
     function getMatchMakerReward() public view returns (uint256) {
         uint256 divisor = IShibaWars(shibaWars).getArenaQueueLength().max(1);
-        return matchmakerReward.div(divisor);
+        return matchmakerReward.div(divisor).min(maxShibMMReward);
     }
 
     // RETURN REWARD LEASH FOR CREATING MATCHES
     function getMatchMakerRewardLeash() public view returns (uint256) {
         uint256 divisor = IShibaWars(shibaWars).getArenaQueueLength().max(1);
-        return matchmakerRewardLeash.div(divisor);
+        return matchmakerRewardLeash.div(divisor).min(maxLeashMMReward);
     }
 
     // SEND DEV REWARD AND BURN BURN AMOUNT

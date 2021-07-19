@@ -1,6 +1,7 @@
 pragma solidity ^0.8.0;
 
 import "./ShibaWarsEntity.sol";
+import "./ShibaWarsUtils.sol";
 import "./ShibaMath.sol";
 import "./IShibaWars.sol";
 
@@ -12,6 +13,10 @@ contract ShibaWarsArena {
 
     uint256[] private arenaQueue;
     uint256 private inArena;
+
+    // leash to doge mapping
+    mapping(uint256 => uint256) private dogesOnLeash;
+    mapping(uint256 => uint256) private leashUsed;
 
     IShibaWars private shibaWars;
 
@@ -123,17 +128,32 @@ contract ShibaWarsArena {
         ShibaWarsEntity.Doge memory attacker;
         ShibaWarsEntity.Doge memory defender;
         {
-        ShibaWarsEntity.Doge memory _first = shibaWars.getTokenDetails(firstShiba);
-        ShibaWarsEntity.Doge memory _second = shibaWars.getTokenDetails(secondShiba);
-        // the one with higher agility attacks first
-        (attacker, defender) = _first.agility >= _second.agility ? (_first, _second) : (_second, _first);
+            ShibaWarsEntity.Doge memory _first = shibaWars.getTokenDetails(firstShiba);
+            ShibaWarsEntity.Doge memory _second = shibaWars.getTokenDetails(secondShiba);
+            // the one with higher agility attacks first
+            (attacker, defender) = _first.agility >= _second.agility ? (_first, _second) : (_second, _first);
+        }
+        (uint attackerUpgrade, uint defenderUpgrade) = (100, 100);
+        {
+            (uint attackerLeash, uint defenderLeash) = (dogesOnLeash[attacker.id], dogesOnLeash[defender.id]);
+            if(attackerLeash != 0) {
+                // attacker is leashed
+                // every stat is the same so we can pick any for the upgrade
+                attackerUpgrade += shibaWars.getTokenDetails(attackerLeash).strength;
+            }
+            if(defenderLeash != 0) {
+                // defender is leashed
+                defenderUpgrade += shibaWars.getTokenDetails(defenderLeash).strength;
+            }
         }
         uint128 winner = 0;
         // pick random skill for attacker
         uint128 skill = (uint128)(abi.encodePacked(block.timestamp, block.difficulty, firstShiba).random(0, 2));
         uint damageAttacker = skill == 0 ? attacker.strength : (skill == 1 ? attacker.agility : attacker.dexterity);
+        damageAttacker = damageAttacker.mul(attackerUpgrade).div(100);
         skill = (uint128)(abi.encodePacked(block.timestamp, block.difficulty, secondShiba).random(0, 2));
         uint damageDefender = skill == 0 ? defender.strength : (skill == 1 ? defender.agility : defender.dexterity);
+        damageDefender = damageDefender.mul(defenderUpgrade).div(100);
         if(damageAttacker > defender.hitPoints - 1) {
             // defender fainted
             shibaWars.decreaseHp(defender.id, defender.hitPoints - 1);
@@ -200,6 +220,51 @@ contract ShibaWarsArena {
     function canFight(uint tokenId) public view returns (bool) {
         uint id =  shibaWars.getTokenDetails(tokenId).tokenId;
         return id > 1 && id != 13 && id < 17;
+    }
+
+    function putDogeOnLeash(uint dogeId, uint leashId) public {
+        // doge id must be doge
+        require(ShibaWarsUtils.isDoge(shibaWars.getTokenDetails(dogeId).tokenId), "Shiba Wars: CAN ONLY LEASH DOGE");
+        // lesah id must be leash
+        require(ShibaWarsUtils.isLeash(shibaWars.getTokenDetails(leashId).tokenId), "Shiba Wars: CAN ONLY LEASH WITH A LEASH");
+        // doge must not be leashed
+        require(dogesOnLeash[dogeId] == 0, "Shiba Wars: THIS DOGE IS LEASHED ALREADY");
+        // leash must not be used
+        require(leashUsed[leashId] == 0, "Shiba Wars: THIS LEASH IS USED ALREADY");
+        // must be my doge
+        require(shibaWars.ownerOf(dogeId) == msg.sender, "Shiba Wars: YOU DO NOT OWN THIS DOGE");
+        // must be my leash
+        require(shibaWars.ownerOf(leashId) == msg.sender, "Shiba Wars: YOU DO NOT OWN THIS LEASH");
+        // leash the doge
+        dogesOnLeash[dogeId] = leashId;
+        leashUsed[leashId] = dogeId;
+    }
+
+    function unleashDoge(uint dogeId) public {
+        // must be my doge
+        require(shibaWars.ownerOf(dogeId) == msg.sender, "Shiba Wars: YOU DO NOT OWN THIS DOGE");
+        // doge must be leashed to unleash
+        require(isLeashed(dogeId), "Shiba Wars: THIS DOGE IS NOT LEASHED");
+        uint leashId = dogesOnLeash[dogeId];
+        leashUsed[leashId] = 0;
+        dogesOnLeash[dogeId] = 0;
+    }
+
+    function isLeashUsed(uint256 leashId) public view returns (bool) {
+        return leashUsed[leashId] != 0;
+    }
+
+    function isLeashed(uint dogeId) public view returns (bool) {
+        return dogesOnLeash[dogeId] != 0;
+    }
+
+    function getDoge(uint leashId) public view returns (uint256) {
+        return leashUsed[leashId];
+    }
+
+    function getLeashId(uint dogeId) public view returns (uint256) {
+        uint leashId = dogesOnLeash[dogeId];
+        return leashId == 0 ? 0 : shibaWars.getTokenDetails(leashId).id;
     }
 
 }

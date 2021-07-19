@@ -141,4 +141,16 @@ library ShibaWarsUtils {
         }
     }
 
+    function isDoge(uint id) public pure returns (bool) {
+        return id >= 0 && id < 17 && id != 13;
+    }
+
+    function isLeash(uint id) public pure returns (bool) {
+        return id >= 17;
+    }
+
+    function getMaxHpFromStrength(uint64 strength) public pure returns(uint) {
+        return (uint64)(strength * 5 + 5000);
+    }
+
 }

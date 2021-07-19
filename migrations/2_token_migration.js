@@ -12,6 +12,7 @@ module.exports = async function (deployer, networks, accounts) {
   await deployer.deploy(ShibaWarsUtils);
   await deployer.link(ShibaWarsUtils, ShibaWars);  
   await deployer.link(ShibaWarsUtils, ShibaWarsFactory);
+  await deployer.link(ShibaWarsUtils, ShibaWarsArena);
 
   await deployer.deploy(ShibaWarsEntity);
   await deployer.link(ShibaWarsEntity, ShibaWars);
