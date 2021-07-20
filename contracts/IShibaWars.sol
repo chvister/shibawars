@@ -23,5 +23,9 @@ interface IShibaWars {
     function getArenaQueueLength() external view returns (uint256);
 
     function payMatchmaker(address matchmaker) external; 
+    
+    function seasonStart() external view returns (uint256); 
+    
+    function getWinners() external view returns (uint256[] memory winners, uint256[] memory scores);
 
 }

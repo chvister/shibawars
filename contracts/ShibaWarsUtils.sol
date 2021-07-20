@@ -149,8 +149,13 @@ library ShibaWarsUtils {
         return id >= 17;
     }
 
-    function getMaxHpFromStrength(uint64 strength) public pure returns(uint) {
+    function getMaxHp(uint64 strength) public pure returns(uint) {
         return (uint64)(strength * 5 + 5000);
+    }
+    
+    // COST OF LEVEL UP IN POWER TREATS
+    function levelUpCost(uint level) public pure returns (uint) {
+        return level * 1500000;
     }
 
 }

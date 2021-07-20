@@ -26,7 +26,6 @@ module.exports = async function (deployer, networks, accounts) {
   // create shiba wars smart contract
   await deployer.deploy(ShibaWars);
   let shibaWars = await ShibaWars.deployed();
-  await shibaWars.initialMint();
   let shibaWarsAddress = shibaWars['address'];
 
   // create arena

@@ -21,9 +21,10 @@ contract ShibaWars is ERC721 {
     address private factoryAddress;
     
     // info about tokens
-    uint256 private nextId = 0;
+    uint256 private nextId = 1;
     mapping(uint256 => ShibaWarsEntity.Doge) private _tokenDetails;
     mapping(address => uint256) private shibaTreats;
+    uint256 public seasonStart;
 
     modifier isDev(address caller) {
         require(caller == devAddress, "Shiba Wars: Caller is not a dev");
@@ -36,8 +37,17 @@ contract ShibaWars is ERC721 {
         _;
     }
 
+    modifier isSeason() {
+        require(block.timestamp >= seasonStart && block.timestamp <= seasonStart + (90 * 24 * 60 * 60),
+            "Shiba Wars: Season ended!");
+        _;
+    }
+
     constructor() ERC721("ShibaWars", "SHIBW") {
         devAddress = msg.sender;
+        seasonStart = block.timestamp;
+        mint(msg.sender, 0, 10000, 10000, 10000);
+        mint(msg.sender, 1, 10000, 10000, 10000);
     }
 
     // MINT NEW TOKEN
@@ -54,15 +64,9 @@ contract ShibaWars is ERC721 {
                 (uint64)(agility.div(10)), 
                 (uint64)(dexterity.div(10)), 
                 1, 1, 
-                ShibaWarsUtils.getMaxHpFromStrength((uint64)(strength)));
+                ShibaWarsUtils.getMaxHp((uint64)(strength)));
         _safeMint(owner, nextId);
         ++nextId;
-    }
-
-    // MINTS FIRST TWO TOKENS. CAN ONLY BE CALLED BY DEV BUT THESE DOGES CAN NOT FIGHT IN ARENA
-    function initialMint() public isDev(msg.sender) {
-        mint(msg.sender, 0, 10000, 10000, 10000);
-        mint(msg.sender, 1, 10000, 10000, 10000);
     }
 
     // SETS ADDRESS OF ARENA CONTRACT. CAN ONLY BE CALLED BY DEV
@@ -73,16 +77,6 @@ contract ShibaWars is ERC721 {
     // SETS ADDRESS OF ARENA CONTRACT. CAN ONLY BE CALLED BY DEV
     function setFactoryAddress(address factoryAddress_) public isDev(msg.sender) {
         factoryAddress = factoryAddress_;
-    }
-
-    // COST OF LEVEL UP IN POWER TREATS
-    function levelUpCost(uint256 id) public view returns (uint) {
-        return getTokenDetails(id).level.mul(1500000);
-    }
-
-    // MAX HP OF DOGE
-    function getMaxHp(uint id) public view returns (uint) {
-        return ShibaWarsUtils.getMaxHpFromStrength(_tokenDetails[id].strength);
     }
 
     // USER'S TOKENS
@@ -101,6 +95,45 @@ contract ShibaWars is ERC721 {
                 }
             }
             return result;
+        }
+    }
+
+     // TOP 10
+    function getWinners() public view returns (uint256[] memory result, uint256[] memory scores) {
+        result = new uint256[](10);
+        scores = new uint256[](10);
+        uint found = 0;
+        (uint min, uint max) = ((2 ** 256) - 1, 0);
+        for(uint256 i = 0; i < nextId; ++i) {
+            // if owner and exists
+            if(_exists(i)) {
+                ShibaWarsEntity.Doge memory doge = _tokenDetails[i];
+                if(ShibaWarsUtils.isDoge(doge.tokenId)) {
+                    bool adding = false;
+                    if (found < 10) {
+                        adding = true;
+                        result[found] = i;
+                        scores[found++] = doge.arenaScore;
+                    } else if (doge.arenaScore > min) {
+                        for(uint256 j = 0; j < 10; ++j) {
+                            if(scores[j] == min) {
+                                result[j] = i;
+                                scores[j] = doge.arenaScore;
+                                break;
+                            }
+                        }
+                        adding = true;
+                    }
+                    if(adding) {
+                        if(doge.arenaScore < min) {
+                            min = doge.arenaScore;
+                        }
+                        if(doge.arenaScore > max) {
+                            max = doge.arenaScore;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -123,17 +156,17 @@ contract ShibaWars is ERC721 {
     }
 
     // LEVEL UP DOGE
-    function levelUp(uint256 id) public {
+    function levelUp(uint256 id) public isSeason() {
+        ShibaWarsEntity.Doge memory _shiba = _tokenDetails[id];
         // level up if enough shiba treats
         require(ownerOf(id) == msg.sender, "Shiba Wars: YOU DO NOT OWN THIS TOKEN");
-        require(shibaTreats[msg.sender] >= levelUpCost(id), "Shiba Wars: NOT ENOUGH POWER TREATS TO UPGRADE THIS SHIBA");
+        require(shibaTreats[msg.sender] >= ShibaWarsUtils.levelUpCost(_shiba.level), "Shiba Wars: NOT ENOUGH POWER TREATS TO UPGRADE THIS SHIBA");
         // only can level up doges
         require(ShibaWarsUtils.isDoge(id), "Shiba Wars: ONLY DOGES CAN BE LEVELLED UP");
-        shibaTreats[msg.sender] = shibaTreats[msg.sender].sub(levelUpCost(id));
-        ShibaWarsEntity.Doge memory _shiba = getTokenDetails(id);
+        shibaTreats[msg.sender] = shibaTreats[msg.sender].sub(ShibaWarsUtils.levelUpCost(_shiba.level));
         ++_tokenDetails[id].level;
         _tokenDetails[id].strength += _shiba.strengthGain;
-        _tokenDetails[id].hitPoints = ShibaWarsUtils.getMaxHpFromStrength(_shiba.strength);
+        _tokenDetails[id].hitPoints = ShibaWarsUtils.getMaxHp(_shiba.strength);
         _tokenDetails[id].agility += _shiba.agilityGain;
         _tokenDetails[id].dexterity += _shiba.dexterityGain;
     }
@@ -153,8 +186,7 @@ contract ShibaWars is ERC721 {
 
     // DECREASES HP 
     function decreaseHp(uint256 id, uint damage) public isShibaWars(msg.sender) {
-        uint newHp = _tokenDetails[id].hitPoints.sub(damage); 
-        _tokenDetails[id].hitPoints = newHp;
+        _tokenDetails[id].hitPoints = _tokenDetails[id].hitPoints.sub(damage);
     }
 
     // SET SCORE FOR DOGE
@@ -163,13 +195,14 @@ contract ShibaWars is ERC721 {
     }
 
     // FEED YOUR SHIBA
-    function feed(uint256 id) public {
-        uint treatTokensNeeded = getMaxHp(id).sub(_tokenDetails[id].hitPoints);
+    function feed(uint256 id) public isSeason() {
+        ShibaWarsEntity.Doge memory doge = _tokenDetails[id];
+        uint treatTokensNeeded = ShibaWarsUtils.getMaxHp(doge.strength).sub(doge.hitPoints);
         uint256 userTreats = shibaTreats[msg.sender];
         require(treatTokensNeeded > 0, "Shiba Wars: This Shiba is not hungry");
         require(userTreats >= treatTokensNeeded, "Shiba Wars: Not enough treat tokens to feed this Shiba");
         shibaTreats[msg.sender] = userTreats.sub(treatTokensNeeded);
-        _tokenDetails[id].hitPoints = getMaxHp(id);
+        _tokenDetails[id].hitPoints = ShibaWarsUtils.getMaxHp(doge.strength);
     }
 
     function addTreats(address user, uint256 count) public isShibaWars(msg.sender) {
@@ -186,6 +219,10 @@ contract ShibaWars is ERC721 {
 
     function payMatchmaker(address matchmaker) public isShibaWars(msg.sender) {
         IShibaWarsFactory(factoryAddress).payMatchmaker(matchmaker);
+    }
+
+    function startSeason() public isDev(msg.sender) {
+        seasonStart = block.timestamp;
     }
 
 }

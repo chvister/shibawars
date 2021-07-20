@@ -26,12 +26,12 @@ library ShibaMath {
         return a / b;
     }
 
-    function ratio(uint256 number, uint256 share, uint256 max) external pure returns (uint256) {
-        require(max != 0, "RATIO: Zero division");
-        require(max >= share, "RATIO: Max is greater than shares");
-        (uint256 a, uint256 b) = (number * max, number * (max - share)); 
+    function ratio(uint256 number, uint256 share, uint256 _max) external pure returns (uint256) {
+        require(_max != 0, "RATIO: Zero division");
+        require(_max >= share, "RATIO: Max is greater than shares");
+        (uint256 a, uint256 b) = (number * _max, number * (_max - share)); 
         require(a >= b, "RATIO: Math Error");
-        return (a - b) / max;
+        return (a - b) / _max;
     }
 
     // random between min inclusive and max inclusive

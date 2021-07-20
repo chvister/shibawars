@@ -20,6 +20,12 @@ contract ShibaWarsArena {
 
     IShibaWars private shibaWars;
 
+    modifier isSeason() {
+        require(block.timestamp >= shibaWars.seasonStart() && block.timestamp <= shibaWars.seasonStart() + (90 * 24 * 60 * 60),
+            "Shiba Wars: Can only be called by Shiba Wars contract!");
+        _;
+    }
+
     constructor (address shibaWars_) {
         shibaWars = IShibaWars(shibaWars_);
         inArena = 0;
@@ -40,7 +46,7 @@ contract ShibaWarsArena {
         }
     }
 
-    function queueToArena(uint tokenId) public {
+    function queueToArena(uint tokenId) public isSeason() {
         checkCanFight(tokenId);
         shibaWars.setInArena(tokenId, 1);
         bool pushed = false;
@@ -68,7 +74,7 @@ contract ShibaWarsArena {
         require(_shiba.hitPoints > 1, "Shiba Wars: THIS DOGE IS TOO EXHAUSTED");
     }
 
-    function matchmake(uint tokenId) public {
+    function matchmake(uint tokenId) public isSeason() {
         require(inArena > 0, "Shiba Wars: NO MATCH CAN BE STARTED");
         checkCanFight(tokenId);
         uint256[] memory _arenaQueue = arenaQueue;
@@ -90,7 +96,7 @@ contract ShibaWarsArena {
         fight(tokenId, foundId, msg.sender, 1);
     }
 
-    function matchmake() public {
+    function matchmake() public isSeason() {
         // find tokens
         require(inArena > 1, "Shiba Wars: NO MATCH CAN BE STARTED");
         (uint256 id1, uint256 id2, uint index1, uint index2) = getMatch();
@@ -123,7 +129,7 @@ contract ShibaWarsArena {
         }
     }
 
-    function fight(uint256 firstShiba, uint256 secondShiba, address matchmaker, uint8 matches) private {
+    function fight(uint256 firstShiba, uint256 secondShiba, address matchmaker, uint8 matches) private isSeason() {
         require(shibaWars.ownerOf(firstShiba) != shibaWars.ownerOf(secondShiba), "Shiba Wars: CAN NOT FIGHT YOUR OWN DOGE");
         ShibaWarsEntity.Doge memory attacker;
         ShibaWarsEntity.Doge memory defender;
@@ -222,7 +228,7 @@ contract ShibaWarsArena {
         return id > 1 && id != 13 && id < 17;
     }
 
-    function putDogeOnLeash(uint dogeId, uint leashId) public {
+    function putDogeOnLeash(uint dogeId, uint leashId) public isSeason() {
         // doge id must be doge
         require(ShibaWarsUtils.isDoge(shibaWars.getTokenDetails(dogeId).tokenId), "Shiba Wars: CAN ONLY LEASH DOGE");
         // lesah id must be leash
@@ -240,7 +246,7 @@ contract ShibaWarsArena {
         leashUsed[leashId] = dogeId;
     }
 
-    function unleashDoge(uint dogeId) public {
+    function unleashDoge(uint dogeId) public isSeason() {
         // must be my doge
         require(shibaWars.ownerOf(dogeId) == msg.sender, "Shiba Wars: YOU DO NOT OWN THIS DOGE");
         // doge must be leashed to unleash
