@@ -26,6 +26,9 @@ contract ShibaWars is ERC721 {
     mapping(address => uint256) private shibaTreats;
     uint256 public seasonStart;
 
+    uint256 constant SEASON_DURATION = 90 * 24 * 60 * 60;
+    uint256 constant MAX_INT = (2 ** 256) - 1;
+
     modifier isDev(address caller) {
         require(caller == devAddress, "Shiba Wars: Caller is not a dev");
         _;
@@ -38,7 +41,7 @@ contract ShibaWars is ERC721 {
     }
 
     modifier isSeason() {
-        require(block.timestamp >= seasonStart && block.timestamp <= seasonStart + (90 * 24 * 60 * 60),
+        require(block.timestamp >= seasonStart && block.timestamp <= seasonStart + SEASON_DURATION,
             "Shiba Wars: Season ended!");
         _;
     }
@@ -103,7 +106,7 @@ contract ShibaWars is ERC721 {
         result = new uint256[](10);
         scores = new uint256[](10);
         uint found = 0;
-        (uint min, uint max) = ((2 ** 256) - 1, 0);
+        (uint min, uint max) = (MAX_INT, 0);
         for(uint256 i = 0; i < nextId; ++i) {
             // if owner and exists
             if(_exists(i)) {

@@ -29,15 +29,16 @@ contract ShibaWarsFactory {
     // max rewards so first does not take all
     uint256 constant maxShibMMReward = 10000000 * 10 ** 18;
     uint256 constant maxLeashMMReward = 3 * 10 ** 16;
+    uint256 constant SEASON_DURATION = 90 * 24 * 60 * 60;
 
     modifier isSeason() {
-        require(block.timestamp >= IShibaWars(shibaWars).seasonStart() && block.timestamp <= IShibaWars(shibaWars).seasonStart() + (90 * 24 * 60 * 60),
+        require(block.timestamp >= IShibaWars(shibaWars).seasonStart() && block.timestamp <= IShibaWars(shibaWars).seasonStart() + SEASON_DURATION,
             "Shiba Wars: Can only be called during the season!");
         _;
     }
 
     modifier seasonEnded() {
-        require(block.timestamp > IShibaWars(shibaWars).seasonStart() + (90 * 24 * 60 * 60),
+        require(block.timestamp > IShibaWars(shibaWars).seasonStart() + SEASON_DURATION,
             "Shiba Wars: Can only be called after season has ended!");
         _;
     }
