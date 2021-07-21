@@ -24,6 +24,7 @@ contract ShibaWarsArena {
     uint256 constant SEASON_DURATION = 90 * 24 * 60 * 60;
 
     event AdventureFight(uint dogeId, uint enemyId, uint dogeStrength, uint enemyStrength, uint reward);
+    event ArenaFight(uint attackerId, uint defenderId, uint attackerDamage, uint defenderDamage, uint outcome);
 
     modifier isSeason() {
         require(block.timestamp >= shibaWars.seasonStart() && block.timestamp <= shibaWars.seasonStart() + SEASON_DURATION,
@@ -218,6 +219,7 @@ contract ShibaWarsArena {
             attNewScore = score <= attNewScore - 1 ? attNewScore.sub(score) : 1;
             setScore(attacker.id, attNewScore, defender.id, defNewScore);
         }
+        emit ArenaFight(attacker.id, defender.id, damageAttacker, damageDefender, winner);
     }
 
     function scoreReward(uint256 winnerScore, uint256 loserScore) private pure returns (uint256) {
@@ -321,6 +323,10 @@ contract ShibaWarsArena {
             adventures[dogeId] = 0;
         }
         emit AdventureFight(dogeId, enemy, damage, strength, reward);
+    }
+
+    function getAdventureLevel(uint dogeId) public view returns (uint) {
+        return adventures[dogeId];
     }
 
 }

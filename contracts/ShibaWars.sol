@@ -169,11 +169,11 @@ contract ShibaWars is ERC721 {
         // level up if enough shiba treats
         require(shibaTreats[msg.sender] >= ShibaWarsUtils.levelUpCost(_shiba.level), "Shiba Wars: NOT ENOUGH POWER TREATS TO UPGRADE THIS SHIBA");
         // only can level up doges
-        require(ShibaWarsUtils.isDoge(id), "Shiba Wars: ONLY DOGES CAN BE LEVELLED UP");
+        require(ShibaWarsUtils.isDoge(_shiba.tokenId), "Shiba Wars: ONLY DOGES CAN BE LEVELLED UP");
         shibaTreats[msg.sender] = shibaTreats[msg.sender].sub(ShibaWarsUtils.levelUpCost(_shiba.level));
         ++_tokenDetails[id].level;
         _tokenDetails[id].strength += _shiba.strengthGain;
-        _tokenDetails[id].hitPoints = ShibaWarsUtils.getMaxHp(_shiba.strength);
+        _tokenDetails[id].hitPoints = ShibaWarsUtils.getMaxHp(_shiba.strength + _shiba.strengthGain);
         _tokenDetails[id].agility += _shiba.agilityGain;
         _tokenDetails[id].dexterity += _shiba.dexterityGain;
     }
