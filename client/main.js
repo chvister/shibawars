@@ -1,9 +1,9 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const SHIBA_WARS = "0xcBB670F409867A64844ecEc05f2632af822BcC3F";
-const ARENA = "0xe6Fa6E1598E9660320f7f814C1d911D0fFEE7Dcb";
-const FACTORY = "0xdf2C9afe38D87bCC2daCE88f362d9e50440766cb";
+const SHIBA_WARS = "0x7bEC0C0883550a6fa03C2de3Dea252e0493066b7";
+const ARENA = "0xE42C29c00883DeD60907546AEa8AE37DE584dEB3";
+const FACTORY = "0xb05d22cf2eE47D29CcAF909dab15376e6E1C4285";
 
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const LEASH_ADDRESS = "0x70bE14767cC790a668BCF6d0E6B4bC815A1bCf05";
@@ -107,8 +107,17 @@ async function renderGame(){
     for(dogeId of userTokens) {
         let data = await shibaWars.methods.getTokenDetails(dogeId).call({from: ethereum.selectedAddress});
         let canFight = await arenaContract.methods.canFight(dogeId).call({from: ethereum.selectedAddress});
-        await renderShiba(dogeId, data, userPowerTreats, (parseFloat(data.strength)/100) * 5 + 5000, canFight, userTokens);
+        await renderShiba(dogeId, data, userPowerTreats, (parseFloat(data.strength) * 5) + 5000, canFight, userTokens);
     }
+
+    await arenaContract.getPastEvents('AdventureFight', {
+        fromBlock: 16600,
+        toBlock: 17000
+    }).then(function(events){
+        events.forEach((item) => {
+            console.log(item)
+        });
+    });
 }
 
 async function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight, userTokens){
@@ -128,13 +137,13 @@ async function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight, user
         <div>Strength: <span class="doge-strength">${parseFloat (data.strength) / 100}</span></div>
         <div>Agility: <span class="doge-agility">${parseFloat (data.agility) / 100}</span></div>
         <div>Dexterity: <span idclass="doge-dexterity">${parseFloat (data.dexterity) / 100}</span></div>
-        <div>Hitpoints: <span idclass="doge-hp">${parseFloat (data.hitPoints) / 100} / ${parseFloat (shibaMaxHp) / 10}</span></div>
+        <div>Hitpoints: <span idclass="doge-hp">${parseFloat (data.hitPoints) / 100} / ${parseFloat (shibaMaxHp) / 100}</span></div>
         <div>Score: <span idclass="arena-score">${data.arenaScore}</span></div>`;
         if(userPowerTreats >= data.level * 1500000) {
             card += `<button id="btn-level-up-${id}" class="btn btn-primary btn-block">Level up</button>`;
         }
         if(data.hitPoints < shibaMaxHp) {
-            let sttNeeded = maxHp - data.hitPoints;
+            let sttNeeded = shibaMaxHp - data.hitPoints;
             if(userPowerTreats >= sttNeeded) {
                 card += `<button id="btn-feed-${id}" class="btn btn-primary btn-block">Feed this doge (${sttNeeded} Treats)</button>`;
             } else {
@@ -143,6 +152,7 @@ async function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight, user
         }
         if(data.inArena == 0 && data.hitPoints > 1 && canFight) {
             card += `<button id="btn-queue-${id}" class="btn btn-primary btn-block">Queue to arena</button>`;
+            card += `<button id="btn-adventure-${id}" class="btn btn-primary btn-block" onclick="goOnAdventure(${dogeId})">Find an adventure</button>`;
             let dogesInArena = await arenaContract.methods.getArenaQueueLength().call({from: ethereum.selectedAddress});
             let myDoges = await arenaContract.methods.myDogesInArena().call({from: ethereum.selectedAddress})
             if(dogesInArena > myDoges) {
@@ -322,7 +332,7 @@ async function levelUp(shibaId) {
 
 async function leashDoge(dogeId, leashId) {
     let contract = await getArenaContract();
-    contract.methods.putDogeOnLeash(dogeId, leashId).send({from: ethereum.selectedAddress, gasLimit: 500000})
+    contract.methods.putDogeOnLeash(dogeId, leashId).send({from: ethereum.selectedAddress, gasLimit: 125000})
         .on("receipt", (() => {
             renderGame();
         }));
@@ -409,6 +419,14 @@ async function endLeague(){
         }));
 }
 
+async function goOnAdventure(dogeId){
+    let contract = await getArenaContract();
+    contract.methods.goOnAdventure(dogeId).send({from:  ethereum.selectedAddress, gasLimit: 200000})
+        .on("receipt", (() => {
+            renderGame();
+        }));
+}
+
 async function approveShib(){
     let contract = await getShibContract();
     contract.methods.approve(FACTORY, SHIB_SUPPLY).send({from: ethereum.selectedAddress, gasLimit: 50000})
@@ -424,7 +442,6 @@ async function approveLeash(){
             renderGame();
         }));
 }
-
 
 async function getAllowance() {
     let contract = await getShibContract();

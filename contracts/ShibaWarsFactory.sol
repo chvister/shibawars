@@ -50,12 +50,12 @@ contract ShibaWarsFactory {
     
     // RETURN TOTAL PRIZE POOL TO BE WON BY PLAYERS
     function getPrizePool() public view returns (uint256) {
-        return IERC20(shibaInu).balanceOf(address(this)).sub(getMatchMakerReward()).sub(devReward).sub(burnAmount);
+        return IERC20(shibaInu).balanceOf(address(this)).sub(matchmakerReward).sub(devReward).sub(burnAmount);
     }
 
     // RETURN TOTAL PRIZE POOL LEASH TO BE WON BY PLAYERS
     function getPrizePoolLeash() public view returns (uint256) {
-        return IERC20(leash).balanceOf(address(this)).sub(getMatchMakerRewardLeash()).sub(devRewardLeash).sub(burnAmountLeash);
+        return IERC20(leash).balanceOf(address(this)).sub(matchmakerRewardLeash).sub(devRewardLeash).sub(burnAmountLeash);
     }
 
     // RETURN REWARD FOR CREATING MATCHES
@@ -230,6 +230,5 @@ contract ShibaWarsFactory {
         IERC20(shibaInu).burn(IERC20(shibaInu).balanceOf(address(this)));
         IERC20(leash).transfer(0x000000000000000000000000000000000000dEaD, IERC20(shibaInu).balanceOf(address(this)));
     }
-
 
 }

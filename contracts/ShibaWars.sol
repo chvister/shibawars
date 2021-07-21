@@ -46,6 +46,11 @@ contract ShibaWars is ERC721 {
         _;
     }
 
+    modifier isOwner(uint tokenId, address caller) {
+        require(ownerOf(tokenId) == caller, "Shiba Wars: YOU DO NOT OWN THIS TOKEN");
+        _;
+    }
+
     constructor() ERC721("ShibaWars", "SHIBW") {
         devAddress = msg.sender;
         seasonStart = block.timestamp;
@@ -162,7 +167,6 @@ contract ShibaWars is ERC721 {
     function levelUp(uint256 id) public isSeason() {
         ShibaWarsEntity.Doge memory _shiba = _tokenDetails[id];
         // level up if enough shiba treats
-        require(ownerOf(id) == msg.sender, "Shiba Wars: YOU DO NOT OWN THIS TOKEN");
         require(shibaTreats[msg.sender] >= ShibaWarsUtils.levelUpCost(_shiba.level), "Shiba Wars: NOT ENOUGH POWER TREATS TO UPGRADE THIS SHIBA");
         // only can level up doges
         require(ShibaWarsUtils.isDoge(id), "Shiba Wars: ONLY DOGES CAN BE LEVELLED UP");
@@ -175,10 +179,9 @@ contract ShibaWars is ERC721 {
     }
 
     // OPEN LUCKY DOGE PACK
-    function openPack(uint256 id, address caller) public isShibaWars(msg.sender) {
+    function openPack(uint256 id, address caller) public isShibaWars(msg.sender) isOwner(id, caller) {
         // open pack
         // burn the token
-        require(ownerOf(id) == caller, "Shiba Wars: YOU DO NOT OWN THIS TOKEN");
         _burn(id);
         delete _tokenDetails[id];
     }

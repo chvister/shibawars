@@ -26,6 +26,10 @@ library ShibaWarsUtils {
     uint constant GOLDEN = 19;
     uint constant DIAMOND = 20;
 
+    uint constant MILLION = 10 ** 6;
+    uint constant THOUSAND = 10 ** 3;
+    uint constant TOKEN = 10 ** 18;
+
     function getStatsMultiplier(uint tokenId) public pure returns (uint) {
         if (tokenId == BOJAR_DA_KILLA || tokenId == KAYA_THE_WOLFMOTHER) {
             return 1000;
@@ -70,15 +74,15 @@ library ShibaWarsUtils {
     }
 
     function millions(uint count) private pure returns (uint) {
-        return count * 10 ** 6;
+        return count * MILLION;
     }
 
     function thousand(uint count) private pure returns (uint) {
-        return count * (10 ** 3);
+        return count * THOUSAND;
     }
 
     function tokens(uint count) private pure returns (uint) {
-        return count * (10 ** 18);
+        return count * TOKEN;
     }
 
     function getTokenPrice(uint tokenId) public pure returns (uint256) {
@@ -155,7 +159,7 @@ library ShibaWarsUtils {
     
     // COST OF LEVEL UP IN POWER TREATS
     function levelUpCost(uint level) public pure returns (uint) {
-        return level * 1500000;
+        return level * 150000;
     }
 
 }
