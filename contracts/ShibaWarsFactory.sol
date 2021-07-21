@@ -155,9 +155,9 @@ contract ShibaWarsFactory {
     }
 
     // BUY SHIBA TREAT TOKENS
-    function buyTreats() public isSeason() {
-        payTheContract(150000 * 10 ** 18);
-        IShibaWars(shibaWars).addTreats(msg.sender, 1500000);
+    function buyTreats(uint count) public isSeason() {
+        payTheContract(count.div(10).mul(10 ** 18));
+        IShibaWars(shibaWars).addTreats(msg.sender, count);
     } 
 
     // OPEN LUCKY DOGE PACK

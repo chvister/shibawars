@@ -36,13 +36,13 @@ library ShibaWarsUtils {
         } else if (tokenId == WOOFMEISTER) {
             return 400;
         } else if (tokenId == SHIBA_WHALE) {
-            return 225;
+            return 250;
         } else if (tokenId == OG_SHIBA) {
-            return 200;
+            return 225;
         } else if (tokenId == SHIBA_WARLORD) {
-            return 175;
+            return 200;
         } else if (tokenId == SHIBA_GENERAL) {
-            return 150;
+            return 175;
         } else if (tokenId == WATCHDOG) {
             return 200;
         } else if (tokenId == DOGE_KILLER) {
@@ -56,11 +56,11 @@ library ShibaWarsUtils {
         } else if (tokenId == SHIBA_PUP) {
             return 100;
         } else if (tokenId == DOGE_FATHER) {
-            return 250;
+            return 275;
         } else if (tokenId == RYOSHI) {
-            return 225;
+            return 250;
         } else if (tokenId == GOLDEN_DOGE) {
-            return 200;
+            return 225;
         } else if (tokenId == IRON) {
             return 15;
         } else if (tokenId == SILVER) {

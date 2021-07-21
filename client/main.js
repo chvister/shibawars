@@ -1,13 +1,15 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const SHIBA_WARS = "0xe5d2257776796BAb8D49AC307e9f54eAE113E363";
-const ARENA = "0xE8ad8800097c717cB7925E4aD4aa93c6eb93B21C";
-const FACTORY = "0x753fb371f5b182C176D45deb82Be71924C30D373";
+const SHIBA_WARS = "0x628FdAA714e46E8618B4610AAEA32e4F92b17975";
+const ARENA = "0x1d3660510f9c2ee91bbe06f04e0c8eE346f66d88";
+const FACTORY = "0x1cEbC2eC6b55335609417722CC2cd2112Bc99984";
 
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const LEASH_ADDRESS = "0x70bE14767cC790a668BCF6d0E6B4bC815A1bCf05";
 const SHIB_SUPPLY = "1000000000000000000000000000000000";
+
+let treatsToBuy = 1500000;
 
 async function init() {
     try {
@@ -192,7 +194,7 @@ async function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight, user
             </button>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">`;
             for (leash of userLeashes) {
-                card += `<a class="dropdown-item" href="#" onclick="leashDoge(${leash[0]}, ${leashId})">Leash with ${getName(leash[1])}</a>`;
+                card += `<a class="dropdown-item" href="#" onclick="leashDoge(${id}, ${leash[0]})">Leash with ${getName(leash[1])}</a>`;
             }
             card += `</div>
             </div>`;
@@ -411,7 +413,7 @@ async function buyLeash(tokenId){
 
 async function buyTreatTokens(){
     let contract = await getFactoryContract();
-    contract.methods.buyTreats().send({from:  ethereum.selectedAddress, gasLimit: 200000})
+    contract.methods.buyTreats(treatsToBuy).send({from:  ethereum.selectedAddress})
         .on("receipt", (() => {
             renderGame();
         }));
@@ -554,6 +556,12 @@ function getName(tokenId) {
     }
     return "";
 }
+
+$("#buy-stt-form").on('input', function(e) {
+    treatsToBuy = $(this).val();
+    $("#buy-stt-count").html(numberWithCommas(treatsToBuy))
+    $("#buy-stt-price").html(numberWithCommas("" + (parseFloat(treatsToBuy / 10))))
+});
 
 $("#btn-buy-7").click( () => { 
     buyDoge(7);
