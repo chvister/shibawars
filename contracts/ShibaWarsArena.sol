@@ -297,7 +297,7 @@ contract ShibaWarsArena {
         uint adventureLevel = adventures[dogeId] + 1;
         // get random enemy - akita inu, rottweiler, bear
         uint64 enemy = (uint64)(abi.encodePacked(block.timestamp, block.difficulty, dogeId).random(0, 2));
-        uint64 strength = (uint64)(enemy.add(1).mul(400).add(abi.encodePacked(block.timestamp, block.difficulty, enemy).random(0, 400).mul(enemy)).mul(adventureLevel));
+        uint64 strength = (uint64)(enemy.add(1).mul(400).add(abi.encodePacked(block.timestamp, block.difficulty, enemy).random(0, enemy.mul(400))).mul(adventureLevel));
         ShibaWarsEntity.Doge memory _doge = shibaWars.getTokenDetails(dogeId);
         // pick random skill of my shiba
         uint damage = enemy == 0 ? _doge.strength : (enemy == 1 ? _doge.agility : _doge.dexterity);
@@ -308,14 +308,12 @@ contract ShibaWarsArena {
         if(damage > adventureLevel.mul(1000).mul(enemy + 1)) {
             // defender fainted
             winner = 1;
-        } else {
-            shibaWars.decreaseHp(dogeId, strength);
         }
         if (winner == 0) {
             // defender attacks as well
             if(strength > _doge.hitPoints - 1) {
                 // attacker fainted
-                shibaWars.decreaseHp(dogeId, strength - 1);
+                shibaWars.decreaseHp(dogeId, _doge.hitPoints - 1);
             } else {
                 shibaWars.decreaseHp(dogeId, strength);
             }
