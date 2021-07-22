@@ -1,9 +1,9 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const SHIBA_WARS = "0x88B06B29c6E81c71bd4D06184d4aa5cd6532918f";
-const ARENA = "0x39608EE94EBF4E14455047f1b41E497eC7ef2119";
-const FACTORY = "0xb752274948599C8dC23A6aF84Ecf94dD988F2D44";
+const SHIBA_WARS = "0x512D62de1Df56D89d3433D8F277C3eFEF0d5AAE9";
+const ARENA = "0xcB3f3B6eE4a60bE1c37eE38364f5b4F79330433a";
+const FACTORY = "0x04e0377E627d6155A153bc0AA91A32C6eFf5d882";
 
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const LEASH_ADDRESS = "0x70bE14767cC790a668BCF6d0E6B4bC815A1bCf05";
@@ -31,6 +31,16 @@ async function init() {
         console.log(error);
     }
 }
+
+// detect Metamask account change
+ethereum.on('accountsChanged', function (accounts) {
+    init()
+});
+
+// detect Network account change
+ethereum.on('networkChanged', function(networkId){
+    init()
+});
 
 async function renderGame(){
     $("#game").show();
