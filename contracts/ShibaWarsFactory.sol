@@ -167,7 +167,7 @@ contract ShibaWarsFactory {
         // burn the token
         _shibaWars.openPack(id, msg.sender);
         // mint random token
-        uint tokenId = ShibaWarsUtils.getRandomId(abi.encodePacked(block.difficulty, block.timestamp).random(0, 10000));
+        uint tokenId = ShibaWarsUtils.getRandomId(abi.encodePacked(block.difficulty, block.timestamp, id).random(0, 10000));
         _shibaWars.mintNFT(msg.sender, tokenId);
     }
 

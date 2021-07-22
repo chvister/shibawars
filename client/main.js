@@ -11,6 +11,12 @@ const SHIB_SUPPLY = "1000000000000000000000000000000000";
 
 let treatsToBuy = 1500000;
 
+let shibaWars;
+let factoryContract;
+let arenaContract;
+let shibContrat;
+let leashContract;
+
 async function init() {
     try {
         let user = Moralis.User.current();
@@ -45,13 +51,160 @@ async function renderGame(){
         $("#btn-approve-leash").show();
     }
 
-    let shibContrat = await getShibContract();
-    let leashContract = await getLeashContract();
+    $("#login_button").hide();
 
-    let shibaWars = await getContract();
-    let factoryContract = await getFactoryContract();
-    let arenaContract = await getArenaContract();
+    shibContrat = await getShibContract();
+    leashContract = await getLeashContract();
+    shibaWars = await getContract();
+    factoryContract = await getFactoryContract();
+    arenaContract = await getArenaContract();
     
+    updateBalances();
+
+    let userPowerTreats = await shibaWars.methods.getUserTreatTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
+    let userTokens = await shibaWars.methods.getUserTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
+    let userLeashes = await filterLeashes(userTokens);
+
+    for(dogeId of userTokens) {
+        let data = await shibaWars.methods.getTokenDetails(dogeId).call({from: ethereum.selectedAddress});
+        let canFight = await arenaContract.methods.canFight(dogeId).call({from: ethereum.selectedAddress});
+        let dogesInArena = await arenaContract.methods.getArenaQueueLength().call({from: ethereum.selectedAddress});
+        let myDoges = await arenaContract.methods.myDogesInArena().call({from: ethereum.selectedAddress});
+        await renderShiba(dogeId, data, userPowerTreats, (parseFloat(data.strength) * 5) + 5000, canFight, userTokens, dogesInArena, myDoges, userLeashes);
+    }
+
+}
+
+async function filterLeashes(userTokens) {
+    let userLeashes = [];
+
+    for (tokenId of userTokens) {
+        let dogeData = await shibaWars.methods.getTokenDetails(tokenId).call({from: ethereum.selectedAddress});
+        if(dogeData.tokenId >= 17) {
+            let isLeashUsed = await arenaContract.methods.isLeashUsed(tokenId).call({from: ethereum.selectedAddress}); 
+            if(!isLeashUsed){
+                userLeashes.push([tokenId, dogeData.tokenId])
+            }
+        }
+    }
+    return userLeashes;
+}
+
+async function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight, userTokens, dogesInArena, myDoges, userLeashes) {
+    // 13 doge pack
+    let card = `<div class="col-md-4 card" id="pet-${id}"></div>`
+
+    let element = $.parseHTML(card);
+
+    $("#doges-row").append(element);
+    $(`#pet-${id}`).html(await getCardContent(id, data, userPowerTreats, shibaMaxHp, canFight, userTokens, dogesInArena, myDoges, userLeashes));
+}
+
+async function getCardContent(id, data, userPowerTreats, shibaMaxHp, canFight, userTokens, dogesInArena, myDoges, userLeashes) {
+    let leashedDogeId = 0;
+    let card = 
+    `<img class="card-img-top" src="img/token-${data.tokenId}.png">
+    <div class="card-body">
+        <div>Id: <span class="doge-id">${id}</span></div>
+        <div>Name: <span class="doge-name">${getName(data.tokenId)}</span></div>
+        <div>Description: <span class="doge-description">${getDescription(data.tokenId)}</span></div>`;
+    if(data.tokenId != 13 && data.tokenId < 17) {
+        card += `<div>Level: <span class="doge-level">${data.level}</span></div>
+        <div>Strength: <span class="doge-strength">${parseFloat (data.strength) / 100}</span></div>
+        <div>Agility: <span class="doge-agility">${parseFloat (data.agility) / 100}</span></div>
+        <div>Dexterity: <span idclass="doge-dexterity">${parseFloat (data.dexterity) / 100}</span></div>
+        <div>Hitpoints: <span idclass="doge-hp">${parseFloat (data.hitPoints) / 100} / ${parseFloat (shibaMaxHp) / 100}</span></div>
+        <div>Score: <span idclass="arena-score">${data.arenaScore}</span></div>`;
+        if(userPowerTreats >= data.level * 150000) {
+            card += `<button id="btn-level-up-${id}" class="btn btn-primary btn-block" onClick="levelUp(${id})">Level up</button>`;
+        }
+        if(data.hitPoints < shibaMaxHp) {
+            let sttNeeded = shibaMaxHp - data.hitPoints;
+            if(userPowerTreats >= sttNeeded) {
+                card += `<button id="btn-feed-${id}" class="btn btn-primary btn-block" onClick="feed(${id})">Feed this doge (${sttNeeded} Treats)</button>`;
+            } else {
+                card += `<button id="btn-feed-blocked" class="btn btn-primary btn-block">Need (${sttNeeded} Treats) to feed</button>`;
+            }
+        }
+        if(data.inArena == 0 && data.hitPoints > 1 && canFight) {
+            card += `<button id="btn-queue-${id}" class="btn btn-primary btn-block" onClick="queueToArena(${id})">Queue to arena</button>`;
+            let adventureLevel = parseInt(await arenaContract.methods.getAdventureLevel(id).call({from: ethereum.selectedAddress})) + 1;
+            card += `<button id="btn-adventure-${id}" class="btn btn-primary btn-block" onclick="goOnAdventure(${id})">Find an adventure (level ${adventureLevel})</button>`;
+            if(dogesInArena > myDoges) {
+                card += `<button id="btn-matchmake-${id}" class="btn btn-primary btn-block" onClick="matchmake(${id})">Find a match</button>`;
+            }
+        } else {
+            if(data.hitPoints == 1) {
+                card += `This doge is too exhausted to fight.</br>`;
+            } else if (!canFight) {
+                card += `This doge can not fight.</br>`;
+            } else {
+                card += `This doge is waiting for a match.</br>`;
+            }
+        }
+        let isLeashed = await arenaContract.methods.isLeashed(id).call({from : ethereum.selectedAddress});
+        if(isLeashed) {
+            let leashUsed = await arenaContract.methods.getLeashId(id).call({from : ethereum.selectedAddress});
+            leashUsed = await shibaWars.methods.getTokenDetails(leashUsed).call({from : ethereum.selectedAddress});
+            card += `Leashed by ${getName(leashUsed.tokenId)}`;
+            card += `<button id="btn-unleash-${id}" class="btn btn-primary btn-block" onClick="unleash(${id})">Unleash</button>`;
+        } else if (userLeashes.length != 0) {
+            card += `<div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Leash your doge
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">`;
+            for (leash of userLeashes) {
+                card += `<a class="dropdown-item" href="#" onclick="leashDoge(${id}, ${leash[0]})">Leash with ${getName(leash[1])}</a>`;
+            }
+            card += `</div>
+            </div>`;
+        }
+    } else if (data.tokenId == 13) {
+        card += `<button id="btn-open-${id}" class="btn btn-primary btn-block" onClick="openPack(${id})">Open</button>`;
+    } else {
+        // leash 
+        let leashUsed = await arenaContract.methods.isLeashUsed(id).call({from : ethereum.selectedAddress});
+        if(leashUsed) {
+            leashedDogeId = await arenaContract.methods.getDoge(id).call({from : ethereum.selectedAddress});
+            card += `<button id="btn-unleash-${id}" class="btn btn-primary btn-block" onClick="unleash(${leashedDogeId});">Unleash</button>`;
+        } else {
+            card += `<div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Leash your doge
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">`;
+            for (dogeId of userTokens) {
+                let isLeashed = await arenaContract.methods.isLeashed(dogeId).call({from : ethereum.selectedAddress});
+                if(!isLeashed){
+                    let dogeData = await shibaWars.methods.getTokenDetails(dogeId).call({from: ethereum.selectedAddress});
+                    if(dogeData.tokenId < 17 && dogeData.tokenId != 13) {
+                        card += `<a class="dropdown-item" href="#" onclick="leashDoge(${dogeId}, ${id})">Leash ${getName(dogeData.tokenId)} #${dogeId}</a>`;
+                    }
+                }
+            }
+            card += `</div>
+          </div>`;
+        }
+    }
+    card += `</div>`;
+
+    return card;
+}
+
+async function updateShiba(dogeId) {
+    let userTokens = await shibaWars.methods.getUserTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
+    let userLeashes = await filterLeashes(userTokens);
+    let userPowerTreats = await shibaWars.methods.getUserTreatTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
+    let data = await shibaWars.methods.getTokenDetails(dogeId).call({from: ethereum.selectedAddress});
+    let canFight = await arenaContract.methods.canFight(dogeId).call({from: ethereum.selectedAddress});
+    let dogesInArena = await arenaContract.methods.getArenaQueueLength().call({from: ethereum.selectedAddress});
+    let myDoges = await arenaContract.methods.myDogesInArena().call({from: ethereum.selectedAddress});
+    let content = await getCardContent(dogeId, data, userPowerTreats, (parseFloat(data.strength) * 5) + 5000, canFight, userTokens, dogesInArena, myDoges, userLeashes);
+    $(`#pet-${dogeId}`).html(content);
+}
+
+async function updateBalances() {
     let userBalance = await shibContrat.methods.balanceOf(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
     if(userBalance != 0) {
         $("#shib-balance").html(numberWithCommas(userBalance.substring(0, userBalance.length - 18)));
@@ -90,8 +243,6 @@ async function renderGame(){
         $("#leash-matchmaker").html(0);
     }
 
-    $("#login_button").hide();
-    
     let userPowerTreats = await shibaWars.methods.getUserTreatTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
     $("#stt-balance").html(numberWithCommas(userPowerTreats));
 
@@ -103,162 +254,6 @@ async function renderGame(){
     }
 
     $("#in-arena").html(arenaQueueLength);
-
-    let userTokens = await shibaWars.methods.getUserTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
-    let userLeashes = [];
-
-    for (tokenId of userTokens) {
-        let dogeData = await shibaWars.methods.getTokenDetails(tokenId).call({from: ethereum.selectedAddress});
-        if(dogeData.tokenId >= 17) {
-            let isLeashUsed = await arenaContract.methods.isLeashUsed(tokenId).call({from: ethereum.selectedAddress}); 
-            if(!isLeashUsed){
-                userLeashes.push([tokenId, dogeData.tokenId])
-            }
-        }
-    }
-
-    for(dogeId of userTokens) {
-        let data = await shibaWars.methods.getTokenDetails(dogeId).call({from: ethereum.selectedAddress});
-        let canFight = await arenaContract.methods.canFight(dogeId).call({from: ethereum.selectedAddress});
-        let dogesInArena = await arenaContract.methods.getArenaQueueLength().call({from: ethereum.selectedAddress});
-        let myDoges = await arenaContract.methods.myDogesInArena().call({from: ethereum.selectedAddress});
-        await renderShiba(dogeId, data, userPowerTreats, (parseFloat(data.strength) * 5) + 5000, canFight, userTokens, dogesInArena, myDoges, userLeashes);
-    }
-
-    await arenaContract.getPastEvents('AdventureFight', {
-        fromBlock: 16600,
-        toBlock: 17000
-    }).then(function(events){
-        events.forEach((item) => {
-            console.log(item)
-        });
-    });
-}
-
-async function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight, userTokens, dogesInArena, myDoges, userLeashes) {
-    let leashedDogeId = 0;
-    let arenaContract = await getArenaContract();
-    let shibaWars = await getContract();
-    // 13 doge pack
-    let card = 
-    `<div class="col-md-4 card id="pet-${id}">
-    <img class="card-img-top" src="img/token-${data.tokenId}.png">
-    <div class="card-body">
-        <div>Id: <span class="doge-id">${id}</span></div>
-        <div>Name: <span class="doge-name">${getName(data.tokenId)}</span></div>
-        <div>Description: <span class="doge-description">${getDescription(data.tokenId)}</span></div>`;
-    if(data.tokenId != 13 && data.tokenId < 17) {
-        card += `<div>Level: <span class="doge-level">${data.level}</span></div>
-        <div>Strength: <span class="doge-strength">${parseFloat (data.strength) / 100}</span></div>
-        <div>Agility: <span class="doge-agility">${parseFloat (data.agility) / 100}</span></div>
-        <div>Dexterity: <span idclass="doge-dexterity">${parseFloat (data.dexterity) / 100}</span></div>
-        <div>Hitpoints: <span idclass="doge-hp">${parseFloat (data.hitPoints) / 100} / ${parseFloat (shibaMaxHp) / 100}</span></div>
-        <div>Score: <span idclass="arena-score">${data.arenaScore}</span></div>`;
-        if(userPowerTreats >= data.level * 150000) {
-            card += `<button id="btn-level-up-${id}" class="btn btn-primary btn-block">Level up</button>`;
-        }
-        if(data.hitPoints < shibaMaxHp) {
-            let sttNeeded = shibaMaxHp - data.hitPoints;
-            if(userPowerTreats >= sttNeeded) {
-                card += `<button id="btn-feed-${id}" class="btn btn-primary btn-block">Feed this doge (${sttNeeded} Treats)</button>`;
-            } else {
-                card += `<button id="btn-feed-blocked" class="btn btn-primary btn-block">Need (${sttNeeded} Treats) to feed</button>`;
-            }
-        }
-        if(data.inArena == 0 && data.hitPoints > 1 && canFight) {
-            card += `<button id="btn-queue-${id}" class="btn btn-primary btn-block">Queue to arena</button>`;
-            let adventureLevel = parseInt(await arenaContract.methods.getAdventureLevel(id).call({from: ethereum.selectedAddress})) + 1;
-            card += `<button id="btn-adventure-${id}" class="btn btn-primary btn-block" onclick="goOnAdventure(${dogeId})">Find an adventure (level ${adventureLevel})</button>`;
-            if(dogesInArena > myDoges) {
-                card += `<button id="btn-matchmake-${id}" class="btn btn-primary btn-block">Find a match</button>`;
-            }
-        } else {
-            if(data.hitPoints == 1) {
-                card += `This doge is too exhausted to fight.`;
-            } else if (!canFight) {
-                card += `This doge can not fight.`;
-            } else {
-                card += `This doge is waiting for a match.`;
-            }
-        }
-        let isLeashed = await arenaContract.methods.isLeashed(id).call({from : ethereum.selectedAddress});
-        if(isLeashed) {
-            let leashUsed = await arenaContract.methods.getLeashId(id).call({from : ethereum.selectedAddress});
-            leashUsed = await shibaWars.methods.getTokenDetails(leashUsed).call({from : ethereum.selectedAddress});
-            card += `Leashed by ${getName(leashUsed.tokenId)}`;
-            card += `<button id="btn-unleash-${id}" class="btn btn-primary btn-block">Unleash</button>`;
-        } else if (userLeashes.length != 0) {
-            card += `<div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              Leash your doge
-            </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">`;
-            for (leash of userLeashes) {
-                card += `<a class="dropdown-item" href="#" onclick="leashDoge(${id}, ${leash[0]})">Leash with ${getName(leash[1])}</a>`;
-            }
-            card += `</div>
-            </div>`;
-        }
-    } else if (data.tokenId == 13) {
-        card += `<button id="btn-open-${id}" class="btn btn-primary btn-block">Open</button>`;
-    } else {
-        // leash 
-        let leashUsed = await arenaContract.methods.isLeashUsed(id).call({from : ethereum.selectedAddress});
-        if(leashUsed) {
-            leashedDogeId = await arenaContract.methods.getDoge(id).call({from : ethereum.selectedAddress});
-            card += `<button id="btn-unleash-${id}" class="btn btn-primary btn-block">Unleash</button>`;
-        } else {
-            card += `<div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              Leash your doge
-            </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">`;
-            for (dogeId of userTokens) {
-                let isLeashed = await arenaContract.methods.isLeashed(dogeId).call({from : ethereum.selectedAddress});
-                if(!isLeashed){
-                    let dogeData = await shibaWars.methods.getTokenDetails(dogeId).call({from: ethereum.selectedAddress});
-                    if(dogeData.tokenId < 17 && dogeData.tokenId != 13) {
-                        card += `<a class="dropdown-item" href="#" onclick="leashDoge(${dogeId}, ${id})">Leash ${getName(dogeData.tokenId)}</a>`;
-                    }
-                }
-            }
-            card += `</div>
-          </div>`;
-        }
-    }
-    card += `</div></div>`;
-
-    let element = $.parseHTML(card);
-    $("#doges-row").append(element);
-
-    $(`#btn-feed-${id}`).click( () => { 
-        feed(id);
-    });
-
-    if(data.tokenId != 13 && data.tokenId < 17) {
-        $(`#btn-level-up-${id}`).click( () => { 
-            levelUp(id);
-        });
-        if(data.inArena == 0 && data.hitPoints > 1 && canFight) {
-            $(`#btn-queue-${id}`).click( () => { 
-                queueToArena(id);
-            });
-            $(`#btn-matchmake-${id}`).click( () => { 
-                matchmake(id);
-            });
-        }
-        $(`#btn-unleash-${id}`).click( () => { 
-            unleash(id);
-        });
-    } else if (data.tokenId == 13) {
-        $(`#btn-open-${id}`).click( () => { 
-            openPack(id);
-        });
-    } else {
-        $(`#btn-unleash-${id}`).click( () => { 
-            unleash(leashedDogeId);
-        });
-    }
 }
 
 function numberWithCommas(x) {
@@ -334,7 +329,8 @@ async function levelUp(shibaId) {
     let contract = await getContract();
     contract.methods.levelUp(shibaId).send({from: ethereum.selectedAddress, gasLimit: 125000})
         .on("receipt", (() => {
-            renderGame();
+            updateShiba(shibaId);
+            updateBalances();
         }));
 }
 
@@ -342,7 +338,8 @@ async function leashDoge(dogeId, leashId) {
     let contract = await getArenaContract();
     contract.methods.putDogeOnLeash(dogeId, leashId).send({from: ethereum.selectedAddress, gasLimit: 125000})
         .on("receipt", (() => {
-            renderGame();
+            updateShiba(dogeId);
+            updateShiba(leashId);
         }));
 }
 
@@ -350,7 +347,8 @@ async function feed(shibaId) {
     let contract = await getContract();
     contract.methods.feed(shibaId).send({from: ethereum.selectedAddress, gasLimit: 75000})
         .on("receipt", (() => {
-            renderGame();
+            updateShiba(shibaId);
+            updateBalances();
         }));
 }
 
@@ -358,7 +356,8 @@ async function queueToArena(shibaId) {
     let contract = await getArenaContract();
     contract.methods.queueToArena(shibaId).send({from: ethereum.selectedAddress, gasLimit: 150000})
         .on("receipt", (() => {
-            renderGame();
+            updateShiba(shibaId);
+            updateBalances();
         }));
 }
 
@@ -366,15 +365,18 @@ async function matchmake(shibaId) {
     let contract = await getArenaContract();
     contract.methods.matchmake(shibaId).send({from: ethereum.selectedAddress, gasLimit: 400000})
         .on("receipt", (() => {
-            renderGame();
+            updateShiba(shibaId);
+            updateBalances();
         }));
 }
 
 async function unleash(shibaId) {
     let contract = await getArenaContract();
+    let leashId = await contract.methods.getLeashId(shibaId).call({from: ethereum.selectedAddress});
     contract.methods.unleashDoge(shibaId).send({from: ethereum.selectedAddress, gasLimit: 60000})
         .on("receipt", (() => {
-            renderGame();
+            updateShiba(shibaId);
+            updateShiba(leashId);
         }));
 }
 
@@ -431,7 +433,8 @@ async function goOnAdventure(dogeId){
     let contract = await getArenaContract();
     contract.methods.goOnAdventure(dogeId).send({from:  ethereum.selectedAddress, gasLimit: 200000})
         .on("receipt", (() => {
-            renderGame();
+            updateShiba(dogeId);
+            updateBalances();
         }));
 }
 
@@ -557,7 +560,7 @@ function getName(tokenId) {
     return "";
 }
 
-$("#buy-stt-form").on('input', function(e) {
+$("#buy-stt-form").on('input', function (e) {
     treatsToBuy = $(this).val();
     $("#buy-stt-count").html(numberWithCommas(treatsToBuy))
     $("#buy-stt-price").html(numberWithCommas("" + (parseFloat(treatsToBuy / 10))))
