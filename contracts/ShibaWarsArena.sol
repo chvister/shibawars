@@ -74,6 +74,18 @@ contract ShibaWarsArena {
         ++inArena;
     }
 
+    function unqueue(uint tokenId) public myToken(tokenId) {
+        require(shibaWars.getTokenDetails(tokenId).inArena == 1, "Shiba Wars: THIS DOGE IS NOT IN ARENA");
+        shibaWars.setInArena(tokenId, 0);
+        for(uint i = 0; i < arenaQueue.length; ++i){
+            if(arenaQueue[i] == tokenId) {
+                arenaQueue[i] = 0;
+                break;
+            }
+        }
+        --inArena;
+    }
+
     function checkCanFight(uint tokenId) private view myToken(tokenId) 
         returns (ShibaWarsEntity.Doge memory _shiba) {
         _shiba = shibaWars.getTokenDetails(tokenId);

@@ -1,9 +1,9 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const SHIBA_WARS = "0x628FdAA714e46E8618B4610AAEA32e4F92b17975";
-const ARENA = "0x1d3660510f9c2ee91bbe06f04e0c8eE346f66d88";
-const FACTORY = "0x1cEbC2eC6b55335609417722CC2cd2112Bc99984";
+const SHIBA_WARS = "0xa6A846dFeEd3fE98CfEbD5FEB3071F6f537ED50C";
+const ARENA = "0xC6c6713b2F5712f24a5BbA020ee89341BB0a1f2c";
+const FACTORY = "0x4CED360c3d077F43BF08f038109620809c55Bb42";
 
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const LEASH_ADDRESS = "0x70bE14767cC790a668BCF6d0E6B4bC815A1bCf05";
@@ -116,7 +116,9 @@ async function getCardContent(id, data, userPowerTreats, shibaMaxHp, canFight, u
         <div>Hitpoints: <span idclass="doge-hp">${parseFloat (data.hitPoints) / 100} / ${parseFloat (shibaMaxHp) / 100}</span></div>
         <div>Score: <span idclass="arena-score">${data.arenaScore}</span></div>`;
         if(userPowerTreats >= data.level * 150000) {
-            card += `<button id="btn-level-up-${id}" class="btn btn-primary btn-block" onClick="levelUp(${id})">Level up</button>`;
+            card += `<button id="btn-level-up-${id}" class="btn btn-primary btn-block" onClick="levelUp(${id})">Level up (${ksAndMs(data.level * 150000)} Treats)</button>`;
+        } else {
+            card += `<button id="btn-level-up-${id}" class="btn btn-primary btn-block">Need ${ksAndMs(data.level * 150000)} Treats to level up</button>`;
         }
         if(data.hitPoints < shibaMaxHp) {
             let sttNeeded = shibaMaxHp - data.hitPoints;
@@ -140,6 +142,7 @@ async function getCardContent(id, data, userPowerTreats, shibaMaxHp, canFight, u
                 card += `This doge can not fight.</br>`;
             } else {
                 card += `This doge is waiting for a match.</br>`;
+                card += `<button id="btn-unqueue-${id}" class="btn btn-primary btn-block" onClick="unqueue(${id})">Unqueue</button>`;
             }
         }
         let isLeashed = await arenaContract.methods.isLeashed(id).call({from : ethereum.selectedAddress});
@@ -256,6 +259,22 @@ async function updateBalances() {
     $("#in-arena").html(arenaQueueLength);
 }
 
+function ksAndMs(number) {
+    if (number < 1000) {
+        return number;
+    } else if (number < 1000000) {
+        return (number / 1000) + "K"
+    } else if (number < 1000000000) {
+        return (number / 1000000) + "M"
+    } else if (number < 1000000000000) {
+        return (number / 1000000000) + "B"
+    } else if (number < 1000000000000000) {
+        return (number / 1000000000000) + "T"
+    } else {
+        return (number / 1000000000000000) + "Q"
+    } 
+}
+
 function numberWithCommas(x) {
     return x.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
@@ -355,6 +374,15 @@ async function feed(shibaId) {
 async function queueToArena(shibaId) {
     let contract = await getArenaContract();
     contract.methods.queueToArena(shibaId).send({from: ethereum.selectedAddress, gasLimit: 150000})
+        .on("receipt", (() => {
+            updateShiba(shibaId);
+            updateBalances();
+        }));
+}
+
+async function unqueue(shibaId) {
+    let contract = await getArenaContract();
+    contract.methods.unqueue(shibaId).send({from: ethereum.selectedAddress, gasLimit: 150000})
         .on("receipt", (() => {
             updateShiba(shibaId);
             updateBalances();
