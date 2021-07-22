@@ -16,6 +16,7 @@ let factoryContract;
 let arenaContract;
 let shibContrat;
 let leashContract;
+let userTokens;
 
 async function init() {
     try {
@@ -62,7 +63,7 @@ async function renderGame(){
     updateBalances();
 
     let userPowerTreats = await shibaWars.methods.getUserTreatTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
-    let userTokens = await shibaWars.methods.getUserTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
+    userTokens = await shibaWars.methods.getUserTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
     let userLeashes = await filterLeashes(userTokens);
 
     for(dogeId of userTokens) {
@@ -205,6 +206,28 @@ async function updateShiba(dogeId) {
     let myDoges = await arenaContract.methods.myDogesInArena().call({from: ethereum.selectedAddress});
     let content = await getCardContent(dogeId, data, userPowerTreats, (parseFloat(data.strength) * 5) + 5000, canFight, userTokens, dogesInArena, myDoges, userLeashes);
     $(`#pet-${dogeId}`).html(content);
+}
+
+async function addShiba(dogeId) {
+    userTokens = await shibaWars.methods.getUserTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
+    let userLeashes = await filterLeashes(userTokens);
+    let userPowerTreats = await shibaWars.methods.getUserTreatTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
+    let data = await shibaWars.methods.getTokenDetails(dogeId).call({from: ethereum.selectedAddress});
+    let canFight = await arenaContract.methods.canFight(dogeId).call({from: ethereum.selectedAddress});
+    let dogesInArena = await arenaContract.methods.getArenaQueueLength().call({from: ethereum.selectedAddress});
+    let myDoges = await arenaContract.methods.myDogesInArena().call({from: ethereum.selectedAddress});
+    await renderShiba(dogeId, data, userPowerTreats, (parseFloat(data.strength) * 5) + 5000, canFight, userTokens, dogesInArena, myDoges, userLeashes);
+}
+
+async function syncTokens() {
+    let newUserTokens = await shibaWars.methods.getUserTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
+    for(token of newUserTokens) {
+        if(!userTokens.includes(token)){
+            addShiba(token);
+        } else {
+            updateShiba(token);
+        }
+    }
 }
 
 async function updateBalances() {
@@ -359,6 +382,7 @@ async function leashDoge(dogeId, leashId) {
         .on("receipt", (() => {
             updateShiba(dogeId);
             updateShiba(leashId);
+            syncTokens();
         }));
 }
 
@@ -405,6 +429,7 @@ async function unleash(shibaId) {
         .on("receipt", (() => {
             updateShiba(shibaId);
             updateShiba(leashId);
+            syncTokens();
         }));
 }
 
@@ -421,7 +446,8 @@ async function openPack(shibaId) {
     let contract = await getFactoryContract();
     contract.methods.openPack(shibaId).send({from: ethereum.selectedAddress, gasLimit: 350000})
         .on("receipt", (() => {
-            renderGame();
+            $(`#pet-${dogeId}`).remove();
+            syncTokens();
         }));
 }
 
@@ -429,7 +455,7 @@ async function buyDoge(tokenId){
     let contract = await getFactoryContract();
     contract.methods.buyDoge(tokenId).send({from:  ethereum.selectedAddress, gasLimit: 500000})
         .on("receipt", (() => {
-            renderGame();
+            syncTokens();
         }));
 }
 
@@ -437,7 +463,7 @@ async function buyLeash(tokenId){
     let contract = await getFactoryContract();
     contract.methods.buyLeash(tokenId).send({from:  ethereum.selectedAddress, gasLimit: 500000})
         .on("receipt", (() => {
-            renderGame();
+            syncTokens();
         }));
 }
 
@@ -445,7 +471,7 @@ async function buyTreatTokens(){
     let contract = await getFactoryContract();
     contract.methods.buyTreats(treatsToBuy).send({from:  ethereum.selectedAddress})
         .on("receipt", (() => {
-            renderGame();
+            updateBalances();
         }));
 }
 
@@ -470,7 +496,7 @@ async function approveShib(){
     let contract = await getShibContract();
     contract.methods.approve(FACTORY, SHIB_SUPPLY).send({from: ethereum.selectedAddress, gasLimit: 50000})
         .on("receipt", (() => {
-            renderGame();
+            $("#btn-approve-shib").hide();
         }));
 }
 
@@ -478,7 +504,7 @@ async function approveLeash(){
     let contract = await getLeashContract();
     contract.methods.approve(FACTORY, "100000000000000000000000").send({from: ethereum.selectedAddress, gasLimit: 50000})
         .on("receipt", (() => {
-            renderGame();
+            $("#btn-approve-leash").hide();
         }));
 }
 
