@@ -297,7 +297,7 @@ contract ShibaWarsArena {
         uint adventureLevel = adventures[dogeId] + 1;
         // get random enemy - akita inu, rottweiler, bear
         uint64 enemy = (uint64)(abi.encodePacked(block.timestamp, block.difficulty, dogeId).random(0, 2));
-        uint64 strength = (uint64)(enemy.add(1).mul(400).add(abi.encodePacked(block.timestamp, block.difficulty, enemy).random(0, 400).mul(enemy)));
+        uint64 strength = (uint64)(adventureLevel.add(1).mul(400).add(abi.encodePacked(block.timestamp, block.difficulty, enemy).random(0, 400).mul(adventureLevel)));
         ShibaWarsEntity.Doge memory _doge = shibaWars.getTokenDetails(dogeId);
         // pick random skill of my shiba
         uint damage = enemy == 0 ? _doge.strength : (enemy == 1 ? _doge.agility : _doge.dexterity);
