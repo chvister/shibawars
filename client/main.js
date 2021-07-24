@@ -18,6 +18,8 @@ let shibContrat;
 let leashContract;
 let userTokens;
 
+let filterId = -1;
+
 async function init() {
     try {
         let user = Moralis.User.current();
@@ -233,7 +235,10 @@ async function syncTokens() {
     let newUserTokens = await shibaWars.methods.getUserTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
     for(token of newUserTokens) {
         if(!userTokens.includes(token)){
-            addShiba(token);
+            let data = await shibaWars.methods.getTokenDetails(token).call({from: ethereum.selectedAddress});
+            if(filterId == -1 || data.tokenId == filterId) {
+                addShiba(token);
+            }
         } else {
             updateShiba(token);
         }
@@ -530,8 +535,57 @@ async function getLeashAllowance() {
     return allowance;
 }
 
-function filter(tokenId) {
-    console.log(tokenId);
+async function filter(tokenId) {
+    if(filter == tokenId) {
+        return;
+    } else if (tokenId == -1) {
+        $("#filter-text").html("Filter tokens");
+        // remove all 
+        $("#doges-row").html("");
+        // add all
+        let userPowerTreats = await shibaWars.methods.getUserTreatTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
+        userTokens = await shibaWars.methods.getUserTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
+        let userLeashes = await filterLeashes(userTokens);
+
+        for(dogeId of userTokens) {
+            let data = await shibaWars.methods.getTokenDetails(dogeId).call({from: ethereum.selectedAddress});
+            let canFight = await arenaContract.methods.canFight(dogeId).call({from: ethereum.selectedAddress});
+            let dogesInArena = await arenaContract.methods.getArenaQueueLength().call({from: ethereum.selectedAddress});
+            let myDoges = await arenaContract.methods.myDogesInArena().call({from: ethereum.selectedAddress});
+            await renderShiba(dogeId, data, userPowerTreats, (parseFloat(data.strength) * 5) + 5000, canFight, userTokens, dogesInArena, myDoges, userLeashes);
+        }
+    } else if (filterId == -1) {
+        // only remove invalid
+        userTokens = await shibaWars.methods.getUserTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
+
+        for(dogeId of userTokens) {
+            let data = await shibaWars.methods.getTokenDetails(dogeId).call({from: ethereum.selectedAddress});
+            if(data.tokenId != tokenId) {
+                $(`#pet-${dogeId}`).remove()
+            }
+        }
+    } else {
+        // remove invalid and add valid
+        let userPowerTreats = await shibaWars.methods.getUserTreatTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
+        userTokens = await shibaWars.methods.getUserTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
+        let userLeashes = await filterLeashes(userTokens);
+
+        for(dogeId of userTokens) {
+            let data = await shibaWars.methods.getTokenDetails(dogeId).call({from: ethereum.selectedAddress});
+            if(data.tokenId != tokenId) {
+                $(`#pet-${dogeId}`).remove()
+            } else {
+                let canFight = await arenaContract.methods.canFight(dogeId).call({from: ethereum.selectedAddress});
+                let dogesInArena = await arenaContract.methods.getArenaQueueLength().call({from: ethereum.selectedAddress});
+                let myDoges = await arenaContract.methods.myDogesInArena().call({from: ethereum.selectedAddress});
+                await renderShiba(dogeId, data, userPowerTreats, (parseFloat(data.strength) * 5) + 5000, canFight, userTokens, dogesInArena, myDoges, userLeashes);
+            }
+        }
+    }
+    if(tokenId != -1) {
+        $("#filter-text").html(getName(tokenId));
+    }
+    filterId = tokenId;
 }
 
 function getDescription(tokenId) {
@@ -639,6 +693,10 @@ for (var tokenId of [7, 8, 9, 10, 11, 12, 13, 20, 19, 18, 17]) {
 for (var tokenId = 0; tokenId <= 20; ++tokenId) {
     $("#filter-buttons").append(`<a class="dropdown-item" href="#" id="filter-${tokenId}" onClick="filter(${tokenId})">${getName(tokenId)}</a>`);
 }
+
+$(`#filter-all`).click(()=>{
+    filter(-1);
+})
 
 $("#buy-stt-form").on('input', function (e) {
     treatsToBuy = $(this).val();
