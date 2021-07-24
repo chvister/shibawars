@@ -530,6 +530,10 @@ async function getLeashAllowance() {
     return allowance;
 }
 
+function filter(tokenId) {
+    console.log(tokenId);
+}
+
 function getDescription(tokenId) {
     if (tokenId == 0) {
         return "Altough he's not a shiba, do not mess with him. The warden of order.";
@@ -624,54 +628,22 @@ function getName(tokenId) {
     return "";
 }
 
+for (var tokenId of [7, 8, 9, 10, 11, 12, 13, 20, 19, 18, 17]) {
+    if(tokenId < 17) {
+        $(`#btn-buy-${tokenId}`).attr("onClick",`buyDoge(${tokenId})`);
+    } else {
+        $(`#btn-buy-${tokenId}`).attr("onClick",`buyLeash(${tokenId})`);
+    }
+}
+
+for (var tokenId = 0; tokenId <= 20; ++tokenId) {
+    $("#filter-buttons").append(`<a class="dropdown-item" href="#" id="filter-${tokenId}" onClick="filter(${tokenId})">${getName(tokenId)}</a>`);
+}
+
 $("#buy-stt-form").on('input', function (e) {
     treatsToBuy = $(this).val();
     $("#buy-stt-count").html(numberWithCommas(treatsToBuy))
     $("#buy-stt-price").html(numberWithCommas("" + (parseFloat(treatsToBuy / 10))))
-});
-
-$("#btn-buy-7").click( () => { 
-    buyDoge(7);
-});
-
-$("#btn-buy-8").click( () => { 
-    buyDoge(8);
-});
-
-$("#btn-buy-9").click( () => { 
-    buyDoge(9);
-});
-
-$("#btn-buy-10").click( () => { 
-    buyDoge(10);
-});
-
-$("#btn-buy-11").click( () => { 
-    buyDoge(11);
-});
-
-$("#btn-buy-12").click( () => { 
-    buyDoge(12);
-});
-
-$("#btn-buy-13").click( () => { 
-    buyDoge(13);
-});
-
-$("#btn-buy-17").click( () => { 
-    buyLeash(17);
-});
-
-$("#btn-buy-18").click( () => { 
-    buyLeash(18);
-});
-
-$("#btn-buy-19").click( () => { 
-    buyLeash(19);
-});
-
-$("#btn-buy-20").click( () => { 
-    buyLeash(20);
 });
 
 $("#btn-buy-treat-tokens").click( () => { 
