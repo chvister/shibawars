@@ -431,7 +431,27 @@ async function unqueue(shibaId) {
 async function matchmake(shibaId) {
     let contract = await getArenaContract();
     contract.methods.matchmake(shibaId).send({from: ethereum.selectedAddress, gasLimit: 400000})
-        .on("receipt", (() => {
+        .on("receipt", (async (receipt) => {
+            let event = receipt.events["ArenaFight"].returnValues;
+            let attacker = await shibaWars.methods.getTokenDetails(event["attackerId"]).call({from: ethereum.selectedAddress});
+            let defender = await shibaWars.methods.getTokenDetails(event["defenderId"]).call({from: ethereum.selectedAddress});
+            $("#attacker-info").html(`${getName(attacker.tokenId)} #${event["attackerId"]}`);
+            $("#defender-info").html(`${getName(defender.tokenId)} #${event["defenderId"]}`);
+            if(event["outcome"] == 1) {
+                $("#who-won").html("Attacker won")
+            } else if(event["outcome"] == 2) {
+                $("#who-won").html("Defender won")
+            } else {
+                $("#who-won").html("It was a draw!")
+            }
+            $("#attacker-damage").html(parseFloat(event["attackerDamage"]) / 100);
+            $("#defender-damage").html(parseFloat(event["defenderDamage"]) / 100);
+            if(event["defenderDamage"] == 0) {
+                $("#additional-info").html("Defender fainted.");
+            } else if (event["defenderDamage"] < event["attackerDamage"] && event["outcome"] == 2) {
+                $("#additional-info").html("Attacker fainted.");
+            }
+            $("#btn-show-fight").click()
             updateShiba(shibaId);
             updateBalances();
         }));
@@ -501,7 +521,26 @@ async function endLeague(){
 async function goOnAdventure(dogeId){
     let contract = await getArenaContract();
     contract.methods.goOnAdventure(dogeId).send({from:  ethereum.selectedAddress, gasLimit: 200000})
-        .on("receipt", (() => {
+        .on("receipt", (async (receipt) => {
+            let event = receipt.events["AdventureFight"].returnValues;
+            let attacker = await shibaWars.methods.getTokenDetails(event["dogeId"]).call({from: ethereum.selectedAddress});
+            let defenderName = event["enemyId"] == 0 ? "Watchdog" : (event["enemyId"] == 1 ? "Wolf" : "Bear"); 
+            $("#attacker-info").html(`${getName(attacker.tokenId)} #${event["dogeId"]}`);
+            $("#defender-info").html(defenderName);
+            if(event["reward"] == 0) {
+                $("#who-won").html(`${defenderName} won`)
+            } else {
+                $("#who-won").html("Attacker won")
+            } 
+            $("#attacker-damage").html(parseFloat(event["dogeStrength"]) / 100);
+            $("#defender-damage").html(parseFloat(event["enemyStrength"]) / 100);
+            if(event["enemyStrength"] == 0) {
+                $("#additional-info").html(`${defenderName} fainted`);
+            } else if (event["enemyStrength"] < event["dogeStrength"] && event["reward"] == 0) {
+                $("#additional-info").html("Attacker fainted.");
+            }
+            $("#reward-info").html(`Found ${numberWithCommas(event["reward"])} treats.`);
+            $("#btn-show-fight").click()
             updateShiba(dogeId);
             updateBalances();
         }));
