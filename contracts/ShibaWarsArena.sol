@@ -11,8 +11,7 @@ contract ShibaWarsArena {
     using ShibaMath for uint64;
     using ShibaMath for bytes;
 
-    uint256[] private arenaQueue;
-    uint256 private inArena;
+    mapping (uint256 => uint256) private arenaQueue;
 
     // leash to doge mapping
     mapping(uint256 => uint256) private dogesOnLeash;
@@ -22,6 +21,7 @@ contract ShibaWarsArena {
     IShibaWars private shibaWars;
 
     uint256 constant SEASON_DURATION = 90 * 24 * 60 * 60;
+    uint256 constant LEAGUE_DIVISOR = 250;
 
     event AdventureFight(uint dogeId, uint enemyId, uint dogeStrength, uint enemyStrength, uint reward);
     event ArenaFight(uint attackerId, uint defenderId, uint attackerDamage, uint defenderDamage, uint outcome);
@@ -36,54 +36,28 @@ contract ShibaWarsArena {
         require(shibaWars.ownerOf(tokenId) == msg.sender, "Shiba Wars: YOU DO NOT OWN THIS TOKEN");
         _;
     }
+
+    modifier hasOpponent(uint tokenId) {
+        ShibaWarsEntity.Doge memory _shiba = shibaWars.getTokenDetails(tokenId);
+        require(arenaQueue[_shiba.arenaScore / LEAGUE_DIVISOR] == 0 || 
+            shibaWars.ownerOf(tokenId) != shibaWars.ownerOf(arenaQueue[_shiba.arenaScore / LEAGUE_DIVISOR]), "Shiba Wars: NO OPPONENT READY FOR THIS DOGE");
+        _;
+    }
  
     constructor (address shibaWars_) {
         shibaWars = IShibaWars(shibaWars_);
-        inArena = 0;
-    }
-
-    function getArenaQueueLength() public view returns (uint256) {
-        return inArena;
-    }
-
-    function myDogesInArena() public view returns (uint256 out) {
-        out = 0;
-        for(uint256 i = 0; i < arenaQueue.length; ++i) {
-            if(arenaQueue[i] != 0) {
-                if(shibaWars.ownerOf(arenaQueue[i]) == msg.sender) {
-                    ++out;
-                }
-            }
-        }
     }
 
     function queueToArena(uint tokenId) public isSeason() {
         checkCanFight(tokenId);
-        shibaWars.setInArena(tokenId, 1);
-        bool pushed = false;
-        for(uint i = 0; i < arenaQueue.length; ++i){
-            if(arenaQueue[i] == 0) {
-                arenaQueue[i] = tokenId;
-                pushed = true;
-                break;
-            }
+        ShibaWarsEntity.Doge memory _doge = shibaWars.getTokenDetails(tokenId);
+        if(arenaQueue[_doge.arenaScore / LEAGUE_DIVISOR] == 0) {
+            shibaWars.setInArena(tokenId, 1);
+            arenaQueue[_doge.arenaScore / LEAGUE_DIVISOR] = tokenId;
+        } else {
+            fight(tokenId, arenaQueue[_doge.arenaScore / LEAGUE_DIVISOR], msg.sender, 1);
+            arenaQueue[_doge.arenaScore / LEAGUE_DIVISOR] = 0;
         }
-        if(!pushed) {
-            arenaQueue.push(tokenId);
-        }
-        ++inArena;
-    }
-
-    function unqueue(uint tokenId) public myToken(tokenId) {
-        require(shibaWars.getTokenDetails(tokenId).inArena == 1, "Shiba Wars: THIS DOGE IS NOT IN ARENA");
-        shibaWars.setInArena(tokenId, 0);
-        for(uint i = 0; i < arenaQueue.length; ++i){
-            if(arenaQueue[i] == tokenId) {
-                arenaQueue[i] = 0;
-                break;
-            }
-        }
-        --inArena;
     }
 
     function checkCanFight(uint tokenId) private view myToken(tokenId) 
@@ -94,61 +68,6 @@ contract ShibaWarsArena {
         // can not be in arena
         require(_shiba.inArena == 0, "Shiba Wars: THIS DOGE IS IN ARENA ALREADY");
         require(_shiba.hitPoints > 1, "Shiba Wars: THIS DOGE IS TOO EXHAUSTED");
-    }
-
-    function matchmake(uint tokenId) public isSeason() {
-        require(inArena > 0, "Shiba Wars: NO MATCH CAN BE STARTED");
-        checkCanFight(tokenId);
-        uint256[] memory _arenaQueue = arenaQueue;
-        uint256 foundId = 0;
-        uint index = 0;
-        // find the best match
-        for(; index < _arenaQueue.length; ++index) {
-            uint256 id = _arenaQueue[index];
-            if(id != 0) {
-                foundId = id;
-                break;
-            }
-        }
-        require(foundId != 0, "Shiba Wars: NO MATCH FOUND");
-        // remove from queue
-        arenaQueue[index] = 0;
-        // do the fight
-        shibaWars.setInArena(foundId, 0);
-        fight(tokenId, foundId, msg.sender, 1);
-    }
-
-    function matchmake() public isSeason() {
-        // find tokens
-        require(inArena > 1, "Shiba Wars: NO MATCH CAN BE STARTED");
-        (uint256 id1, uint256 id2, uint index1, uint index2) = getMatch();
-        require(id1 != 0 && id2 != 0, "Shiba Wars: NO MATCH CAN BE STARTED");
-        // remove from queue
-        arenaQueue[index1] = 0;
-        arenaQueue[index2] = 0;
-        // do the fight
-        shibaWars.setInArena(id1, 0);
-        shibaWars.setInArena(id2, 0);
-        fight(id1, id2, msg.sender, 2);
-    }
-
-    function getMatch() private view returns (uint256 id1, uint256 id2, uint index1, uint index2) {
-        uint256[] memory _arenaQueue = arenaQueue;
-        id1 = 0;
-        id2 = 0;
-        index1 = 0;
-        index2 = 0;
-        // find the best match
-        for(; index2 < _arenaQueue.length; ++index2) {
-            uint256 id = _arenaQueue[index2];
-            if(id != 0 && id1 == 0) {
-                id1 = id;
-                index1 = index2;
-            } else if (id != 0 && id1 != 0 && shibaWars.ownerOf(id1) != shibaWars.ownerOf(id)) {
-                id2 = id;
-                break;
-            }
-        }
     }
 
     function fight(uint256 firstShiba, uint256 secondShiba, address matchmaker, uint8 matches) private isSeason() {
@@ -211,7 +130,6 @@ contract ShibaWarsArena {
         }
         // pay fee to matchmaker
         shibaWars.payMatchmaker(matchmaker);
-        inArena -= matches;
         if(winner == 1) {
             uint256 score = scoreReward(attacker.arenaScore, defender.arenaScore);
             uint attNewScore = attacker.arenaScore.add(score);

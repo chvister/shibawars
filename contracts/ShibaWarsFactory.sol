@@ -18,17 +18,13 @@ contract ShibaWarsFactory {
 
     // shib
     uint256 private arenaReward;
-    uint256 private matchmakerReward;
     uint256 private devReward;
     uint256 private burnAmount;
     // leash
     uint256 private arenaRewardLeash;
-    uint256 private matchmakerRewardLeash;
     uint256 private devRewardLeash;
     uint256 private burnAmountLeash;
     // max rewards so first does not take all
-    uint256 constant maxShibMMReward = 10000000 * 10 ** 18;
-    uint256 constant maxLeashMMReward = 3 * 10 ** 16;
     uint256 constant SEASON_DURATION = 90 * 24 * 60 * 60;
 
     modifier isSeason() {
@@ -50,24 +46,12 @@ contract ShibaWarsFactory {
     
     // RETURN TOTAL PRIZE POOL TO BE WON BY PLAYERS
     function getPrizePool() public view returns (uint256) {
-        return IERC20(shibaInu).balanceOf(address(this)).sub(matchmakerReward).sub(devReward).sub(burnAmount);
+        return IERC20(shibaInu).balanceOf(address(this)).sub(devReward).sub(burnAmount);
     }
 
     // RETURN TOTAL PRIZE POOL LEASH TO BE WON BY PLAYERS
     function getPrizePoolLeash() public view returns (uint256) {
-        return IERC20(leash).balanceOf(address(this)).sub(matchmakerRewardLeash).sub(devRewardLeash).sub(burnAmountLeash);
-    }
-
-    // RETURN REWARD FOR CREATING MATCHES
-    function getMatchMakerReward() public view returns (uint256) {
-        uint256 divisor = IShibaWars(shibaWars).getArenaQueueLength().max(1);
-        return matchmakerReward.div(divisor).min(maxShibMMReward);
-    }
-
-    // RETURN REWARD LEASH FOR CREATING MATCHES
-    function getMatchMakerRewardLeash() public view returns (uint256) {
-        uint256 divisor = IShibaWars(shibaWars).getArenaQueueLength().max(1);
-        return matchmakerRewardLeash.div(divisor).min(maxLeashMMReward);
+        return IERC20(leash).balanceOf(address(this)).sub(devRewardLeash).sub(burnAmountLeash);
     }
 
     // SEND DEV REWARD AND BURN BURN AMOUNT
@@ -97,9 +81,8 @@ contract ShibaWarsFactory {
         require(_shibaInu.allowance(msg.sender, factory) >= cost, "Shiba Wars: ALLOW US TO SPEND YOUR SHIB");
         // transfer shib from buyer to smart contract
         require(_shibaInu.transferFrom(msg.sender, factory, cost), "Shiba Wars: Can not transfer tokens to the smart contract");
-        (uint256 _burn, uint256 _mmkr, uint256 _dev, uint256 _arena) = getFees(cost);
+        (uint256 _burn, uint256 _dev, uint256 _arena) = getFees(cost);
         arenaReward = arenaReward.add(_arena);
-        matchmakerReward = matchmakerReward.add(_mmkr);
         devReward = devReward.add(_dev);
         burnAmount = burnAmount.add(_burn);
     }
@@ -113,33 +96,19 @@ contract ShibaWarsFactory {
         require(_leash.allowance(msg.sender, factory) >= cost, "Shiba Wars: ALLOW US TO SPEND YOUR LEASH");
         // transfer leash from buyer to smart contract
         require(_leash.transferFrom(msg.sender, factory, cost), "Shiba Wars: Can not transfer tokens to the smart contract");
-        (uint256 _burn, uint256 _mmkr, uint256 _dev, uint256 _arena) = getFees(cost);
+        (uint256 _burn, uint256 _dev, uint256 _arena) = getFees(cost);
         arenaRewardLeash = arenaRewardLeash.add(_arena);
-        matchmakerRewardLeash = matchmakerRewardLeash.add(_mmkr);
         devRewardLeash = devRewardLeash.add(_dev);
         burnAmountLeash = burnAmountLeash.add(_burn);
     }
 
-
-    function payMatchmaker(address matchmaker) public {
-        require(msg.sender == shibaWars, "Shiba Wars: ONLY ARENA CAN PAY MATCHMAKER");
-        uint256 reward = getMatchMakerReward();
-        matchmakerReward = matchmakerReward.sub(reward);
-        IERC20(shibaInu).transfer(matchmaker, reward);
-        reward = getMatchMakerRewardLeash();
-        matchmakerRewardLeash = matchmakerRewardLeash.sub(reward);
-        IERC20(leash).transfer(matchmaker, reward);
-    }
-
-    function getFees(uint256 cost) public pure returns (uint256 _burn, uint256 _mmkr, uint256 _dev, uint256 _arena) {
-        //25% burn
+    function getFees(uint256 cost) public pure returns (uint256 _burn, uint256 _dev, uint256 _arena) {
+        // 25% burn
         _burn = cost.ratio(25, 100);
-        // 3% to matchmaking
-        _mmkr = cost.ratio(3, 100);
-        // 22% to dev
+        // 25% to dev
         _dev = cost.ratio(22, 100);
         // rest to arena winners
-        _arena = cost.sub(_burn).sub(_mmkr).sub(_dev);
+        _arena = cost.sub(_burn).sub(_dev);
     }
 
     // BUY DOGE FROM SHOP
