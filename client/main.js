@@ -150,7 +150,6 @@ async function getCardContent(id, data, userPowerTreats, shibaMaxHp, canFight, u
                 card += `This doge can not fight.</br>`;
             } else {
                 card += `This doge is waiting for a match.</br>`;
-                card += `<button id="btn-unqueue-${id}" class="btn btn-primary btn-block" onClick="unqueue(${id})">Unqueue</button>`;
             }
         }
         let isLeashed = await arenaContract.methods.isLeashed(id).call({from : ethereum.selectedAddress});
