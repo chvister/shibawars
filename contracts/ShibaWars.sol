@@ -3,8 +3,6 @@ pragma solidity ^0.8.0;
 import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./ShibaMath.sol";
 import "./ShibaWarsUtils.sol";
-import "./IShibaWarsArena.sol";
-import "./IShibaWarsFactory.sol";
 import "./ShibaWarsEntity.sol";
 
 contract ShibaWars is ERC721 {
@@ -217,14 +215,6 @@ contract ShibaWars is ERC721 {
 
     function getUserTreatTokens(address user) public view returns (uint) {
         return shibaTreats[user];
-    }
-
-    function getArenaQueueLength() public view returns (uint256 out) {
-        return IShibaWarsArena(shibaWarsArena).getArenaQueueLength();
-    }
-
-    function payMatchmaker(address matchmaker) public isShibaWars(msg.sender) {
-        IShibaWarsFactory(factoryAddress).payMatchmaker(matchmaker);
     }
 
     function startSeason() public isDev(msg.sender) {

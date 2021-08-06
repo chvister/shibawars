@@ -48,14 +48,16 @@ contract ShibaWarsArena {
         shibaWars = IShibaWars(shibaWars_);
     }
 
-    function queueToArena(uint tokenId) public isSeason() {
+    function queueToArena(uint tokenId) public isSeason() hasOpponent(tokenId) {
         checkCanFight(tokenId);
         ShibaWarsEntity.Doge memory _doge = shibaWars.getTokenDetails(tokenId);
-        if(arenaQueue[_doge.arenaScore / LEAGUE_DIVISOR] == 0) {
+        uint enemyId = arenaQueue[_doge.arenaScore / LEAGUE_DIVISOR];
+        if(enemyId == 0) {
             shibaWars.setInArena(tokenId, 1);
             arenaQueue[_doge.arenaScore / LEAGUE_DIVISOR] = tokenId;
         } else {
-            fight(tokenId, arenaQueue[_doge.arenaScore / LEAGUE_DIVISOR], msg.sender, 1);
+            fight(tokenId, enemyId);
+            shibaWars.setInArena(enemyId, 0);
             arenaQueue[_doge.arenaScore / LEAGUE_DIVISOR] = 0;
         }
     }
@@ -70,7 +72,7 @@ contract ShibaWarsArena {
         require(_shiba.hitPoints > 1, "Shiba Wars: THIS DOGE IS TOO EXHAUSTED");
     }
 
-    function fight(uint256 firstShiba, uint256 secondShiba, address matchmaker, uint8 matches) private isSeason() {
+    function fight(uint256 firstShiba, uint256 secondShiba) private isSeason() {
         require(shibaWars.ownerOf(firstShiba) != shibaWars.ownerOf(secondShiba), "Shiba Wars: CAN NOT FIGHT YOUR OWN DOGE");
         ShibaWarsEntity.Doge memory attacker;
         ShibaWarsEntity.Doge memory defender;
@@ -128,8 +130,6 @@ contract ShibaWarsArena {
                 winner = 2;
             }
         }
-        // pay fee to matchmaker
-        shibaWars.payMatchmaker(matchmaker);
         if(winner == 1) {
             uint256 score = scoreReward(attacker.arenaScore, defender.arenaScore);
             uint attNewScore = attacker.arenaScore.add(score);

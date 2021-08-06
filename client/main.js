@@ -1,9 +1,9 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const SHIBA_WARS = "0xcbe28aAAe9cE6a74D838c286ebEA5976d8544Df1";
-const ARENA = "0xf60774202799d22049B733fDD9cD2B0635BB9B9C";
-const FACTORY = "0xe25Be3dD4A1616504eA0191eB1eC8228Ddb87F6E";
+const SHIBA_WARS = "0xf7060ADE1042d5B83F981AAD6F0181993953c51a";
+const ARENA = "0x1dD1bF3E4d0fcB0102F72e6CC12b2Fea7E84137D";
+const FACTORY = "0x5f5Dce46BE8ed1B58dC6DAA7Ac85ff278FC27b7C";
 
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const LEASH_ADDRESS = "0x70bE14767cC790a668BCF6d0E6B4bC815A1bCf05";
@@ -378,7 +378,7 @@ async function feed(shibaId) {
 
 async function queueToArena(shibaId) {
     let contract = await getArenaContract();
-    contract.methods.queueToArena(shibaId).send({from: ethereum.selectedAddress, gasLimit: 150000})
+    contract.methods.queueToArena(shibaId).send({from: ethereum.selectedAddress, gasLimit: 300000})
         .on("receipt", (async (receipt) => {
             if(receipt.events["ArenaFight"] != null) {
                 let event = receipt.events["ArenaFight"].returnValues;
@@ -387,9 +387,17 @@ async function queueToArena(shibaId) {
                 $("#attacker-info").html(`${getName(attacker.tokenId)} #${event["attackerId"]}`);
                 $("#defender-info").html(`${getName(defender.tokenId)} #${event["defenderId"]}`);
                 if(event["outcome"] == 1) {
-                    $("#who-won").html("Attacker won")
+                    if(attacker.id == shibaId) {
+                        $("#who-won").html("You won")
+                    } else {
+                        $("#who-won").html("Attacker won")
+                    }
                 } else if(event["outcome"] == 2) {
-                    $("#who-won").html("Defender won")
+                    if(defender.id == shibaId) {
+                        $("#who-won").html("You won")
+                    } else {
+                        $("#who-won").html("Defender won")
+                    }
                 } else {
                     $("#who-won").html("It was a draw!")
                 }
