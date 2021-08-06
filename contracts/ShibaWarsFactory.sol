@@ -106,7 +106,7 @@ contract ShibaWarsFactory {
         // 25% burn
         _burn = cost.ratio(25, 100);
         // 25% to dev
-        _dev = cost.ratio(22, 100);
+        _dev = cost.ratio(25, 100);
         // rest to arena winners
         _arena = cost.sub(_burn).sub(_dev);
     }

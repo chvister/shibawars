@@ -1,9 +1,9 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const SHIBA_WARS = "0x512D62de1Df56D89d3433D8F277C3eFEF0d5AAE9";
-const ARENA = "0xcB3f3B6eE4a60bE1c37eE38364f5b4F79330433a";
-const FACTORY = "0x04e0377E627d6155A153bc0AA91A32C6eFf5d882";
+const SHIBA_WARS = "0xcbe28aAAe9cE6a74D838c286ebEA5976d8544Df1";
+const ARENA = "0xf60774202799d22049B733fDD9cD2B0635BB9B9C";
+const FACTORY = "0xe25Be3dD4A1616504eA0191eB1eC8228Ddb87F6E";
 
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const LEASH_ADDRESS = "0x70bE14767cC790a668BCF6d0E6B4bC815A1bCf05";
@@ -81,9 +81,7 @@ async function renderGame(){
     for(dogeId of userTokens) {
         let data = await shibaWars.methods.getTokenDetails(dogeId).call({from: ethereum.selectedAddress});
         let canFight = await arenaContract.methods.canFight(dogeId).call({from: ethereum.selectedAddress});
-        let dogesInArena = await arenaContract.methods.getArenaQueueLength().call({from: ethereum.selectedAddress});
-        let myDoges = await arenaContract.methods.myDogesInArena().call({from: ethereum.selectedAddress});
-        await renderShiba(dogeId, data, userPowerTreats, (parseFloat(data.strength) * 5) + 5000, canFight, userTokens, dogesInArena, myDoges, userLeashes);
+        await renderShiba(dogeId, data, userPowerTreats, (parseFloat(data.strength) * 5) + 5000, canFight, userTokens, userLeashes);
     }
 
 }
@@ -103,17 +101,17 @@ async function filterLeashes(userTokens) {
     return userLeashes;
 }
 
-async function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight, userTokens, dogesInArena, myDoges, userLeashes) {
+async function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight, userTokens, userLeashes) {
     // 13 doge pack
     let card = `<div class="col-md-4 card" id="pet-${id}"></div>`
 
     let element = $.parseHTML(card);
 
     $("#doges-row").append(element);
-    $(`#pet-${id}`).html(await getCardContent(id, data, userPowerTreats, shibaMaxHp, canFight, userTokens, dogesInArena, myDoges, userLeashes));
+    $(`#pet-${id}`).html(await getCardContent(id, data, userPowerTreats, shibaMaxHp, canFight, userTokens, userLeashes));
 }
 
-async function getCardContent(id, data, userPowerTreats, shibaMaxHp, canFight, userTokens, dogesInArena, myDoges, userLeashes) {
+async function getCardContent(id, data, userPowerTreats, shibaMaxHp, canFight, userTokens, userLeashes) {
     let leashedDogeId = 0;
     let card = 
     `<img class="card-img-top" src="img/token-${data.tokenId}.png">
@@ -145,9 +143,6 @@ async function getCardContent(id, data, userPowerTreats, shibaMaxHp, canFight, u
             card += `<button id="btn-queue-${id}" class="btn btn-primary btn-block" onClick="queueToArena(${id})">Queue to arena</button>`;
             let adventureLevel = parseInt(await arenaContract.methods.getAdventureLevel(id).call({from: ethereum.selectedAddress})) + 1;
             card += `<button id="btn-adventure-${id}" class="btn btn-primary btn-block" onclick="goOnAdventure(${id})">Find an adventure (level ${adventureLevel})</button>`;
-            if(dogesInArena > myDoges) {
-                card += `<button id="btn-matchmake-${id}" class="btn btn-primary btn-block" onClick="matchmake(${id})">Find a match</button>`;
-            }
         } else {
             if(data.hitPoints == 1) {
                 card += `This doge is too exhausted to fight.</br>`;
@@ -214,9 +209,7 @@ async function updateShiba(dogeId) {
     let userPowerTreats = await shibaWars.methods.getUserTreatTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
     let data = await shibaWars.methods.getTokenDetails(dogeId).call({from: ethereum.selectedAddress});
     let canFight = await arenaContract.methods.canFight(dogeId).call({from: ethereum.selectedAddress});
-    let dogesInArena = await arenaContract.methods.getArenaQueueLength().call({from: ethereum.selectedAddress});
-    let myDoges = await arenaContract.methods.myDogesInArena().call({from: ethereum.selectedAddress});
-    let content = await getCardContent(dogeId, data, userPowerTreats, (parseFloat(data.strength) * 5) + 5000, canFight, userTokens, dogesInArena, myDoges, userLeashes);
+    let content = await getCardContent(dogeId, data, userPowerTreats, (parseFloat(data.strength) * 5) + 5000, canFight, userTokens, userLeashes);
     $(`#pet-${dogeId}`).html(content);
 }
 
@@ -226,9 +219,7 @@ async function addShiba(dogeId) {
     let userPowerTreats = await shibaWars.methods.getUserTreatTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
     let data = await shibaWars.methods.getTokenDetails(dogeId).call({from: ethereum.selectedAddress});
     let canFight = await arenaContract.methods.canFight(dogeId).call({from: ethereum.selectedAddress});
-    let dogesInArena = await arenaContract.methods.getArenaQueueLength().call({from: ethereum.selectedAddress});
-    let myDoges = await arenaContract.methods.myDogesInArena().call({from: ethereum.selectedAddress});
-    await renderShiba(dogeId, data, userPowerTreats, (parseFloat(data.strength) * 5) + 5000, canFight, userTokens, dogesInArena, myDoges, userLeashes);
+    await renderShiba(dogeId, data, userPowerTreats, (parseFloat(data.strength) * 5) + 5000, canFight, userTokens, userLeashes);
 }
 
 async function syncTokens() {
@@ -269,32 +260,8 @@ async function updateBalances() {
         $("#leash-prizepool").html(0)
     }
 
-    let matchmaker = await factoryContract.methods.getMatchMakerReward().call({from: ethereum.selectedAddress});
-    if(matchmaker != 0) {
-        $("#shib-matchmaker").html(numberWithCommas(matchmaker.substring(0, matchmaker.length - 18)));
-    } else {
-        $("#shib-matchmaker").html(0);
-    }
-
-    matchmaker = await factoryContract.methods.getMatchMakerRewardLeash().call({from: ethereum.selectedAddress});
-    if(matchmaker != 0) {
-        var first = numberWithCommas(matchmaker.substring(0, matchmaker.length - 18));
-        $("#leash-matchmaker").html((first.length == 0 ? "0" : first) +","+ matchmaker.substring(matchmaker.length - 18, matchmaker.length - 14));
-    } else {
-        $("#leash-matchmaker").html(0);
-    }
-
     let userPowerTreats = await shibaWars.methods.getUserTreatTokens(ethereum.selectedAddress).call({from: ethereum.selectedAddress});
     $("#stt-balance").html(numberWithCommas(userPowerTreats));
-
-    let arenaQueueLength = await arenaContract.methods.getArenaQueueLength().call({from: ethereum.selectedAddress});
-    if(arenaQueueLength <= 1) {
-        $("#btn-matchmake").hide();
-    } else {
-        $("#btn-matchmake").show();
-    }
-
-    $("#in-arena").html(arenaQueueLength);
 }
 
 function ksAndMs(number) {
@@ -413,45 +380,29 @@ async function feed(shibaId) {
 async function queueToArena(shibaId) {
     let contract = await getArenaContract();
     contract.methods.queueToArena(shibaId).send({from: ethereum.selectedAddress, gasLimit: 150000})
-        .on("receipt", (() => {
-            updateShiba(shibaId);
-            updateBalances();
-        }));
-}
-
-async function unqueue(shibaId) {
-    let contract = await getArenaContract();
-    contract.methods.unqueue(shibaId).send({from: ethereum.selectedAddress, gasLimit: 150000})
-        .on("receipt", (() => {
-            updateShiba(shibaId);
-            updateBalances();
-        }));
-}
-
-async function matchmake(shibaId) {
-    let contract = await getArenaContract();
-    contract.methods.matchmake(shibaId).send({from: ethereum.selectedAddress, gasLimit: 400000})
         .on("receipt", (async (receipt) => {
-            let event = receipt.events["ArenaFight"].returnValues;
-            let attacker = await shibaWars.methods.getTokenDetails(event["attackerId"]).call({from: ethereum.selectedAddress});
-            let defender = await shibaWars.methods.getTokenDetails(event["defenderId"]).call({from: ethereum.selectedAddress});
-            $("#attacker-info").html(`${getName(attacker.tokenId)} #${event["attackerId"]}`);
-            $("#defender-info").html(`${getName(defender.tokenId)} #${event["defenderId"]}`);
-            if(event["outcome"] == 1) {
-                $("#who-won").html("Attacker won")
-            } else if(event["outcome"] == 2) {
-                $("#who-won").html("Defender won")
-            } else {
-                $("#who-won").html("It was a draw!")
+            if(receipt.events["ArenaFight"] != null) {
+                let event = receipt.events["ArenaFight"].returnValues;
+                let attacker = await shibaWars.methods.getTokenDetails(event["attackerId"]).call({from: ethereum.selectedAddress});
+                let defender = await shibaWars.methods.getTokenDetails(event["defenderId"]).call({from: ethereum.selectedAddress});
+                $("#attacker-info").html(`${getName(attacker.tokenId)} #${event["attackerId"]}`);
+                $("#defender-info").html(`${getName(defender.tokenId)} #${event["defenderId"]}`);
+                if(event["outcome"] == 1) {
+                    $("#who-won").html("Attacker won")
+                } else if(event["outcome"] == 2) {
+                    $("#who-won").html("Defender won")
+                } else {
+                    $("#who-won").html("It was a draw!")
+                }
+                $("#attacker-damage").html(parseFloat(event["attackerDamage"]) / 100);
+                $("#defender-damage").html(parseFloat(event["defenderDamage"]) / 100);
+                if(event["defenderDamage"] == 0) {
+                    $("#additional-info").html("Defender fainted.");
+                } else if (event["defenderDamage"] < event["attackerDamage"] && event["outcome"] == 2) {
+                    $("#additional-info").html("Attacker fainted.");
+                }
+                $("#btn-show-fight").click()
             }
-            $("#attacker-damage").html(parseFloat(event["attackerDamage"]) / 100);
-            $("#defender-damage").html(parseFloat(event["defenderDamage"]) / 100);
-            if(event["defenderDamage"] == 0) {
-                $("#additional-info").html("Defender fainted.");
-            } else if (event["defenderDamage"] < event["attackerDamage"] && event["outcome"] == 2) {
-                $("#additional-info").html("Attacker fainted.");
-            }
-            $("#btn-show-fight").click()
             updateShiba(shibaId);
             updateBalances();
         }));
@@ -467,15 +418,6 @@ async function unleash(shibaId) {
             syncTokens();
         }));
 }
-
-async function createMatch() {
-    let contract = await getArenaContract();
-    contract.methods.matchmake().send({from: ethereum.selectedAddress, gasLimit: 400000})
-        .on("receipt", (() => {
-            renderGame();
-        }));
-}
-
 
 async function openPack(shibaId) {
     let contract = await getFactoryContract();
@@ -753,10 +695,6 @@ $("#btn-approve-shib").click( () => {
 
 $("#btn-approve-leash").click( () => { 
     approveLeash();
-})
-
-$("#btn-matchmake").click( () => { 
-    createMatch();
 })
 
 $("#btn-end-league").click( () => { 
