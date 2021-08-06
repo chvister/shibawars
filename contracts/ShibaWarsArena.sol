@@ -324,7 +324,7 @@ contract ShibaWarsArena {
         }
         uint reward = 0;
         if(winner == 1) {
-            uint newScore = _doge.arenaScore.add(adventureLevel);
+            uint newScore = _doge.arenaScore.add(adventureLevel.sqrt());
             reward = abi.encodePacked(block.timestamp, block.difficulty, newScore).random(adventureLevel.mul(30000), adventureLevel.mul(60000));
             ++adventures[dogeId];
             shibaWars.addTreats(msg.sender, reward);
