@@ -10,11 +10,11 @@ library ShibaWarsUtils {
     uint constant OG_SHIBA = 4;
     uint constant SHIBA_WARLORD = 5;
     uint constant SHIBA_GENERAL = 6;
-    uint constant WATCHDOG = 7;
-    uint constant DOGE_KILLER = 8;
-    uint constant SHIBA_INU = 9;
-    uint constant AKITA_INU = 10;
-    uint constant SANSHU_INU = 11;
+    uint constant DOGE_KILLER = 7;
+    uint constant AGGRESIVE_SHIBA_INU = 8;
+    uint constant BORED_SHIBA_INU = 9;
+    uint constant SHIBA_INU = 10;
+    uint constant AGGRESIVE_SHIBA_PUP = 11;
     uint constant SHIBA_PUP = 12;
     uint constant LUCKY_DOGE_PACK_GEN_1 = 13;
     uint constant DOGE_FATHER = 14;
@@ -43,15 +43,15 @@ library ShibaWarsUtils {
             return 200;
         } else if (tokenId == SHIBA_GENERAL) {
             return 175;
-        } else if (tokenId == WATCHDOG) {
-            return 200;
         } else if (tokenId == DOGE_KILLER) {
+            return 200;
+        } else if (tokenId == AGGRESIVE_SHIBA_INU) {
             return 180;
-        } else if (tokenId == SHIBA_INU) {
+        } else if (tokenId == BORED_SHIBA_INU) {
             return 160;
-        } else if (tokenId == AKITA_INU) {
+        } else if (tokenId == SHIBA_INU) {
             return 140;
-        } else if (tokenId == SANSHU_INU) {
+        } else if (tokenId == AGGRESIVE_SHIBA_PUP) {
             return 120;
         } else if (tokenId == SHIBA_PUP) {
             return 100;
@@ -86,15 +86,15 @@ library ShibaWarsUtils {
     }
 
     function getTokenPrice(uint tokenId) public pure returns (uint256) {
-        if (tokenId == WATCHDOG) {
+        if (tokenId == DOGE_KILLER) {
             return tokens(millions(100));
-        } else if (tokenId == DOGE_KILLER) {
+        } else if (tokenId == AGGRESIVE_SHIBA_INU) {
             return tokens(millions(20));
-        } else if (tokenId == SHIBA_INU) {
+        } else if (tokenId == BORED_SHIBA_INU) {
             return tokens(millions(10));
-        } else if (tokenId == AKITA_INU) {
+        } else if (tokenId == SHIBA_INU) {
             return tokens(millions(5));
-        } else if (tokenId == SANSHU_INU) {
+        } else if (tokenId == AGGRESIVE_SHIBA_PUP) {
             return tokens(millions(25) / 10);
         } else if (tokenId == SHIBA_PUP) {
             return tokens(thousand(500));
@@ -132,13 +132,13 @@ library ShibaWarsUtils {
             tokenId = ShibaWarsUtils.GOLDEN_DOGE;
         } else if (number < 1500) {
             // shiba inu
-            tokenId = ShibaWarsUtils.SHIBA_INU;
+            tokenId = ShibaWarsUtils.AGGRESIVE_SHIBA_INU;
         } else if (number < 3000) {
             // akita inu
-            tokenId = ShibaWarsUtils.AKITA_INU; 
+            tokenId = ShibaWarsUtils.SHIBA_INU; 
         } else if (number < 5500) {
             // sanshu inu
-            tokenId = ShibaWarsUtils.SANSHU_INU;
+            tokenId = ShibaWarsUtils.AGGRESIVE_SHIBA_PUP;
         } else {
             // shiba pup
             tokenId = ShibaWarsUtils.SHIBA_PUP;

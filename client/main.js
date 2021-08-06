@@ -352,8 +352,8 @@ async function levelUp(shibaId) {
     let contract = await getContract();
     contract.methods.levelUp(shibaId).send({from: ethereum.selectedAddress, gasLimit: 125000})
         .on("receipt", (() => {
-            updateShiba(shibaId);
             updateBalances();
+            syncTokens();
         }));
 }
 
@@ -443,11 +443,12 @@ async function buyLeash(tokenId){
         }));
 }
 
-async function buyTreatTokens(){
+async function buyTreats(){
     let contract = await getFactoryContract();
     contract.methods.buyTreats(treatsToBuy).send({from:  ethereum.selectedAddress})
         .on("receipt", (() => {
             updateBalances();
+            syncTokens();
         }));
 }
 
@@ -584,15 +585,15 @@ function getDescription(tokenId) {
     } else if (tokenId == 6) {
         return "One bark, and they are in the battle.";
     } else if (tokenId == 7) {
-        return "This is not a shiba. But a small cute doge needs a big strong DOG to defend it.";
+        return "All doges are family. But this is a doge killer.";
     } else if (tokenId == 8) {
-        return "Put the doge on the leash. Even though the doges hold together, Doge Killer is true to its beliefs.";
+        return "Somebody did something to this shiba.";
     } else if (tokenId == 9) {
-        return "Just look at it! How can you not want to own them all?";
+        return "Somebody queue him to arena or something...";
     } else if (tokenId == 10) {
-        return "A copy cat? NO! Just another cute Inu family member!";
+        return "A regular dog, ready to fight";
     } else if (tokenId == 11) {
-        return "Do you even know this one? If you don't, just look at it!";
+        return "A small cute doggo, but you should better stay away!";
     } else if (tokenId == 12) {
         return "AWWWWWWWWWWWWWWWWWW";
     } else if (tokenId == 13) {
@@ -600,7 +601,7 @@ function getDescription(tokenId) {
     } else if (tokenId == 14) {
         return "A friend should always underestimate your virtues and an enemy overestimate your faults.";
     } else if (tokenId == 15) {
-        return "We all are in it. AND THIS ONE IS GOLDEN!";
+        return "A member of very rare race of golden shiba inus";
     } else if (tokenId == 16) {
         return "The one who took us under their wings. Ryoshi.";
     } else if (tokenId == 17) {
@@ -631,15 +632,15 @@ function getName(tokenId) {
     } else if (tokenId == 6) {
         return "Shib General";
     } else if (tokenId == 7) {
-        return "Watchdog";
-    } else if (tokenId == 8) {
         return "Doge Killer";
+    } else if (tokenId == 8) {
+        return "Aggresive Shiba Inu";
     } else if (tokenId == 9) {
-        return "Shiba Inu";
+        return "Bored Shiba Inu";
     } else if (tokenId == 10) {
-        return "Akita Inu";
+        return "Shiba Inu";
     } else if (tokenId == 11) {
-        return "Sanshu Inu";
+        return "Aggresive Shiba Pup";
     } else if (tokenId == 12) {
         return "Shib Pup";
     } else if (tokenId == 13) {
@@ -685,7 +686,7 @@ $("#buy-stt-form").on('input', function (e) {
 });
 
 $("#btn-buy-treat-tokens").click( () => { 
-    buyTreatTokens();
+    buyTreats();
 });
 
 $("#btn-approve-shib").click( () => { 
