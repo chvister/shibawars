@@ -22,8 +22,6 @@ public class Main {
 		final int shibasLength = Objects.requireNonNull(new File(shibas).list()).length;
 		final int chainsLength = Objects.requireNonNull(new File(chains).list()).length;
 
-		int imageIndex = 0;
-
 		for (int bgI = 0; bgI < backgroundsLength; ++bgI) {
 			for (int shibaI = 0; shibaI < shibasLength; ++shibaI) {
 				for (int chainI = 0; chainI < chainsLength; ++chainI) {
@@ -43,7 +41,7 @@ public class Main {
 					g.dispose();
 
 					// Save as new image
-					ImageIO.write(combined, "PNG", new File(output, imageIndex++ + ".png"));
+					ImageIO.write(combined, "PNG", new File(output, String.format("%d%d%d.png", bgI, shibaI, chainI)));
 				}
 			}
 		}
