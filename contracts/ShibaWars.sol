@@ -12,11 +12,14 @@ contract ShibaWars is ERC721 {
     using ShibaMath for uint64;
     using ShibaMath for uint256;
     using ShibaMath for bytes;
+    using Strings for uint256;
 
     // addresses
     address private devAddress;
     address private shibaWarsArena;
     address private factoryAddress;
+
+    string constant baseURI = "https://ipfs.io/ipfs/Qmf4ngHHgzmuRCYXCpVytwr9UsqPonLPK2urmy8faGo1Bu/token_metadata/";
     
     // info about tokens
     uint256 private nextId = 1;
@@ -73,6 +76,12 @@ contract ShibaWars is ERC721 {
                 ShibaWarsUtils.getMaxHp((uint64)(strength)));
         _safeMint(owner, nextId);
         ++nextId;
+    }
+
+    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+        require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
+        ShibaWarsEntity.Doge memory _doge = getTokenDetails(tokenId);
+        return string(abi.encodePacked(baseURI, (uint256)(_doge.tokenId).toString(), ".json"));
     }
 
     // SETS ADDRESS OF ARENA CONTRACT. CAN ONLY BE CALLED BY DEV

@@ -1,9 +1,9 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const SHIBA_WARS = "0xf7060ADE1042d5B83F981AAD6F0181993953c51a";
-const ARENA = "0x1dD1bF3E4d0fcB0102F72e6CC12b2Fea7E84137D";
-const FACTORY = "0x5f5Dce46BE8ed1B58dC6DAA7Ac85ff278FC27b7C";
+const SHIBA_WARS = "0xA01d4bE9eF58165246AD4Ff344d8C2dd6bF3D566";
+const ARENA = "0x93B1CCebC2f52949Ab6c697813B3E43Ea48073c2";
+const FACTORY = "0xf282F2004124990118cbc91B1cDF829090e63491";
 
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const LEASH_ADDRESS = "0x70bE14767cC790a668BCF6d0E6B4bC815A1bCf05";
@@ -113,12 +113,17 @@ async function renderShiba(id, data, userPowerTreats, shibaMaxHp, canFight, user
 
 async function getCardContent(id, data, userPowerTreats, shibaMaxHp, canFight, userTokens, userLeashes) {
     let leashedDogeId = 0;
+    let jsonURL = await getTokenURI(id);
+    let response = await fetch(jsonURL);
+    let json = await response.json()
+    let imageURL = json["image"];
+    console.log(imageURL)
     let card = 
-    `<img class="card-img-top" src="img/token-${data.tokenId}.png">
+    `<img class="card-img-top" src="${imageURL}">
     <div class="card-body">
         <div>Id: <span class="doge-id">${id}</span></div>
-        <div>Name: <span class="doge-name">${getName(data.tokenId)}</span></div>
-        <div>Description: <span class="doge-description">${getDescription(data.tokenId)}</span></div>`;
+        <div>Name: <span class="doge-name">${json["name"]}</span></div>
+        <div>Description: <span class="doge-description">${json["description"]}</span></div>`;
     if(data.tokenId != 13 && data.tokenId < 17) {
         card += `<div>Level: <span class="doge-level">${data.level}</span></div>
         <div>Strength: <span class="doge-strength">${parseFloat (data.strength) / 100}</span></div>
@@ -426,6 +431,11 @@ async function unleash(shibaId) {
         }));
 }
 
+async function getTokenURI(shibaId) {
+    let contract = await getContract();
+    return contract.methods.tokenURI(shibaId).call({from: ethereum.selectedAddress})
+}
+
 async function openPack(shibaId) {
     let contract = await getFactoryContract();
     contract.methods.openPack(shibaId).send({from: ethereum.selectedAddress, gasLimit: 350000})
@@ -439,6 +449,7 @@ async function buyDoge(tokenId){
     let contract = await getFactoryContract();
     contract.methods.buyDoge(tokenId).send({from:  ethereum.selectedAddress, gasLimit: 500000})
         .on("receipt", (() => {
+            updateBalances();
             syncTokens();
         }));
 }
@@ -447,6 +458,7 @@ async function buyLeash(tokenId){
     let contract = await getFactoryContract();
     contract.methods.buyLeash(tokenId).send({from:  ethereum.selectedAddress, gasLimit: 500000})
         .on("receipt", (() => {
+            updateBalances();
             syncTokens();
         }));
 }
@@ -575,53 +587,6 @@ async function filter(tokenId) {
         $("#filter-text").html(getName(tokenId));
     }
     filterId = tokenId;
-}
-
-function getDescription(tokenId) {
-    if (tokenId == 0) {
-        return "Altough he's not a shiba, do not mess with him. The warden of order.";
-    } else if (tokenId == 1) {
-        return "She may be cute, but she will get you. Beware, she bites.";
-    } else if (tokenId == 2) {
-        return "The one who has power over all the dogs. We look up to you and believe in you.";
-    } else if (tokenId == 3) {
-        return "The true holders of the ShibArmy.";
-    } else if (tokenId == 4) {
-        return "They were here since the beginning. The true loyal ones.";
-    } else if (tokenId == 5) {
-        return "Altough they may not be recognized, they do lead the ShibArmy forward.";
-    } else if (tokenId == 6) {
-        return "One bark, and they are in the battle.";
-    } else if (tokenId == 7) {
-        return "All doges are family. But this is a doge killer.";
-    } else if (tokenId == 8) {
-        return "Somebody did something to this shiba.";
-    } else if (tokenId == 9) {
-        return "Somebody queue him to arena or something...";
-    } else if (tokenId == 10) {
-        return "A regular dog, ready to fight";
-    } else if (tokenId == 11) {
-        return "A small cute doggo, but you should better stay away!";
-    } else if (tokenId == 12) {
-        return "AWWWWWWWWWWWWWWWWWW";
-    } else if (tokenId == 13) {
-        return "Open for a chance to get a very rare Doge, including the WoofMeister themself.";
-    } else if (tokenId == 14) {
-        return "A friend should always underestimate your virtues and an enemy overestimate your faults.";
-    } else if (tokenId == 15) {
-        return "A member of very rare race of golden shiba inus";
-    } else if (tokenId == 16) {
-        return "The one who took us under their wings. Ryoshi.";
-    } else if (tokenId == 17) {
-        return "Increases the stats of your doge in fight by 15%";
-    } else if (tokenId == 18) {
-        return "Increases the stats of your doge in fight by 20%";
-    } else if (tokenId == 19) {
-        return "Increases the stats of your doge in fight by 25%";
-    }  else if (tokenId == 20) {
-        return "Increases the stats of your doge in fight by 30%";
-    }
-    return "";
 }
 
 function getName(tokenId) {
