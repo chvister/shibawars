@@ -28,7 +28,7 @@ for row in fileReader :
 
 	for tnx in row :
 
-		currentItem = str(tnx).encode('utf-8')
+		currentItem = (str(tnx)[2:]).encode('utf-8')
 		storeHash.append(sha256(currentItem).hexdigest())
 
 		# calculate hash row wise and save them in the storeHash

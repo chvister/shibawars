@@ -24,8 +24,9 @@ contract ShibaWarsFactory {
     uint256 private arenaRewardLeash;
     uint256 private devRewardLeash;
     uint256 private burnAmountLeash;
-    // max rewards so first does not take all
+
     uint256 constant SEASON_DURATION = 90 * 24 * 60 * 60;
+    bytes32 constant merkleRoot = 0x4f0d17494dd5d193866f8754325e611c13e421410b7518ddba91c95aee116d5e;
 
     modifier isSeason() {
         require(block.timestamp >= IShibaWars(shibaWars).seasonStart() && block.timestamp <= IShibaWars(shibaWars).seasonStart() + SEASON_DURATION,
@@ -199,5 +200,29 @@ contract ShibaWarsFactory {
         IERC20(shibaInu).burn(IERC20(shibaInu).balanceOf(address(this)));
         IERC20(leash).transfer(0x000000000000000000000000000000000000dEaD, IERC20(shibaInu).balanceOf(address(this)));
     }
+
+    function getMerkleProof(address account, uint8 tokenId) public pure returns (bytes memory) {
+        return abi.encodePacked(account, tokenId);
+    }
+
+    function checkProof(address account, uint8 tokenId, bytes32 hash) public pure returns (bool) {
+        bytes memory proof = getMerkleProof(account, tokenId);
+        bytes32 el;
+        bytes32 h = hash;
+
+        for (uint256 i = 32; i <= proof.length; i += 32) {
+            assembly {
+                el := mload(add(proof, i))
+            }
+
+            if (h < el) {
+                h = keccak256(abi.encodePacked(h, el));
+            } else {
+                h = keccak256(abi.encodePacked(el, h));
+            }
+        }
+
+        return h == merkleRoot;
+  }
 
 }
