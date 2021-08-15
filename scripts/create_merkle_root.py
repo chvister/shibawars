@@ -6,14 +6,19 @@ next feature, how to validate a single data point without traversing the whole f
 
 SOURCE CODE FROM https://github.com/anudishjain/Merkle-Tree/blob/master/MerkleScript.py
 
+original source code updated because hashlib uses different hashing than ethereum's keccak256
+
+ALSO THE ORIGINAL CODE NOT WORKING LOL
+
 '''
 
+import json
 from csv import *
-from hashlib import * 
+from web3 import Web3
+import time
 
 filePath = "./airdrop2.csv"
 # absolute or relative path to the csv file containing the transactions or data '''
-
 
 fileOpen = open(filePath, 'rU')
 # opening the file for reading in Universal NewLine (rU) 
@@ -24,15 +29,22 @@ fileReader = reader(fileOpen)
 storeHash = []
 # list to store the hashes as they are calculated
 
+parents = {}
+siblings = {}
+
+i = 0
+
 for row in fileReader :
 
 	for tnx in row :
-
-		currentItem = (str(tnx)[2:]).encode('utf-8')
-		storeHash.append(sha256(currentItem).hexdigest())
+	
+		end = str(tnx).__len__() - 1
+		hash = Web3.keccak(hexstr = str(tnx)[:end])
+		storeHash.append(hash)
+		i += 1
+		print('{} hashes added'.format(i))
 
 		# calculate hash row wise and save them in the storeHash
-
 
 if (len(storeHash) % 2 != 0) :
 	storeHash.append(storeHash[-1])
@@ -42,33 +54,75 @@ if (len(storeHash) % 2 != 0) :
 	so if the number of inputs from CSV are odd, we duplicate the last record's hash in the list
 	'''
 
+operations = 0
+total = 0
+
+startTotal = time.time()
 
 while (len(storeHash)> 1) : 
 	# we run the loop till we don't get a single hash
 
-	j = 0
+	start = time.time() * 1000
 
-	for i in range(0, len(storeHash) - 1) : 
+	for i in range(0, len(storeHash) - 1, 2) : 
 
-		storeHash[j] = sha256(str(storeHash[i] + storeHash[i+1]).encode('utf-8')).hexdigest()
+		hash = Web3.keccak(storeHash[i] + storeHash[i+1])
+		parents[storeHash[i].hex()] = hash.hex()
+		parents[storeHash[i+1].hex()] = hash.hex()
+		siblings[storeHash[i].hex()] = storeHash[i+1].hex()
+		siblings[storeHash[i+1].hex()] = storeHash[i].hex()
+		storeHash[i // 2] = hash
 		# hash of the i th leaf and i + 1 th leaf are concatenated
 		# to find the hash parent to the both
-		
-		i += 2
-		j += 1
 
+	del storeHash[-len(storeHash)//2:]
 
-	lastDelete = i - j;
-
-	del storeHash[-lastDelete:];
+	operations += 1
+	elapsed = (time.time() * 1000) - start
+	total += elapsed
+	average = total / operations
+	reamining = len(storeHash)
+	secs = (average * reamining) / 1000
+	print('Hash eliminated in {} millis. {} hashes remaining. Average {} millis per hash. Estimated {} seconds ({} minutes) remaining'.format(elapsed, reamining, average, secs, secs / 60))
 	# as we now have the hash to the upper level of the tree, we delete the extra space in the array.
 	# in each iteration of this loop the size of the storeHash list is halved.
-
 
 merkleFile = open('merkle.csv', 'w')
 # create the file for saving the merkle root
 
+#print testing sequence
+root = storeHash[0].hex()
+hash = "0x46bfa01cd74df005bb90c4600b4b53e4a05d0d5dfc5e3bf736f76be4294ad067"
+
+i = 0
+
+print("Test sequence:")
+
+while(hash != root):
+	print(hash)
+	if(i % 2 == 0):
+		hash = siblings[hash] 
+	else:
+		hash = parents[hash]
+	i += 1
+
+print(hash)
+
+jsonString = json.dumps(parents)
+jsonFile = open("./parents.json", "w")
+jsonFile.write(jsonString)
+jsonFile.close()
+
+jsonString = json.dumps(siblings)
+jsonFile = open("./siblings.json", "w")
+jsonFile.write(jsonString)
+jsonFile.close()
+
+print('Finished in {} seconds.'.format(time.time() - startTotal))
+
 write = writer(merkleFile)
 
 write.writerow(storeHash)
+
+print('merkle root: {}'.format(storeHash))
 # write to the file in simple text mode

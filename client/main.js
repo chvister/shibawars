@@ -1,9 +1,9 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const SHIBA_WARS = "0xaE6f2a616EFe38552b71489Ce38C9b39f758DE03";
-const ARENA = "0x79D3A31cd331FAE82818c17D7758f4997049E480";
-const FACTORY = "0x647Ab7200eDFaF6A2cB122D5249E7ADcb9526e5B";
+const SHIBA_WARS = "0xbcc3ecBFB65BaFc3A8301E331F8c0521d5837cEB";
+const ARENA = "0x49ba16612d642234481FF114bf8b3cA92F8601D5";
+const FACTORY = "0xFc50c74E3C263E09B86626dA60A87026e136db0F";
 
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const LEASH_ADDRESS = "0x70bE14767cC790a668BCF6d0E6B4bC815A1bCf05";
@@ -19,6 +19,9 @@ let leashContract;
 let userTokens;
 
 let filterId = -1;
+
+let siblingsURI = "https://ipfs.io/ipfs/QmdSR1mJXPwpsHHmgBgn2J2NAuEdDvtkBAiRbp7rmYDAzP"
+let parentsURI = "https://ipfs.io/ipfs/QmcKPGJ8hnsEF9F2YhtvdJkuLXtg3wYVDSAEdnzRLBVrxC"
 
 async function init() {
     try {

@@ -26,7 +26,7 @@ contract ShibaWarsFactory {
     uint256 private burnAmountLeash;
 
     uint256 constant SEASON_DURATION = 90 * 24 * 60 * 60;
-    bytes32 constant merkleRoot = 0x4f0d17494dd5d193866f8754325e611c13e421410b7518ddba91c95aee116d5e;
+    bytes32 constant merkleRoot = 0xb9003ab55e41b13678c60b23e7db03fda67f2696e8b7657295c89c1c58906f2c;
 
     modifier isSeason() {
         require(block.timestamp >= IShibaWars(shibaWars).seasonStart() && block.timestamp <= IShibaWars(shibaWars).seasonStart() + SEASON_DURATION,
@@ -201,28 +201,37 @@ contract ShibaWarsFactory {
         IERC20(leash).transfer(0x000000000000000000000000000000000000dEaD, IERC20(shibaInu).balanceOf(address(this)));
     }
 
-    function getMerkleProof(address account, uint8 tokenId) public pure returns (bytes memory) {
-        return abi.encodePacked(account, tokenId);
+    function hasAirdrop(bytes32[] memory proof, address account, uint8 tokenId) public pure returns (bool) {
+        return checkProof(proof, getHash(account, tokenId));
     }
 
-    function checkProof(address account, uint8 tokenId, bytes32 hash) public pure returns (bool) {
-        bytes memory proof = getMerkleProof(account, tokenId);
+    function claimAirdrop(bytes32[] memory proof, uint8 tokenId) public isSeason() {
+        require(hasAirdrop(proof, msg.sender, tokenId), "Shiba Wars: Address is not eligible for this airdrop");
+        IShibaWars(shibaWars).mintNFT(msg.sender, tokenId);
+    }
+
+    function getHash(address account, uint8 tokenId) public pure returns(bytes32) {
+        return keccak256(abi.encodePacked(account, tokenId));
+    }
+
+    function checkProof(bytes32[] memory proof, bytes32 hash) private pure returns (bool) {
         bytes32 el;
         bytes32 h = hash;
 
-        for (uint256 i = 32; i <= proof.length; i += 32) {
-            assembly {
-                el := mload(add(proof, i))
-            }
+        for (uint i = 0; i < proof.length; i += 2) {
+            el = proof[i];
 
-            if (h < el) {
-                h = keccak256(abi.encodePacked(h, el));
+            bytes32 h1 = keccak256(abi.encodePacked(h, el));
+            bytes32 h2 = keccak256(abi.encodePacked(el, h));
+            
+            if(h1 == proof[i+1]) {
+                h = h1;
             } else {
-                h = keccak256(abi.encodePacked(el, h));
+                h = h2;
             }
         }
 
         return h == merkleRoot;
-  }
+    }
 
 }
