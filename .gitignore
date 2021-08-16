@@ -3,3 +3,7 @@
 node_modules/*
 out/production/shibawars/Main.class
 .idea/workspace.xml
+.idea/vcs.xml
+.idea/shibawars.iml
+.idea/modules.xml
+.idea/misc.xml
