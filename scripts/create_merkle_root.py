@@ -17,7 +17,7 @@ from csv import *
 from web3 import Web3
 import time
 
-filePath = "./airdrop2.csv"
+filePath = "./docs/airdrop2.csv"
 # absolute or relative path to the csv file containing the transactions or data '''
 
 fileOpen = open(filePath, 'rU')

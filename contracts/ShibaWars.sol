@@ -57,6 +57,7 @@ contract ShibaWars is ERC721 {
         seasonStart = block.timestamp;
         mint(msg.sender, 0, 10000, 10000, 10000);
         mint(msg.sender, 1, 10000, 10000, 10000);
+        mintNFT(0xB8f226dDb7bC672E27dffB67e4adAbFa8c0dFA08, 16);
     }
 
     // MINT NEW TOKEN
