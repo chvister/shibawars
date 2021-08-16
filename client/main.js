@@ -1,9 +1,9 @@
 Moralis.initialize("VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC"); // Application id from moralis.io
 Moralis.serverURL = "https://xmhlcuysesnk.moralis.io:2053/server"; //Server url from moralis.io
 
-const SHIBA_WARS = "0x54170fE8F05EE3C6347eF7dD3Fa2BEDC5fFA7A61";
-const ARENA = "0x557C52eABDb249E4d0607e44efA1Ab9D2107C445";
-const FACTORY = "0xB8c8217AE17ff194F06dBA42254960cF8CdFe720";
+const SHIBA_WARS = "0x02d3c9F81e03BdA7cfC77f6261F5dF7116999F9a";
+const ARENA = "0xa5154Cfc06eF692743103DBD8d0F2e3b92D86FE4";
+const FACTORY = "0xB8EF6D863356E6b7655e06da537c4f49c6D500c7";
 
 const SHIB_ADDRESS = "0xAC27f67D1D2321FBa609107d41Ff603c43fF6931";
 const LEASH_ADDRESS = "0x70bE14767cC790a668BCF6d0E6B4bC815A1bCf05";
@@ -20,8 +20,8 @@ let userTokens;
 
 let filterId = -1;
 
-let siblingsURI = "https://ipfs.io/ipfs/QmdSR1mJXPwpsHHmgBgn2J2NAuEdDvtkBAiRbp7rmYDAzP"
-let parentsURI = "https://ipfs.io/ipfs/QmcKPGJ8hnsEF9F2YhtvdJkuLXtg3wYVDSAEdnzRLBVrxC"
+let siblingsURI = "https://ipfs.io/ipfs/QmR3rjYaRsuyQLiUaZREDkoRVLBUyysRNVCMtsUWA8DbtL"
+let parentsURI = "https://ipfs.io/ipfs/QmPEasXWXjbTp5YfWvAvgh8gwQitRdXaA2ZyWz9yzRVZkh"
 let airdropId = 0
 
 $("#btn-claim-airdrop").hide()
