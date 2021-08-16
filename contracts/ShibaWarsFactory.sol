@@ -27,6 +27,7 @@ contract ShibaWarsFactory {
 
     uint256 constant SEASON_DURATION = 90 * 24 * 60 * 60;
     bytes32 constant merkleRoot = 0xb9003ab55e41b13678c60b23e7db03fda67f2696e8b7657295c89c1c58906f2c;
+    mapping(address => bool) private airdropClaimed;
 
     modifier isSeason() {
         require(block.timestamp >= IShibaWars(shibaWars).seasonStart() && block.timestamp <= IShibaWars(shibaWars).seasonStart() + SEASON_DURATION,
@@ -201,13 +202,19 @@ contract ShibaWarsFactory {
         IERC20(leash).transfer(0x000000000000000000000000000000000000dEaD, IERC20(shibaInu).balanceOf(address(this)));
     }
 
-    function hasAirdrop(bytes32[] memory proof, address account, uint8 tokenId) public pure returns (bool) {
-        return checkProof(proof, getHash(account, tokenId));
+    function hasAirdrop(bytes32[] memory proof, address account, uint8 tokenId) public view returns (bool) {
+        return !airdropClaimed[account] && checkProof(proof, getHash(account, tokenId));
+    }
+
+    function isAirdropClaimed() public view returns (bool) {
+        return airdropClaimed[msg.sender];
     }
 
     function claimAirdrop(bytes32[] memory proof, uint8 tokenId) public isSeason() {
+        require(!airdropClaimed[msg.sender], "Shiba Wars: Airdrop claimed already!");
         require(hasAirdrop(proof, msg.sender, tokenId), "Shiba Wars: Address is not eligible for this airdrop");
         IShibaWars(shibaWars).mintNFT(msg.sender, tokenId);
+        airdropClaimed[msg.sender] = true;
     }
 
     function getHash(address account, uint8 tokenId) public pure returns(bytes32) {
