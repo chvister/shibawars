@@ -661,13 +661,13 @@ function getName(tokenId) {
     } else if (tokenId == 2) {
         return "WoofMeister";
     } else if (tokenId == 3) {
-        return "Shib Whale";
+        return "Shiba Whale";
     } else if (tokenId == 4) {
-        return "OG doge";
+        return "OG Shiba";
     } else if (tokenId == 5) {
-        return "Shib Warlord";
+        return "Shiba Warlord";
     } else if (tokenId == 6) {
-        return "Shib General";
+        return "Shiba Warrior";
     } else if (tokenId == 7) {
         return "Doge Killer";
     } else if (tokenId == 8) {

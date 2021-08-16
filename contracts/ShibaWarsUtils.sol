@@ -9,7 +9,7 @@ library ShibaWarsUtils {
     uint constant SHIBA_WHALE = 3;
     uint constant OG_SHIBA = 4;
     uint constant SHIBA_WARLORD = 5;
-    uint constant SHIBA_GENERAL = 6;
+    uint constant SHIBA_WARRIOR = 6;
     uint constant DOGE_KILLER = 7;
     uint constant AGGRESIVE_SHIBA_INU = 8;
     uint constant BORED_SHIBA_INU = 9;
@@ -41,7 +41,7 @@ library ShibaWarsUtils {
             return 225;
         } else if (tokenId == SHIBA_WARLORD) {
             return 200;
-        } else if (tokenId == SHIBA_GENERAL) {
+        } else if (tokenId == SHIBA_WARRIOR) {
             return 175;
         } else if (tokenId == DOGE_KILLER) {
             return 200;
