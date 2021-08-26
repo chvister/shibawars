@@ -3,28 +3,30 @@ pragma solidity ^0.8.0;
 library ShibaWarsUtils {
 
     // token ids
-    uint constant BOJAR_DA_KILLA = 0;
-    uint constant KAYA_THE_WOLFMOTHER = 1;
-    uint constant WOOFMEISTER = 2;
-    uint constant SHIBA_WHALE = 3;
-    uint constant OG_SHIBA = 4;
-    uint constant SHIBA_WARLORD = 5;
-    uint constant SHIBA_WARRIOR = 6;
-    uint constant DOGE_KILLER = 7;
-    uint constant AGGRESIVE_SHIBA_INU = 8;
-    uint constant BORED_SHIBA_INU = 9;
-    uint constant SHIBA_INU = 10;
-    uint constant AGGRESIVE_SHIBA_PUP = 11;
-    uint constant SHIBA_PUP = 12;
-    uint constant LUCKY_SHIBA_PACK_GEN_1 = 13;
-    uint constant DOGE_FATHER = 14;
-    uint constant GOLDEN_SHIBA = 15;
-    uint constant RYOSHI = 16;
+    uint constant LUCKY_SHIBA_PACK_GEN_1 = 100;
+    uint constant SHIBAWARS_SUPPORTER = 101;
+    uint constant BOJAR_DA_KILLA = 102;
+    uint constant KAYA_THE_WOLFMOTHER = 103;
+    uint constant WOOFMEISTER = 104;
+    uint constant SHIBA_WHALE = 105;
+    uint constant OG_SHIBA = 106;
+    uint constant SHIBA_WARLORD = 107;
+    uint constant SHIBA_WARRIOR = 108;
+    uint constant DOGE_KILLER = 109;
+    uint constant AGGRESIVE_SHIBA_INU = 110;
+    uint constant BORED_SHIBA_INU = 111;
+    uint constant SHIBA_INU = 112;
+    uint constant AGGRESIVE_SHIBA_PUP = 113;
+    uint constant SHIBA_PUP = 114;
+    uint constant DOGE_FATHER = 115;
+    uint constant GOLDEN_SHIBA = 116;
+    uint constant RYOSHI = 117;
+    uint constant SHIBA_GENERAL = 118;
 
-    uint constant IRON = 17;
-    uint constant SILVER = 18;
-    uint constant GOLDEN = 19;
-    uint constant DIAMOND = 20;
+    uint constant IRON = 1;
+    uint constant SILVER = 2;
+    uint constant GOLDEN = 3;
+    uint constant DIAMOND = 4;
 
     uint constant MILLION = 10 ** 6;
     uint constant THOUSAND = 10 ** 3;
@@ -34,15 +36,15 @@ library ShibaWarsUtils {
         if (tokenId == BOJAR_DA_KILLA || tokenId == KAYA_THE_WOLFMOTHER) {
             return 1000;
         } else if (tokenId == WOOFMEISTER) {
-            return 400;
+            return 300;
         } else if (tokenId == SHIBA_WHALE) {
-            return 250;
-        } else if (tokenId == OG_SHIBA) {
             return 225;
-        } else if (tokenId == SHIBA_WARLORD) {
+        } else if (tokenId == OG_SHIBA) {
             return 200;
-        } else if (tokenId == SHIBA_WARRIOR) {
+        } else if (tokenId == SHIBA_WARLORD) {
             return 175;
+        } else if (tokenId == SHIBA_WARRIOR) {
+            return 150;
         } else if (tokenId == DOGE_KILLER) {
             return 200;
         } else if (tokenId == AGGRESIVE_SHIBA_INU) {
@@ -56,11 +58,13 @@ library ShibaWarsUtils {
         } else if (tokenId == SHIBA_PUP) {
             return 100;
         } else if (tokenId == DOGE_FATHER) {
-            return 275;
-        } else if (tokenId == RYOSHI) {
             return 250;
-        } else if (tokenId == GOLDEN_SHIBA) {
+        } else if (tokenId == RYOSHI) {
             return 225;
+        } else if (tokenId == GOLDEN_SHIBA) {
+            return 200;
+        } else if (tokenId == SHIBA_GENERAL) {
+            return 200;
         } else if (tokenId == IRON) {
             return 15;
         } else if (tokenId == SILVER) {
@@ -100,7 +104,9 @@ library ShibaWarsUtils {
             return tokens(thousand(500));
         } else if (tokenId == LUCKY_SHIBA_PACK_GEN_1) {
             return tokens(millions(4));
-        }
+        } else if (tokenId == SHIBAWARS_SUPPORTER) {
+            return tokens(millions(15) / 10);
+        } 
         return 0;
     }
 
@@ -146,11 +152,11 @@ library ShibaWarsUtils {
     }
 
     function isShiba(uint id) public pure returns (bool) {
-        return id >= 0 && id < 17 && id != 13;
+        return id / 100 == 1 && id > 101;
     }
 
     function isLeash(uint id) public pure returns (bool) {
-        return id >= 17;
+        return id / 100 == 0;
     }
 
     function getMaxHp(uint64 strength) public pure returns(uint) {

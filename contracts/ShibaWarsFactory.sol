@@ -41,6 +41,11 @@ contract ShibaWarsFactory {
         _;
     }
 
+    modifier isDev(address caller) {
+        require(caller == devAddress, "SHIBAWARS: CALLER IS NOT A DEV");
+        _;
+    }
+
     constructor(address shibaWars_) {
         devAddress = msg.sender;
         shibaWars = shibaWars_;
@@ -113,8 +118,12 @@ contract ShibaWarsFactory {
         _arena = cost.sub(_burn).sub(_dev);
     }
 
-    // BUY DOGE FROM SHOP
-    function buyDoge(uint tokenId) public isSeason() {
+    function mintGeneral(address user) public isDev(msg.sender) {
+        IShibaWars(shibaWars).mintNFT(user, ShibaWarsUtils.SHIBA_GENERAL);
+    }
+
+    // BUY SHIBA FROM SHOP
+    function buyShiba(uint tokenId) public isSeason() {
         payTheContract(ShibaWarsUtils.getTokenPrice(tokenId));
         IShibaWars(shibaWars).mintNFT(msg.sender, tokenId);
     }
@@ -131,7 +140,7 @@ contract ShibaWarsFactory {
         IShibaWars(shibaWars).addTreats(msg.sender, count);
     } 
 
-    // OPEN LUCKY DOGE PACK
+    // OPEN LUCKY SHIBA PACK
     function openPack(uint256 id) public {
         IShibaWars _shibaWars = IShibaWars(shibaWars);
         // open pack
