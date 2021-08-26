@@ -492,7 +492,7 @@ async function goOnAdventure(dogeId){
         .on("receipt", (async (receipt) => {
             let event = receipt.events["AdventureFight"].returnValues;
             let attacker = await shibaWars.methods.getTokenDetails(event["dogeId"]).call({from: ethereum.selectedAddress});
-            let defenderName = event["enemyId"] == 0 ? "Watchdog" : (event["enemyId"] == 1 ? "Wolf" : "Bear"); 
+            let defenderName = event["enemyId"] == 0 ? "Wild Shiba" : (event["enemyId"] == 1 ? "Wolf" : "Bear"); 
             $("#attacker-info").html(`${getName(attacker.tokenId)} #${event["dogeId"]}`);
             $("#defender-info").html(defenderName);
             if(event["reward"] == 0) {

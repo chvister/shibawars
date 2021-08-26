@@ -213,7 +213,7 @@ contract ShibaWarsArena {
         // get random enemy
         // get adventure level of this shiba
         uint adventureLevel = adventures[shibaId] + 1;
-        // get random enemy - akita inu, rottweiler, bear
+        // get random enemy - wild shiba, wolf, bear
         uint64 enemy = (uint64)(abi.encodePacked(block.timestamp, block.difficulty, shibaId).random(0, 2));
         uint64 strength = (uint64)(abi.encodePacked(block.timestamp, block.difficulty, enemy).random(enemy.add(1).mul(300), enemy.add(1).mul(600)).mul(adventureLevel));
         ShibaWarsEntity.Shiba memory _shiba = shibaWars.getTokenDetails(shibaId);
