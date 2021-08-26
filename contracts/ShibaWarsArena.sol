@@ -180,7 +180,7 @@ contract ShibaWarsArena {
     // RETURN TRUE IF THIS SHIBA CAN FIGHT IN ARENA
     function canFight(uint tokenId) public view returns (bool) {
         uint id =  shibaWars.getTokenDetails(tokenId).tokenId;
-        return id / 100 == 1 && id > 103;
+        return id / 100 == 1 && id > ShibaWarsUtils.KAYA_THE_WOLFMOTHER;
     }
 
     function putShibaOnLeash(uint shibaId, uint leashId) public isSeason() myToken(shibaId) myToken(leashId) {
