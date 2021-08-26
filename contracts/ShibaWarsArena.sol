@@ -84,52 +84,54 @@ contract ShibaWarsArena {
             // the one with higher agility attacks first
             (attacker, defender) = _first.agility >= _second.agility ? (_first, _second) : (_second, _first);
         }
-        (uint attackerUpgrade, uint defenderUpgrade) = (100, 100);
+        (uint damageAttacker, uint damageDefender, uint128 winner) = (0, 0, 0);
         {
-            (uint attackerLeash, uint defenderLeash) = (leashedShibas[attacker.id], leashedShibas[defender.id]);
-            if(attackerLeash != 0) {
-                // attacker is leashed
-                // every stat is the same so we can pick any for the upgrade
-                attackerUpgrade += shibaWars.getTokenDetails(attackerLeash).strength;
+            (uint attackerUpgrade, uint defenderUpgrade) = (100, 100);
+            {
+                (uint attackerLeash, uint defenderLeash) = (leashedShibas[attacker.id], leashedShibas[defender.id]);
+                if(attackerLeash != 0) {
+                    // attacker is leashed
+                    // every stat is the same so we can pick any for the upgrade
+                    attackerUpgrade += shibaWars.getTokenDetails(attackerLeash).strength;
+                }
+                if(defenderLeash != 0) {
+                    // defender is leashed
+                    defenderUpgrade += shibaWars.getTokenDetails(defenderLeash).strength;
+                }
             }
-            if(defenderLeash != 0) {
-                // defender is leashed
-                defenderUpgrade += shibaWars.getTokenDetails(defenderLeash).strength;
-            }
-        }
-        uint128 winner = 0;
-        // pick random skill for attacker
-        uint128 skill = (uint128)(abi.encodePacked(block.timestamp, block.difficulty, firstShiba).random(0, 2));
-        uint damageAttacker = skill == 0 ? attacker.strength : (skill == 1 ? attacker.agility : attacker.dexterity);
-        damageAttacker = damageAttacker.mul(attackerUpgrade).div(100);
-        skill = (uint128)(abi.encodePacked(block.timestamp, block.difficulty, secondShiba).random(0, 2));
-        uint damageDefender = skill == 0 ? defender.strength : (skill == 1 ? defender.agility : defender.dexterity);
-        damageDefender = damageDefender.mul(defenderUpgrade).div(100);
-        if(damageAttacker > defender.hitPoints - 1) {
-            // defender fainted
-            shibaWars.decreaseHp(defender.id, defender.hitPoints - 1);
-            winner = 1;
-        } else {
-            shibaWars.decreaseHp(defender.id, damageAttacker);
-        }
-        if (winner == 0) {
-            // defender attacks as well
-            if(damageDefender > attacker.hitPoints - 1) {
+            // pick random skill for attacker
+            uint128 skill = (uint128)(abi.encodePacked(block.timestamp, block.difficulty, firstShiba).random(0, 2));
+            damageAttacker = skill == 0 ? attacker.strength : (skill == 1 ? attacker.agility : attacker.dexterity);
+            damageAttacker = damageAttacker.mul(attackerUpgrade).div(100);
+            skill = (uint128)(abi.encodePacked(block.timestamp, block.difficulty, secondShiba).random(0, 2));
+            damageDefender = skill == 0 ? defender.strength : (skill == 1 ? defender.agility : defender.dexterity);
+            damageDefender = damageDefender.mul(defenderUpgrade).div(100);
+            if(damageAttacker > defender.hitPoints - 1) {
                 // defender fainted
-                shibaWars.decreaseHp(attacker.id, attacker.hitPoints - 1);
-                winner = 2;
-            } else {
-                shibaWars.decreaseHp(attacker.id, damageDefender);
-            }
-        }
-        if(winner == 0) {
-            // nobody fainted
-            if (damageAttacker > damageDefender) {
-                // attacker did more damage
+                shibaWars.decreaseHp(defender.id, defender.hitPoints - 1);
                 winner = 1;
-            } else if (damageDefender > damageAttacker) {
-                // defender did more damage
-                winner = 2;
+            } else {
+                shibaWars.decreaseHp(defender.id, damageAttacker);
+            }
+            if (winner == 0) {
+                // defender attacks as well
+                if(damageDefender > attacker.hitPoints - 1) {
+                    // defender fainted
+                    shibaWars.decreaseHp(attacker.id, attacker.hitPoints - 1);
+                    winner = 2;
+                } else {
+                    shibaWars.decreaseHp(attacker.id, damageDefender);
+                }
+            }
+            if(winner == 0) {
+                // nobody fainted
+                if (damageAttacker > damageDefender) {
+                    // attacker did more damage
+                    winner = 1;
+                } else if (damageDefender > damageAttacker) {
+                    // defender did more damage
+                    winner = 2;
+                }
             }
         }
         // set max score
@@ -152,12 +154,13 @@ contract ShibaWarsArena {
             uint attNewScore = score <= attacker.arenaScore - 1 ? attacker.arenaScore.sub(score) : 1;
             setScore(attacker.id, attNewScore, defender.id, defNewScore);
         } else {
-            uint256 score = scoreReward(attacker.arenaScore, defender.arenaScore);
-            uint attNewScore = attacker.arenaScore.add(score);
-            uint defNewScore = score <= defender.arenaScore - 1 ? defender.arenaScore.sub(score) : 1;
-            score = scoreReward(defender.arenaScore, attacker.arenaScore);
-            defNewScore = defNewScore.add(score);
-            attNewScore = score <= attNewScore - 1 ? attNewScore.sub(score) : 1;
+            // who has more points or attacker should win
+            uint256 _exWinner = defender.arenaScore > attacker.arenaScore ? defender.id : attacker.id;
+            (uint256 scoreA, uint256 scoreB) = 
+                (scoreReward(attacker.arenaScore, defender.arenaScore), scoreReward(defender.arenaScore, attacker.arenaScore));
+            uint256 score = (scoreA > scoreB ? scoreA.sub(scoreB) : scoreB.sub(scoreA)).trim(1, 50);
+            uint attNewScore = _exWinner == attacker.id ? attacker.arenaScore.add(score) : attacker.arenaScore.sub(score);
+            uint defNewScore = _exWinner == defender.id ? defender.arenaScore.add(score) : defender.arenaScore.sub(score);
             setScore(attacker.id, attNewScore, defender.id, defNewScore);
         }
         emit ArenaFight(attacker.id, defender.id, damageAttacker, damageDefender, winner);
