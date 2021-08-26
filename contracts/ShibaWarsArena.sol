@@ -9,6 +9,7 @@ contract ShibaWarsArena {
 
     using ShibaMath for uint;
     using ShibaMath for uint64;
+    using ShibaMath for uint128;
     using ShibaMath for bytes;
 
     mapping (uint256 => uint256) private arenaQueue;
@@ -51,14 +52,15 @@ contract ShibaWarsArena {
     function queueToArena(uint tokenId) public isSeason() hasOpponent(tokenId) {
         checkCanFight(tokenId);
         ShibaWarsEntity.Shiba memory _shiba = shibaWars.getTokenDetails(tokenId);
-        uint enemyId = arenaQueue[_shiba.arenaScore / LEAGUE_DIVISOR];
+        uint league = getLeagueFromScore(_shiba.arenaScore);
+        uint enemyId = arenaQueue[league];
         if(enemyId == 0) {
             shibaWars.setInArena(tokenId, 1);
-            arenaQueue[_shiba.arenaScore / LEAGUE_DIVISOR] = tokenId;
+            arenaQueue[league] = tokenId;
         } else {
             fight(tokenId, enemyId);
             shibaWars.setInArena(enemyId, 0);
-            arenaQueue[_shiba.arenaScore / LEAGUE_DIVISOR] = 0;
+            arenaQueue[league] = 0;
         }
     }
 
@@ -255,6 +257,10 @@ contract ShibaWarsArena {
 
     function getAdventureLevel(uint shibaId) public view returns (uint) {
         return adventures[shibaId];
+    }
+
+    function getLeagueFromScore(uint score) public pure returns (uint) {
+        return score.div(250).add(1).sqrt().sub(1);
     }
 
 }
