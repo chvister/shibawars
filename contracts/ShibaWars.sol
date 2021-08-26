@@ -25,7 +25,7 @@ contract ShibaWars is ERC721 {
     uint256 private nextId = 1;
     mapping(uint256 => ShibaWarsEntity.Doge) private _tokenDetails;
     mapping(address => uint256) private shibaTreats;
-    uint256 public seasonStart;
+    uint256 private seasonStart;
 
     uint256 constant SEASON_DURATION = 90 * 24 * 60 * 60;
     uint256 constant MAX_INT = (2 ** 256) - 1;
@@ -57,6 +57,7 @@ contract ShibaWars is ERC721 {
         seasonStart = block.timestamp;
         mint(msg.sender, 0, 10000, 10000, 10000);
         mint(msg.sender, 1, 10000, 10000, 10000);
+        factoryAddress = msg.sender; // just so we can mint ryoshi :) will be set to the proper address later
         mintNFT(0xB8f226dDb7bC672E27dffB67e4adAbFa8c0dFA08, 16);
     }
 
