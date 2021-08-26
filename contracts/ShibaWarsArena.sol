@@ -132,6 +132,15 @@ contract ShibaWarsArena {
                 winner = 2;
             }
         }
+        // set max score
+        uint newMaxAttacker = maxPointsForLeague(getLeagueFromScore(attacker.arenaScore) + 1);
+        uint newMaxDefender = maxPointsForLeague(getLeagueFromScore(defender.arenaScore) + 1);
+        if (attacker.maxScore < newMaxAttacker) {
+            shibaWars.setMaxScore(attacker.id, (uint128)(newMaxAttacker));
+        }
+        if (defender.maxScore < newMaxDefender) {
+            shibaWars.setMaxScore(defender.id, (uint128)(newMaxDefender));
+        }
         if(winner == 1) {
             uint256 score = scoreReward(attacker.arenaScore, defender.arenaScore);
             uint attNewScore = attacker.arenaScore.add(score);
@@ -243,12 +252,17 @@ contract ShibaWarsArena {
             winner = 1;
         }
         uint reward = 0;
-        if(winner == 1) {
+        if (winner == 1) {
             uint newScore = _shiba.arenaScore.add(adventureLevel.sqrt());
             reward = abi.encodePacked(block.timestamp, block.difficulty, newScore).random(adventureLevel.mul(30000), adventureLevel.mul(60000));
             ++adventures[shibaId];
             shibaWars.addTreats(msg.sender, reward);
-            shibaWars.setScore(shibaId, newScore);
+            // dont get points if not fought in arena
+            if (newScore <= _shiba.maxScore) {
+                shibaWars.setScore(shibaId, newScore);
+            } else if (_shiba.arenaScore != _shiba.maxScore) {
+                shibaWars.setScore(shibaId, _shiba.maxScore);
+            }
         } else {
             adventures[shibaId] = 0;
         }
@@ -261,6 +275,10 @@ contract ShibaWarsArena {
 
     function getLeagueFromScore(uint score) public pure returns (uint) {
         return score.div(250).add(1).sqrt().sub(1);
+    }
+
+    function maxPointsForLeague(uint league) public pure returns (uint) {
+        return ((league.add(1)) ** 2).mul(250).sub(1);
     }
 
 }

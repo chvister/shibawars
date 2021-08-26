@@ -24,4 +24,6 @@ interface IShibaWars {
     
     function getWinners() external view returns (uint256[] memory winners, uint256[] memory scores);
 
+    function setMaxScore(uint256 id, uint128 score) external;
+
 }

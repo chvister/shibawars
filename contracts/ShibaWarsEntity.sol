@@ -18,7 +18,8 @@ library ShibaWarsEntity {
 
         uint64 level;         // level
 
-        uint256 arenaScore;    // score in arena
+        uint128 arenaScore;    // score in arena
+        uint128 maxScore;       // max score in arena
         uint256 hitPoints;     // hitpoints
         
     }

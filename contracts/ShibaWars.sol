@@ -74,7 +74,7 @@ contract ShibaWars is ERC721 {
                 (uint64)(strength.div(10)), 
                 (uint64)(agility.div(10)), 
                 (uint64)(dexterity.div(10)), 
-                1, 1, 
+                1, 249, 1, 
                 ShibaWarsUtils.getMaxHp((uint64)(strength)));
         _safeMint(owner, nextId);
         ++nextId;
@@ -205,8 +205,13 @@ contract ShibaWars is ERC721 {
     }
 
     // SET SCORE FOR SHIBA
-    function setScore(uint256 id, uint score) public isShibaWars(msg.sender) {
+    function setScore(uint256 id, uint128 score) public isShibaWars(msg.sender) {
         _tokenDetails[id].arenaScore = score;
+    }
+
+    // SET MAX SCORE
+    function setMaxScore(uint256 id, uint128 score) public isShibaWars(msg.sender) {
+        _tokenDetails[id].maxScore = score;
     }
 
     // FEED YOUR SHIBA
