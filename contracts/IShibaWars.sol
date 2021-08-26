@@ -6,7 +6,7 @@ interface IShibaWars {
 
     function ownerOf(uint256 tokenId) external view returns (address owner);
 
-    function getTokenDetails(uint256 id) external view returns (ShibaWarsEntity.Doge memory);
+    function getTokenDetails(uint256 id) external view returns (ShibaWarsEntity.Shiba memory);
 
     function setInArena(uint256 id, uint16 inArena) external;
 

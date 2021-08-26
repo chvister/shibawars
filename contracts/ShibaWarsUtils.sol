@@ -16,9 +16,9 @@ library ShibaWarsUtils {
     uint constant SHIBA_INU = 10;
     uint constant AGGRESIVE_SHIBA_PUP = 11;
     uint constant SHIBA_PUP = 12;
-    uint constant LUCKY_DOGE_PACK_GEN_1 = 13;
+    uint constant LUCKY_SHIBA_PACK_GEN_1 = 13;
     uint constant DOGE_FATHER = 14;
-    uint constant GOLDEN_DOGE = 15;
+    uint constant GOLDEN_SHIBA = 15;
     uint constant RYOSHI = 16;
 
     uint constant IRON = 17;
@@ -59,7 +59,7 @@ library ShibaWarsUtils {
             return 275;
         } else if (tokenId == RYOSHI) {
             return 250;
-        } else if (tokenId == GOLDEN_DOGE) {
+        } else if (tokenId == GOLDEN_SHIBA) {
             return 225;
         } else if (tokenId == IRON) {
             return 15;
@@ -98,7 +98,7 @@ library ShibaWarsUtils {
             return tokens(millions(25) / 10);
         } else if (tokenId == SHIBA_PUP) {
             return tokens(thousand(500));
-        } else if (tokenId == LUCKY_DOGE_PACK_GEN_1) {
+        } else if (tokenId == LUCKY_SHIBA_PACK_GEN_1) {
             return tokens(millions(4));
         }
         return 0;
@@ -128,8 +128,8 @@ library ShibaWarsUtils {
             // ryoshi
             tokenId = ShibaWarsUtils.RYOSHI;
         } else if (number < 500) {
-            // golden doge
-            tokenId = ShibaWarsUtils.GOLDEN_DOGE;
+            // golden shiba inu
+            tokenId = ShibaWarsUtils.GOLDEN_SHIBA;
         } else if (number < 1500) {
             // shiba inu
             tokenId = ShibaWarsUtils.AGGRESIVE_SHIBA_INU;
@@ -145,7 +145,7 @@ library ShibaWarsUtils {
         }
     }
 
-    function isDoge(uint id) public pure returns (bool) {
+    function isShiba(uint id) public pure returns (bool) {
         return id >= 0 && id < 17 && id != 13;
     }
 

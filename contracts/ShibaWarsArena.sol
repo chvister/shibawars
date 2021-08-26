@@ -13,8 +13,8 @@ contract ShibaWarsArena {
 
     mapping (uint256 => uint256) private arenaQueue;
 
-    // leash to doge mapping
-    mapping(uint256 => uint256) private dogesOnLeash;
+    // leash to shiba mapping
+    mapping(uint256 => uint256) private leashedShibas;
     mapping(uint256 => uint256) private leashUsed;
     mapping(uint256 => uint256) private adventures;
 
@@ -23,7 +23,7 @@ contract ShibaWarsArena {
     uint256 constant SEASON_DURATION = 90 * 24 * 60 * 60;
     uint256 constant LEAGUE_DIVISOR = 250;
 
-    event AdventureFight(uint dogeId, uint enemyId, uint dogeStrength, uint enemyStrength, uint reward);
+    event AdventureFight(uint shibaId, uint enemyId, uint shibaStrength, uint enemyStrength, uint reward);
     event ArenaFight(uint attackerId, uint defenderId, uint attackerDamage, uint defenderDamage, uint outcome);
 
     modifier isSeason() {
@@ -38,9 +38,9 @@ contract ShibaWarsArena {
     }
 
     modifier hasOpponent(uint tokenId) {
-        ShibaWarsEntity.Doge memory _shiba = shibaWars.getTokenDetails(tokenId);
+        ShibaWarsEntity.Shiba memory _shiba = shibaWars.getTokenDetails(tokenId);
         require(arenaQueue[_shiba.arenaScore / LEAGUE_DIVISOR] == 0 || 
-            shibaWars.ownerOf(tokenId) != shibaWars.ownerOf(arenaQueue[_shiba.arenaScore / LEAGUE_DIVISOR]), "Shiba Wars: NO OPPONENT READY FOR THIS DOGE");
+            shibaWars.ownerOf(tokenId) != shibaWars.ownerOf(arenaQueue[_shiba.arenaScore / LEAGUE_DIVISOR]), "Shiba Wars: NO OPPONENT READY FOR THIS SHIBA");
         _;
     }
  
@@ -50,41 +50,41 @@ contract ShibaWarsArena {
 
     function queueToArena(uint tokenId) public isSeason() hasOpponent(tokenId) {
         checkCanFight(tokenId);
-        ShibaWarsEntity.Doge memory _doge = shibaWars.getTokenDetails(tokenId);
-        uint enemyId = arenaQueue[_doge.arenaScore / LEAGUE_DIVISOR];
+        ShibaWarsEntity.Shiba memory _shiba = shibaWars.getTokenDetails(tokenId);
+        uint enemyId = arenaQueue[_shiba.arenaScore / LEAGUE_DIVISOR];
         if(enemyId == 0) {
             shibaWars.setInArena(tokenId, 1);
-            arenaQueue[_doge.arenaScore / LEAGUE_DIVISOR] = tokenId;
+            arenaQueue[_shiba.arenaScore / LEAGUE_DIVISOR] = tokenId;
         } else {
             fight(tokenId, enemyId);
             shibaWars.setInArena(enemyId, 0);
-            arenaQueue[_doge.arenaScore / LEAGUE_DIVISOR] = 0;
+            arenaQueue[_shiba.arenaScore / LEAGUE_DIVISOR] = 0;
         }
     }
 
     function checkCanFight(uint tokenId) private view myToken(tokenId) 
-        returns (ShibaWarsEntity.Doge memory _shiba) {
+        returns (ShibaWarsEntity.Shiba memory _shiba) {
         _shiba = shibaWars.getTokenDetails(tokenId);
-        // must be doge
-        require(canFight(tokenId), "Shiba Wars: THIS DOGE CAN NOT FIGHT!");
+        // must be shiba
+        require(canFight(tokenId), "Shiba Wars: THIS SHIBA CAN NOT FIGHT!");
         // can not be in arena
-        require(_shiba.inArena == 0, "Shiba Wars: THIS DOGE IS IN ARENA ALREADY");
-        require(_shiba.hitPoints > 1, "Shiba Wars: THIS DOGE IS TOO EXHAUSTED");
+        require(_shiba.inArena == 0, "Shiba Wars: THIS SHIBA IS IN ARENA ALREADY");
+        require(_shiba.hitPoints > 1, "Shiba Wars: THIS SHIBA IS TOO EXHAUSTED");
     }
 
     function fight(uint256 firstShiba, uint256 secondShiba) private isSeason() {
-        require(shibaWars.ownerOf(firstShiba) != shibaWars.ownerOf(secondShiba), "Shiba Wars: CAN NOT FIGHT YOUR OWN DOGE");
-        ShibaWarsEntity.Doge memory attacker;
-        ShibaWarsEntity.Doge memory defender;
+        require(shibaWars.ownerOf(firstShiba) != shibaWars.ownerOf(secondShiba), "Shiba Wars: CAN NOT FIGHT YOUR OWN SHIBA");
+        ShibaWarsEntity.Shiba memory attacker;
+        ShibaWarsEntity.Shiba memory defender;
         {
-            ShibaWarsEntity.Doge memory _first = shibaWars.getTokenDetails(firstShiba);
-            ShibaWarsEntity.Doge memory _second = shibaWars.getTokenDetails(secondShiba);
+            ShibaWarsEntity.Shiba memory _first = shibaWars.getTokenDetails(firstShiba);
+            ShibaWarsEntity.Shiba memory _second = shibaWars.getTokenDetails(secondShiba);
             // the one with higher agility attacks first
             (attacker, defender) = _first.agility >= _second.agility ? (_first, _second) : (_second, _first);
         }
         (uint attackerUpgrade, uint defenderUpgrade) = (100, 100);
         {
-            (uint attackerLeash, uint defenderLeash) = (dogesOnLeash[attacker.id], dogesOnLeash[defender.id]);
+            (uint attackerLeash, uint defenderLeash) = (leashedShibas[attacker.id], leashedShibas[defender.id]);
             if(attackerLeash != 0) {
                 // attacker is leashed
                 // every stat is the same so we can pick any for the upgrade
@@ -163,63 +163,63 @@ contract ShibaWarsArena {
         shibaWars.setScore(defenderId, defenderScore);
     }
 
-    // RETURN TRUE IF THIS DOGE CAN FIGHT IN ARENA
+    // RETURN TRUE IF THIS SHIBA CAN FIGHT IN ARENA
     function canFight(uint tokenId) public view returns (bool) {
         uint id =  shibaWars.getTokenDetails(tokenId).tokenId;
         return id > 1 && id != 13 && id < 17;
     }
 
-    function putDogeOnLeash(uint dogeId, uint leashId) public isSeason() myToken(dogeId) myToken(leashId) {
-        // doge id must be doge
-        require(ShibaWarsUtils.isDoge(shibaWars.getTokenDetails(dogeId).tokenId), "Shiba Wars: CAN ONLY LEASH DOGE");
+    function putShibaOnLeash(uint shibaId, uint leashId) public isSeason() myToken(shibaId) myToken(leashId) {
+        // shiba id must be shiba
+        require(ShibaWarsUtils.isShiba(shibaWars.getTokenDetails(shibaId).tokenId), "Shiba Wars: CAN ONLY LEASH A SHIBA");
         // lesah id must be leash
         require(ShibaWarsUtils.isLeash(shibaWars.getTokenDetails(leashId).tokenId), "Shiba Wars: CAN ONLY LEASH WITH A LEASH");
-        // doge must not be leashed
-        require(dogesOnLeash[dogeId] == 0, "Shiba Wars: THIS DOGE IS LEASHED ALREADY");
+        // shiba must not be leashed
+        require(leashedShibas[shibaId] == 0, "Shiba Wars: THIS SHIBA IS LEASHED ALREADY");
         // leash must not be used
         require(leashUsed[leashId] == 0, "Shiba Wars: THIS LEASH IS USED ALREADY");
-        // leash the doge
-        dogesOnLeash[dogeId] = leashId;
-        leashUsed[leashId] = dogeId;
+        // leash the shiba
+        leashedShibas[shibaId] = leashId;
+        leashUsed[leashId] = shibaId;
     }
 
-    function unleashDoge(uint dogeId) public isSeason() myToken(dogeId) {
-        // must be my doge
-        // doge must be leashed to unleash
-        require(isLeashed(dogeId), "Shiba Wars: THIS DOGE IS NOT LEASHED");
-        uint leashId = dogesOnLeash[dogeId];
+    function unleashShiba(uint shibaId) public isSeason() myToken(shibaId) {
+        // must be my shiba
+        // shiba must be leashed to unleash
+        require(isLeashed(shibaId), "Shiba Wars: THIS SHIBA IS NOT LEASHED");
+        uint leashId = leashedShibas[shibaId];
         leashUsed[leashId] = 0;
-        dogesOnLeash[dogeId] = 0;
+        leashedShibas[shibaId] = 0;
     }
 
     function isLeashUsed(uint256 leashId) public view returns (bool) {
         return leashUsed[leashId] != 0;
     }
 
-    function isLeashed(uint dogeId) public view returns (bool) {
-        return dogesOnLeash[dogeId] != 0;
+    function isLeashed(uint shibaId) public view returns (bool) {
+        return leashedShibas[shibaId] != 0;
     }
 
-    function getDoge(uint leashId) public view returns (uint256) {
+    function getShiba(uint leashId) public view returns (uint256) {
         return leashUsed[leashId];
     }
 
-    function getLeashId(uint dogeId) public view returns (uint256) {
-        uint leashId = dogesOnLeash[dogeId];
+    function getLeashId(uint shibaId) public view returns (uint256) {
+        uint leashId = leashedShibas[shibaId];
         return leashId == 0 ? 0 : shibaWars.getTokenDetails(leashId).id;
     }
 
-    function goOnAdventure(uint dogeId) public myToken(dogeId) {
+    function goOnAdventure(uint shibaId) public myToken(shibaId) {
         // get random enemy
-        // get adventure level of this doge
-        uint adventureLevel = adventures[dogeId] + 1;
+        // get adventure level of this shiba
+        uint adventureLevel = adventures[shibaId] + 1;
         // get random enemy - akita inu, rottweiler, bear
-        uint64 enemy = (uint64)(abi.encodePacked(block.timestamp, block.difficulty, dogeId).random(0, 2));
-        uint64 strength = (uint64)(enemy.add(1).mul(300).add(abi.encodePacked(block.timestamp, block.difficulty, enemy).random(0, enemy.add(1).mul(300))).mul(adventureLevel));
-        ShibaWarsEntity.Doge memory _doge = shibaWars.getTokenDetails(dogeId);
+        uint64 enemy = (uint64)(abi.encodePacked(block.timestamp, block.difficulty, shibaId).random(0, 2));
+        uint64 strength = (uint64)(abi.encodePacked(block.timestamp, block.difficulty, enemy).random(enemy.add(1).mul(300), enemy.add(1).mul(600)).mul(adventureLevel));
+        ShibaWarsEntity.Shiba memory _shiba = shibaWars.getTokenDetails(shibaId);
         // pick random skill of my shiba
-        uint damage = enemy == 0 ? _doge.strength : (enemy == 1 ? _doge.agility : _doge.dexterity);
-        uint leashId = dogesOnLeash[dogeId];
+        uint damage = enemy == 0 ? _shiba.strength : (enemy == 1 ? _shiba.agility : _shiba.dexterity);
+        uint leashId = leashedShibas[shibaId];
         uint upgrade = leashId != 0 ? shibaWars.getTokenDetails(leashId).strength.add(100) : 100;
         damage = damage.mul(upgrade).div(100);
         uint8 winner = 0;
@@ -229,11 +229,11 @@ contract ShibaWarsArena {
         }
         if (winner == 0) {
             // defender attacks as well
-            if(strength > _doge.hitPoints - 1) {
+            if(strength > _shiba.hitPoints - 1) {
                 // attacker fainted
-                shibaWars.decreaseHp(dogeId, _doge.hitPoints - 1);
+                shibaWars.decreaseHp(shibaId, _shiba.hitPoints - 1);
             } else {
-                shibaWars.decreaseHp(dogeId, strength);
+                shibaWars.decreaseHp(shibaId, strength);
             }
         }
         if(winner == 0 && damage >= strength) {
@@ -242,19 +242,19 @@ contract ShibaWarsArena {
         }
         uint reward = 0;
         if(winner == 1) {
-            uint newScore = _doge.arenaScore.add(adventureLevel.sqrt());
+            uint newScore = _shiba.arenaScore.add(adventureLevel.sqrt());
             reward = abi.encodePacked(block.timestamp, block.difficulty, newScore).random(adventureLevel.mul(30000), adventureLevel.mul(60000));
-            ++adventures[dogeId];
+            ++adventures[shibaId];
             shibaWars.addTreats(msg.sender, reward);
-            shibaWars.setScore(dogeId, newScore);
+            shibaWars.setScore(shibaId, newScore);
         } else {
-            adventures[dogeId] = 0;
+            adventures[shibaId] = 0;
         }
-        emit AdventureFight(dogeId, enemy, damage, strength, reward);
+        emit AdventureFight(shibaId, enemy, damage, strength, reward);
     }
 
-    function getAdventureLevel(uint dogeId) public view returns (uint) {
-        return adventures[dogeId];
+    function getAdventureLevel(uint shibaId) public view returns (uint) {
+        return adventures[shibaId];
     }
 
 }

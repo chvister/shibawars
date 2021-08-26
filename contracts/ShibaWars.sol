@@ -7,7 +7,7 @@ import "./ShibaWarsEntity.sol";
 
 contract ShibaWars is ERC721 {
 
-    using ShibaWarsEntity for ShibaWarsEntity.Doge;
+    using ShibaWarsEntity for ShibaWarsEntity.Shiba;
 
     using ShibaMath for uint64;
     using ShibaMath for uint256;
@@ -23,7 +23,7 @@ contract ShibaWars is ERC721 {
     
     // info about tokens
     uint256 private nextId = 1;
-    mapping(uint256 => ShibaWarsEntity.Doge) private _tokenDetails;
+    mapping(uint256 => ShibaWarsEntity.Shiba) private _tokenDetails;
     mapping(address => uint256) private shibaTreats;
     uint256 private seasonStart;
 
@@ -64,7 +64,7 @@ contract ShibaWars is ERC721 {
     // MINT NEW TOKEN
     function mint(address owner, uint tokenId, uint strength, uint agility, uint dexterity) private {
         _tokenDetails[nextId] = 
-            ShibaWarsEntity.Doge(
+            ShibaWarsEntity.Shiba(
                 nextId,
                 (uint64)(strength), 
                 (uint64)(agility), 
@@ -82,8 +82,8 @@ contract ShibaWars is ERC721 {
 
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
         require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
-        ShibaWarsEntity.Doge memory _doge = getTokenDetails(tokenId);
-        return string(abi.encodePacked(baseURI, (uint256)(_doge.tokenId).toString(), ".json"));
+        ShibaWarsEntity.Shiba memory _shiba = getTokenDetails(tokenId);
+        return string(abi.encodePacked(baseURI, (uint256)(_shiba.tokenId).toString(), ".json"));
     }
 
     // SETS ADDRESS OF ARENA CONTRACT. CAN ONLY BE CALLED BY DEV
@@ -124,29 +124,29 @@ contract ShibaWars is ERC721 {
         for(uint256 i = 0; i < nextId; ++i) {
             // if owner and exists
             if(_exists(i)) {
-                ShibaWarsEntity.Doge memory doge = _tokenDetails[i];
-                if(ShibaWarsUtils.isDoge(doge.tokenId)) {
+                ShibaWarsEntity.Shiba memory shiba = _tokenDetails[i];
+                if(ShibaWarsUtils.isShiba(shiba.tokenId)) {
                     bool adding = false;
                     if (found < 10) {
                         adding = true;
                         result[found] = i;
-                        scores[found++] = doge.arenaScore;
-                    } else if (doge.arenaScore > min) {
+                        scores[found++] = shiba.arenaScore;
+                    } else if (shiba.arenaScore > min) {
                         for(uint256 j = 0; j < 10; ++j) {
                             if(scores[j] == min) {
                                 result[j] = i;
-                                scores[j] = doge.arenaScore;
+                                scores[j] = shiba.arenaScore;
                                 break;
                             }
                         }
                         adding = true;
                     }
                     if(adding) {
-                        if(doge.arenaScore < min) {
-                            min = doge.arenaScore;
+                        if(shiba.arenaScore < min) {
+                            min = shiba.arenaScore;
                         }
-                        if(doge.arenaScore > max) {
-                            max = doge.arenaScore;
+                        if(shiba.arenaScore > max) {
+                            max = shiba.arenaScore;
                         }
                     }
                 }
@@ -155,11 +155,11 @@ contract ShibaWars is ERC721 {
     }
 
     // DETAILS OF TOKEN
-    function getTokenDetails(uint256 id) public view returns (ShibaWarsEntity.Doge memory){
+    function getTokenDetails(uint256 id) public view returns (ShibaWarsEntity.Shiba memory){
         return _tokenDetails[id];
     }
 
-    // SETS STATS OF NEW DOGE AND MINTS
+    // SETS STATS OF NEW SHIBA AND MINTS
     function mintNFT(address owner, uint tokenId) public isShibaWars(msg.sender) {
         uint multiplier = ShibaWarsUtils.getStatsMultiplier(tokenId);
 
@@ -172,13 +172,13 @@ contract ShibaWars is ERC721 {
         mint(owner, tokenId, str, agi, dex);
     }
 
-    // LEVEL UP DOGE
+    // LEVEL UP SHIBA
     function levelUp(uint256 id) public isSeason() {
-        ShibaWarsEntity.Doge memory _shiba = _tokenDetails[id];
+        ShibaWarsEntity.Shiba memory _shiba = _tokenDetails[id];
         // level up if enough shiba treats
         require(shibaTreats[msg.sender] >= ShibaWarsUtils.levelUpCost(_shiba.level), "Shiba Wars: NOT ENOUGH POWER TREATS TO UPGRADE THIS SHIBA");
-        // only can level up doges
-        require(ShibaWarsUtils.isDoge(_shiba.tokenId), "Shiba Wars: ONLY DOGES CAN BE LEVELLED UP");
+        // only can level up shibas
+        require(ShibaWarsUtils.isShiba(_shiba.tokenId), "Shiba Wars: ONLY SHIBAS CAN BE LEVELLED UP");
         shibaTreats[msg.sender] = shibaTreats[msg.sender].sub(ShibaWarsUtils.levelUpCost(_shiba.level));
         ++_tokenDetails[id].level;
         _tokenDetails[id].strength += _shiba.strengthGain;
@@ -187,7 +187,7 @@ contract ShibaWars is ERC721 {
         _tokenDetails[id].dexterity += _shiba.dexterityGain;
     }
 
-    // OPEN LUCKY DOGE PACK
+    // OPEN LUCKY SHIBA PACK
     function openPack(uint256 id, address caller) public isShibaWars(msg.sender) isOwner(id, caller) {
         // open pack
         // burn the token
@@ -204,20 +204,20 @@ contract ShibaWars is ERC721 {
         _tokenDetails[id].hitPoints = _tokenDetails[id].hitPoints.sub(damage);
     }
 
-    // SET SCORE FOR DOGE
+    // SET SCORE FOR SHIBA
     function setScore(uint256 id, uint score) public isShibaWars(msg.sender) {
         _tokenDetails[id].arenaScore = score;
     }
 
     // FEED YOUR SHIBA
     function feed(uint256 id) public isSeason() {
-        ShibaWarsEntity.Doge memory doge = _tokenDetails[id];
-        uint treatTokensNeeded = ShibaWarsUtils.getMaxHp(doge.strength).sub(doge.hitPoints);
+        ShibaWarsEntity.Shiba memory shiba = _tokenDetails[id];
+        uint treatTokensNeeded = ShibaWarsUtils.getMaxHp(shiba.strength).sub(shiba.hitPoints);
         uint256 userTreats = shibaTreats[msg.sender];
         require(treatTokensNeeded > 0, "Shiba Wars: This Shiba is not hungry");
         require(userTreats >= treatTokensNeeded, "Shiba Wars: Not enough treat tokens to feed this Shiba");
         shibaTreats[msg.sender] = userTreats.sub(treatTokensNeeded);
-        _tokenDetails[id].hitPoints = ShibaWarsUtils.getMaxHp(doge.strength);
+        _tokenDetails[id].hitPoints = ShibaWarsUtils.getMaxHp(shiba.strength);
     }
 
     function addTreats(address user, uint256 count) public isShibaWars(msg.sender) {
