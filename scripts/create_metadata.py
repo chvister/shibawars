@@ -3,7 +3,7 @@ from pathlib import Path
 import ipfsApi
 import requests
 
-tokens = 21
+tokens = 119
 
 api = ipfsApi.Client('127.0.0.1', 5001)
 API_KEY = "e792de1e4aff38e5d97a"
@@ -18,19 +18,22 @@ def write_metadata():
         if Path(metadata_file_name).exists():
             print("Metadata exists")
         else:
-            print("Creating metadata")
             imgPath = "./client/img/token-" + str(token_id) + ".png"
-            image = upload_to_ipfs(imgPath, token_id)
-            values = {
-                "name": get_name(token_id), 
-                "description": get_description(token_id),
-                "image": image, 
-                "attributes" : []
-            }
-            jsonString = json.dumps(values)
-            jsonFile = open(metadata_file_name, "w")
-            jsonFile.write(jsonString)
-            jsonFile.close()
+            if Path(imgPath).exists():
+                print("Creating metadata")
+                image = upload_to_ipfs(imgPath, token_id)
+                values = {
+                    "name": get_name(token_id), 
+                    "description": get_description(token_id),
+                    "image": image, 
+                    "attributes" : [
+                        {"trait_type" : "Generation", "value" : 1}
+                    ]
+                }
+                jsonString = json.dumps(values)
+                jsonFile = open(metadata_file_name, "w")
+                jsonFile.write(jsonString)
+                jsonFile.close()
 
 def upload_to_ipfs(filePath, token_id):
     with Path(filePath).open("rb") as fp:
@@ -46,93 +49,101 @@ def upload_to_ipfs(filePath, token_id):
     return None
 
 def get_name(token_id):
-    if token_id == 0:
+    if token_id == 100:
+        return "Lucky Shiba Pack Gen #1"
+    elif token_id == 101:
+        return "Shibawars Supporter Badge"
+    elif token_id == 102:
         return "Bojar da Killa"
-    elif token_id == 1:
+    elif token_id == 103:
         return "Kaya the Wolfmother"
-    elif token_id == 2:
+    elif token_id == 104:
         return "WoofMeister"
-    elif token_id == 3:
+    elif token_id == 105:
         return "Shiba Whale"
-    elif token_id == 4:
+    elif token_id == 106:
         return "OG Shiba"
-    elif token_id == 5:
+    elif token_id == 107:
         return "Shiba Warlord"
-    elif token_id == 6:
+    elif token_id == 108:
         return "Shiba Warrior"
-    elif token_id == 7:
+    elif token_id == 109:
         return "Doge Killer"
-    elif token_id == 8:
+    elif token_id == 110:
         return "Aggresive Shiba Inu"
-    elif token_id == 9:
+    elif token_id == 111:
         return "Bored Shiba Inu"
-    elif token_id == 10:
+    elif token_id == 112:
         return "Shiba Inu"
-    elif token_id == 11:
+    elif token_id == 113:
         return "Aggresive Shiba Pup"
-    elif token_id == 12:
+    elif token_id == 114:
         return "Shib Pup"
-    elif token_id == 13:
-        return "Lucky Doge Pack Gen #1"
-    elif token_id == 14:
+    elif token_id == 115:
         return "Doge Father"
-    elif token_id == 15:
-        return "Golden Doge"
-    elif token_id == 16:
+    elif token_id == 116:
+        return "Golden Shiba"
+    elif token_id == 117:
         return "Ryoshi"
-    elif token_id == 17:
+    elif token_id == 118:
+        return "Shiba General"
+    elif token_id == 1:
         return "Iron Leash"
-    elif token_id == 18:
+    elif token_id == 2:
         return "Silver Leash"
-    elif token_id == 19:
+    elif token_id == 3:
         return "Golden Leash"
-    elif token_id == 20:
+    elif token_id == 4:
         return "Diamond Leash"
     else:
         return ""
 
 def get_description(token_id):
-    if token_id == 0:
-        return "Altough he's not a shiba, do not mess with him. The warden of order."
-    elif token_id == 1:
-        return "She may be cute, but she will get you. Beware, she bites."
-    elif token_id == 2:
-        return "The one who has power over all the dogs. We look up to you and believe in you."
-    elif token_id == 3:
-        return "The true holders of the ShibaArmy."
-    elif token_id == 4:
-        return "They were here since the beginning. The true loyal ones."
-    elif token_id == 5:
-        return "Altough they may not be recognized, they do lead the ShibArmy forward."
-    elif token_id == 6:
-        return "One bark, and they are in the battle."
-    elif token_id == 7:
-        return "All doges are family. But this is a doge killer."
-    elif token_id == 8:
-        return "Somebody did something to this shiba and it's seeking a revenge."
-    elif token_id == 9:
-        return "Somebody queue him to arena or something..."
-    elif token_id == 10:
-        return "A regular shiba inu, ready to fight"
-    elif token_id == 11:
-        return "A small cute doggo, but you should better stay away!"
-    elif token_id == 12:
-        return "AWWWWWWWWWWWWWWWWWW"
-    elif token_id == 13:
+    if token_id == 100:
         return "Open for a chance to get a very rare Doge, including the WoofMeister themself."
-    elif token_id == 14:
+    elif token_id == 101:
+        return "Shibawars Supporter Badge"
+    elif token_id == 102:
+        return "Altough he's not a shiba, do not mess with him. The warden of order."
+    elif token_id == 103:
+        return "She may be cute, but she will get you. Beware, she bites."
+    elif token_id == 104:
+        return "The one who has power over all the dogs. We look up to you and believe in you."
+    elif token_id == 105:
+        return "The true holders of the ShibaArmy."
+    elif token_id == 106:
+        return "They were here since the beginning. The true loyal ones."
+    elif token_id == 107:
+        return "These dogs lead the ShibArmy forward."
+    elif token_id == 108:
+        return "One bark, and they are in the battle."
+    elif token_id == 109:
+        return "This Shiba is on its infinite blood path."
+    elif token_id == 110:
+        return "Somebody did something to this shiba and it's seeking a revenge."
+    elif token_id == 111:
+        return "Somebody queue him to arena or something..."
+    elif token_id == 112:
+        return "A regular shiba inu, ready to fight"
+    elif token_id == 113:
+        return "A small cute doggo, but you should better stay away!"
+    elif token_id == 114:
+        return "AWWWWWWWWWWWWWWWWWW"
+    elif token_id == 115:
         return "A friend should always underestimate your virtues and an enemy overestimate your faults."
-    elif token_id == 15:
+    elif token_id == 116:
         return "A member of very rare race of golden shiba inus"
-    elif token_id == 16:
+    elif token_id == 117:
         return "The one who took us under their wings. Ryoshi."
-    elif token_id == 17:
+    elif token_id == 118:
+        return "When the times are difficult, the Shiba Generals embrace the morale of ShibaArmy."
+    elif token_id == 1:
         return "Increases the stats of your doge in fight by 15%"
-    elif token_id == 18:
+    elif token_id == 2:
         return "Increases the stats of your doge in fight by 20%"
-    elif token_id == 19:
+    elif token_id == 3:
         return "Increases the stats of your doge in fight by 25%"
-    elif token_id == 20:
+    elif token_id == 4:
         return "Increases the stats of your doge in fight by 30%"
     else:
         return ""
