@@ -22,7 +22,6 @@ contract ShibaWarsArena {
     IShibaWars private shibaWars;
 
     uint256 constant SEASON_DURATION = 90 * 24 * 60 * 60;
-    uint256 constant LEAGUE_DIVISOR = 250;
 
     event AdventureFight(uint shibaId, uint enemyId, uint shibaStrength, uint enemyStrength, uint reward);
     event ArenaFight(uint attackerId, uint defenderId, uint attackerDamage, uint defenderDamage, uint outcome);
@@ -40,8 +39,9 @@ contract ShibaWarsArena {
 
     modifier hasOpponent(uint tokenId) {
         ShibaWarsEntity.Shiba memory _shiba = shibaWars.getTokenDetails(tokenId);
-        require(arenaQueue[_shiba.arenaScore / LEAGUE_DIVISOR] == 0 || 
-            shibaWars.ownerOf(tokenId) != shibaWars.ownerOf(arenaQueue[_shiba.arenaScore / LEAGUE_DIVISOR]), "Shiba Wars: NO OPPONENT READY FOR THIS SHIBA");
+        uint league = getLeagueFromScore(_shiba.arenaScore);
+        require(arenaQueue[league] == 0 || 
+            shibaWars.ownerOf(tokenId) != shibaWars.ownerOf(arenaQueue[league]), "Shiba Wars: NO OPPONENT READY FOR THIS SHIBA");
         _;
     }
  

@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@material-ui/core": "^4.12.3",
-    "@openzeppelin/contracts": "^4.3.0",
+    "@openzeppelin/contracts": "^4.3.1",
     "babel-plugin-styled-components": "^1.13.2",
     "next": "11.1.0",
     "react": "17.0.2",

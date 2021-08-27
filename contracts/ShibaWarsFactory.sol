@@ -12,7 +12,7 @@ contract ShibaWarsFactory {
 
     address constant shibaInu = 0xAC27f67D1D2321FBa609107d41Ff603c43fF6931;
     address constant leash = 0x70bE14767cC790a668BCF6d0E6B4bC815A1bCf05;
-    address immutable shibaWars;
+    IShibaWars immutable shibaWars;
 
     address private devAddress;
 
@@ -46,9 +46,14 @@ contract ShibaWarsFactory {
         _;
     }
 
+    modifier isUser() {
+        require (msg.sender == tx.origin, "SHIBAWARS: CAN NOT BE CALLED BY A SMART CONTRACT!");
+        _;
+    }
+
     constructor(address shibaWars_) {
         devAddress = msg.sender;
-        shibaWars = shibaWars_;
+        shibaWars = IShibaWars(shibaWars_);
     }
     
     // RETURN TOTAL PRIZE POOL TO BE WON BY PLAYERS
@@ -65,18 +70,18 @@ contract ShibaWarsFactory {
     function redeemDevReward() public {
         IERC20 _shibaInu = IERC20(shibaInu);
         // burn shib
-        _shibaInu.burn(burnAmount);
+        _shibaInu.transfer(0xdEAD000000000000000042069420694206942069, burnAmount);
         burnAmount = 0;
         // pay the dev
         _shibaInu.transfer(devAddress, devReward.min(_shibaInu.balanceOf(address(this))));
         devReward = 0;
         IERC20 _leash = IERC20(leash);
         // burn leash 
-        _leash.transfer(0x000000000000000000000000000000000000dEaD, burnAmountLeash);
+        _leash.transfer(0xdEAD000000000000000042069420694206942069, burnAmountLeash);
         burnAmountLeash = 0;
         // pay teh dev
-         _leash.transfer(devAddress, devRewardLeash.min(_leash.balanceOf(address(this))));
-         devRewardLeash = 0;
+        _leash.transfer(devAddress, devRewardLeash.min(_leash.balanceOf(address(this))));
+        devRewardLeash = 0;
     }
 
     function payTheContract(uint256 cost) public {
@@ -119,41 +124,41 @@ contract ShibaWarsFactory {
     }
 
     function mintGeneral(address user) public isDev(msg.sender) {
-        IShibaWars(shibaWars).mintNFT(user, ShibaWarsUtils.SHIBA_GENERAL);
+        shibaWars.mintNFT(user, ShibaWarsUtils.SHIBA_GENERAL);
     }
 
     // BUY SHIBA FROM SHOP
-    function buyShiba(uint tokenId) public isSeason() {
+    function buyShiba(uint tokenId) public isSeason() isUser() {
         payTheContract(ShibaWarsUtils.getTokenPrice(tokenId));
-        IShibaWars(shibaWars).mintNFT(msg.sender, tokenId);
+        shibaWars.mintNFT(msg.sender, tokenId);
     }
 
     // BUY LEASH FROM SHOP
-    function buyLeash(uint tokenId) public isSeason() {
+    function buyLeash(uint tokenId) public isSeason() isUser() {
         payTheContractLeash(ShibaWarsUtils.getTokenPriceLeash(tokenId));
-        IShibaWars(shibaWars).mintNFT(msg.sender, tokenId);
+        shibaWars.mintNFT(msg.sender, tokenId);
     }
 
     // BUY SHIBA TREAT TOKENS
     function buyTreats(uint count) public isSeason() {
         payTheContract(count.div(10).mul(10 ** 18));
-        IShibaWars(shibaWars).addTreats(msg.sender, count);
+        shibaWars.addTreats(msg.sender, count);
     } 
 
     // OPEN LUCKY SHIBA PACK
-    function openPack(uint256 id) public {
-        IShibaWars _shibaWars = IShibaWars(shibaWars);
+    // we will prevent calling this function from smart contracts
+    function openPack(uint256 id) public isUser() {
         // open pack
         // burn the token
-        _shibaWars.openPack(id, msg.sender);
+        shibaWars.openPack(id, msg.sender);
         // mint random token
         uint tokenId = ShibaWarsUtils.getRandomId(abi.encodePacked(block.difficulty, block.timestamp, id).random(0, 10000));
-        _shibaWars.mintNFT(msg.sender, tokenId);
+        shibaWars.mintNFT(msg.sender, tokenId);
     }
 
     function endSeason() public seasonEnded() {
         // get top 10
-        (uint256[] memory winners, uint256[] memory scores) = IShibaWars(shibaWars).getWinners();
+        (uint256[] memory winners, uint256[] memory scores) = shibaWars.getWinners();
         for(uint i = 0; i < 9; ++i) {
             for(uint j = i + 1; j < 10; ++j) {
                 if(scores[i] < scores[j]) {
@@ -199,7 +204,7 @@ contract ShibaWarsFactory {
         uint prizepool = getPrizePool();
         uint prizepoolLeash = getPrizePoolLeash();
         for(uint i = 0; i < 10; ++i) {
-            address winner = IShibaWars(shibaWars).ownerOf(winners[i]);
+            address winner = shibaWars.ownerOf(winners[i]);
             uint prizeShib = prizepool.ratio(shares[i], 1000000);
             uint prizeLeash = prizepoolLeash.ratio(shares[i], 1000000);
             IERC20(shibaInu).transfer(winner, prizeShib);
@@ -222,7 +227,7 @@ contract ShibaWarsFactory {
     function claimAirdrop(bytes32[] memory proof, uint8 tokenId) public isSeason() {
         require(!airdropClaimed[msg.sender], "Shiba Wars: Airdrop claimed already!");
         require(hasAirdrop(proof, msg.sender, tokenId), "Shiba Wars: Address is not eligible for this airdrop");
-        IShibaWars(shibaWars).mintNFT(msg.sender, tokenId);
+        shibaWars.mintNFT(msg.sender, tokenId);
         airdropClaimed[msg.sender] = true;
     }
 

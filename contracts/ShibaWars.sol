@@ -22,7 +22,7 @@ contract ShibaWars is ERC721 {
     string constant baseURI = "https://ipfs.io/ipfs/Qmf4ngHHgzmuRCYXCpVytwr9UsqPonLPK2urmy8faGo1Bu/token_metadata/";
     
     // info about tokens
-    uint256 private nextId = 1;
+    uint256 private nextId = 0;
     mapping(uint256 => ShibaWarsEntity.Shiba) private _tokenDetails;
     mapping(address => uint256) private shibaTreats;
     uint256 private seasonStart;
@@ -163,7 +163,7 @@ contract ShibaWars is ERC721 {
     function mintNFT(address owner, uint tokenId) public isShibaWars(msg.sender) {
         uint multiplier = ShibaWarsUtils.getStatsMultiplier(tokenId);
 
-        (uint str, uint agi, uint dex) = (tokenId < 17) ?
+        (uint str, uint agi, uint dex) = (tokenId / 100 == 1 && tokenId > ShibaWarsUtils.SHIBAWARS_SUPPORTER) ?
             (multiplier.mul(10).add(abi.encodePacked(block.difficulty, block.timestamp).random(0, 6).mul(multiplier)),
             multiplier.mul(10).add(abi.encodePacked(tokenId, block.timestamp).random(0, 6).mul(multiplier)),
             multiplier.mul(10).add(abi.encodePacked(block.difficulty, tokenId).random(0, 6).mul(multiplier))) :
