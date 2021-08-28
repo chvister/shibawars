@@ -277,7 +277,7 @@ contract ShibaWarsArena {
     }
 
     function getLeagueFromScore(uint score) public pure returns (uint) {
-        return score.div(250).add(1).sqrt().sub(1);
+        return score.div(250).sqrt();
     }
 
     function maxPointsForLeague(uint league) public pure returns (uint) {
