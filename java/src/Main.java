@@ -7,8 +7,8 @@ import java.util.Objects;
 
 public class Main {
 
-	public static final int WIDTH = 256;
-	public static final int HEIGHT = 256;
+	public static final int WIDTH = 1240;
+	public static final int HEIGHT = 1768;
 
 	public static void main(String[] args) throws IOException {
 
