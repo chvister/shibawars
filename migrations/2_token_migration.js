@@ -35,7 +35,7 @@ module.exports = async function (deployer, networks, accounts) {
   shibaWars.setShibaWarsArena(arenaAddress, {from : accounts[0]});
 
   // create nft factory
-  await deployer.deploy(ShibaWarsFactory, shibaWarsAddress);
+  await deployer.deploy(ShibaWarsFactory, shibaWarsAddress, arenaAddress);
   let shibaWarsFactory = await ShibaWarsFactory.deployed();
   let factoryAddress = shibaWarsFactory['address'];
   shibaWars.setFactoryAddress(factoryAddress, {from : accounts[0]});

@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 import "./IERC20.sol";
 import "./ShibaMath.sol";
 import "./IShibaWars.sol";
+import "./IShibaWarsArena.sol";
 import "./ShibaWarsUtils.sol";
 
 contract ShibaWarsFactory {
@@ -13,14 +14,17 @@ contract ShibaWarsFactory {
     address constant shibaInu = 0xAC27f67D1D2321FBa609107d41Ff603c43fF6931;
     address constant leash = 0x70bE14767cC790a668BCF6d0E6B4bC815A1bCf05;
     IShibaWars immutable shibaWars;
+    IShibaWarsArena immutable shibaWarsArena;
 
     address private devAddress;
 
     // shib
+    uint256 private winnersReward;
     uint256 private arenaReward;
     uint256 private devReward;
     uint256 private burnAmount;
     // leash
+    uint256 private winnersRewardLeash;
     uint256 private arenaRewardLeash;
     uint256 private devRewardLeash;
     uint256 private burnAmountLeash;
@@ -28,6 +32,7 @@ contract ShibaWarsFactory {
     uint256 constant SEASON_DURATION = 90 * 24 * 60 * 60;
     bytes32 constant merkleRoot = 0x3ec34dbb7ba6997c3cc877559af6f99873409a96f669760d4f24b17c0e75a49b;
     mapping(address => bool) private airdropClaimed;
+    mapping(address => bool) private prizeClaimed;
 
     modifier isSeason() {
         require(block.timestamp >= IShibaWars(shibaWars).seasonStart() && block.timestamp <= IShibaWars(shibaWars).seasonStart() + SEASON_DURATION,
@@ -51,19 +56,20 @@ contract ShibaWarsFactory {
         _;
     }
 
-    constructor(address shibaWars_) {
+    constructor(address _shibaWars, address _arena) {
         devAddress = msg.sender;
-        shibaWars = IShibaWars(shibaWars_);
+        shibaWars = IShibaWars(_shibaWars);
+        shibaWarsArena = IShibaWarsArena(_arena);
     }
     
     // RETURN TOTAL PRIZE POOL TO BE WON BY PLAYERS
     function getPrizePool() public view returns (uint256) {
-        return IERC20(shibaInu).balanceOf(address(this)).sub(devReward).sub(burnAmount);
+        return winnersReward.add(arenaReward);
     }
 
     // RETURN TOTAL PRIZE POOL LEASH TO BE WON BY PLAYERS
     function getPrizePoolLeash() public view returns (uint256) {
-        return IERC20(leash).balanceOf(address(this)).sub(devRewardLeash).sub(burnAmountLeash);
+        return winnersRewardLeash.add(arenaRewardLeash);
     }
 
     // SEND DEV REWARD AND BURN BURN AMOUNT
@@ -93,7 +99,8 @@ contract ShibaWarsFactory {
         require(_shibaInu.allowance(msg.sender, factory) >= cost, "Shiba Wars: ALLOW US TO SPEND YOUR SHIB");
         // transfer shib from buyer to smart contract
         require(_shibaInu.transferFrom(msg.sender, factory, cost), "Shiba Wars: Can not transfer tokens to the smart contract");
-        (uint256 _burn, uint256 _dev, uint256 _arena) = getFees(cost);
+        (uint256 _burn, uint256 _dev, uint256 _arena, uint256 _winners) = getFees(cost);
+        winnersReward = arenaReward.add(_winners);
         arenaReward = arenaReward.add(_arena);
         devReward = devReward.add(_dev);
         burnAmount = burnAmount.add(_burn);
@@ -108,23 +115,30 @@ contract ShibaWarsFactory {
         require(_leash.allowance(msg.sender, factory) >= cost, "Shiba Wars: ALLOW US TO SPEND YOUR LEASH");
         // transfer leash from buyer to smart contract
         require(_leash.transferFrom(msg.sender, factory, cost), "Shiba Wars: Can not transfer tokens to the smart contract");
-        (uint256 _burn, uint256 _dev, uint256 _arena) = getFees(cost);
+        (uint256 _burn, uint256 _dev, uint256 _arena, uint256 _winners) = getFees(cost);
+        winnersRewardLeash = winnersRewardLeash.add(_winners);
         arenaRewardLeash = arenaRewardLeash.add(_arena);
         devRewardLeash = devRewardLeash.add(_dev);
         burnAmountLeash = burnAmountLeash.add(_burn);
     }
 
-    function getFees(uint256 cost) public pure returns (uint256 _burn, uint256 _dev, uint256 _arena) {
+    function getFees(uint256 cost) public pure returns (uint256 _burn, uint256 _dev, uint256 _arena, uint256 _winners) {
         // 25% burn
         _burn = cost.ratio(25, 100);
         // 25% to dev
         _dev = cost.ratio(25, 100);
+        // 25% to the arena
+        _arena = cost.ratio(25, 100);
         // rest to arena winners
-        _arena = cost.sub(_burn).sub(_dev);
+        _winners = cost.sub(_burn).sub(_dev).sub(_arena);
     }
 
-    function mintGeneral(address user) public isDev(msg.sender) {
+    function airdropGeneral(address user) public isDev(msg.sender) {
         shibaWars.mintNFT(user, ShibaWarsUtils.SHIBA_GENERAL);
+    }
+
+    function airdropBadge(address user) public isDev(msg.sender) {
+        shibaWars.mintNFT(user, ShibaWarsUtils.SHIBAWARS_SUPPORTER);
     }
 
     // BUY SHIBA FROM SHOP
@@ -141,7 +155,7 @@ contract ShibaWarsFactory {
 
     // BUY SHIBA TREAT TOKENS
     function buyTreats(uint count) public isSeason() {
-        payTheContract(count.div(10).mul(10 ** 18));
+        payTheContract(count.mul(10 ** 17));
         shibaWars.addTreats(msg.sender, count);
     } 
 
@@ -201,8 +215,8 @@ contract ShibaWarsFactory {
                 }
             }
         }
-        uint prizepool = getPrizePool();
-        uint prizepoolLeash = getPrizePoolLeash();
+        uint prizepool = winnersReward;
+        uint prizepoolLeash = winnersRewardLeash;
         for(uint i = 0; i < 10; ++i) {
             address winner = shibaWars.ownerOf(winners[i]);
             uint prizeShib = prizepool.ratio(shares[i], 1000000);
@@ -211,9 +225,16 @@ contract ShibaWarsFactory {
             IERC20(leash).transfer(winner, prizeLeash);
         }
         redeemDevReward();
-        // burn whats left
-        IERC20(shibaInu).burn(IERC20(shibaInu).balanceOf(address(this)));
-        IERC20(leash).transfer(0x000000000000000000000000000000000000dEaD, IERC20(shibaInu).balanceOf(address(this)));
+    }
+
+    function claimPrize() public seasonEnded() {
+        require(!prizeClaimed[msg.sender], "SHIBAWARS: PRIZE CLAIMED ALREADY!");
+        (uint256 _matchesWon, uint256 _totalMatches) = shibaWarsArena.getMatchesWon(msg.sender);
+        uint256 shibPrize = arenaReward.ratio(_matchesWon, _totalMatches.mul(10));
+        uint256 leashPrize = arenaRewardLeash.ratio(_matchesWon, _totalMatches.mul(10));
+        IERC20(shibaInu).transfer(msg.sender, shibPrize);
+        IERC20(leash).transfer(msg.sender, leashPrize);
+        prizeClaimed[msg.sender] = true;
     }
 
     function hasAirdrop(bytes32[] memory proof, address account, uint8 tokenId) public view returns (bool) {

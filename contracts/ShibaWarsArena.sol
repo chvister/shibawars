@@ -19,6 +19,9 @@ contract ShibaWarsArena {
     mapping(uint256 => uint256) private leashUsed;
     mapping(uint256 => uint256) private adventures;
 
+    uint256 private matches;
+    mapping(address => uint256) private matchesWon;
+
     IShibaWars private shibaWars;
 
     uint256 constant SEASON_DURATION = 90 * 24 * 60 * 60;
@@ -143,27 +146,39 @@ contract ShibaWarsArena {
         if (defender.maxScore < newMaxDefender) {
             shibaWars.setMaxScore(defender.id, (uint128)(newMaxDefender));
         }
+        ++matches;
         if(winner == 1) {
             uint256 score = scoreReward(attacker.arenaScore, defender.arenaScore);
             uint attNewScore = attacker.arenaScore.add(score);
             uint defNewScore = score <= defender.arenaScore - 1 ? defender.arenaScore.sub(score) : 1;
+            matchesWon[shibaWars.ownerOf(attacker.id)] += 10;
             setScore(attacker.id, attNewScore, defender.id, defNewScore);
         } else if (winner == 2) {
             uint256 score = scoreReward(defender.arenaScore, attacker.arenaScore);
             uint defNewScore = defender.arenaScore.add(score);
             uint attNewScore = score <= attacker.arenaScore - 1 ? attacker.arenaScore.sub(score) : 1;
+            matchesWon[shibaWars.ownerOf(defender.id)] += 10;
             setScore(attacker.id, attNewScore, defender.id, defNewScore);
         } else {
             // who has more points or attacker should win
-            uint256 _exWinner = defender.arenaScore > attacker.arenaScore ? defender.id : attacker.id;
+            uint256 attackerId = attacker.id;
+            uint256 defenderId = defender.id;
+            uint256 _exWinner = defender.arenaScore > attacker.arenaScore ? defenderId : attackerId;
             (uint256 scoreA, uint256 scoreB) = 
                 (scoreReward(attacker.arenaScore, defender.arenaScore), scoreReward(defender.arenaScore, attacker.arenaScore));
             uint256 score = (scoreA > scoreB ? scoreA.sub(scoreB) : scoreB.sub(scoreA)).trim(1, 50);
-            uint attNewScore = _exWinner == attacker.id ? attacker.arenaScore.add(score) : attacker.arenaScore.sub(score);
-            uint defNewScore = _exWinner == defender.id ? defender.arenaScore.add(score) : defender.arenaScore.sub(score);
-            setScore(attacker.id, attNewScore, defender.id, defNewScore);
+            uint attNewScore = _exWinner == attackerId ? attacker.arenaScore.add(score) : attacker.arenaScore.sub(score);
+            uint defNewScore = _exWinner == defenderId ? defender.arenaScore.add(score) : defender.arenaScore.sub(score);
+            matchesWon[shibaWars.ownerOf(defenderId)] += 5;
+            matchesWon[shibaWars.ownerOf(attackerId)] += 5;
+            setScore(attackerId, attNewScore, defenderId, defNewScore);
         }
         emit ArenaFight(attacker.id, defender.id, damageAttacker, damageDefender, winner);
+    }
+
+    function getMatchesWon(address account) public view returns (uint256 _matchesWon, uint256 _totalMatches) {
+        _matchesWon = matchesWon[account];
+        _totalMatches = matches;
     }
 
     function scoreReward(uint256 winnerScore, uint256 loserScore) private pure returns (uint256) {
