@@ -1,4 +1,4 @@
-import Head from 'next/head'
+import Header from '../components/Header'
 import Footer from '../components/Footer'
 import NavbarApp from '../components/NavbarApp'
 import styles from '../styles/Home.module.css'
@@ -8,11 +8,7 @@ export default function Arena() {
     // # - dog id - owner address - arena score
   return (
     <div className={styles.container}>
-      <Head>
-        <title>Shibawars</title>
-        <link rel="icon" href="/shibawars_logo_new.png" />
-      </Head>
-
+      <Header/>
       <NavbarApp/>
       <main className={styles.main}>
         <div className={styles.section_app}>
