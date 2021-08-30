@@ -186,17 +186,17 @@ contract ShibaWarsFactory {
             }
         }
         uint256[] memory shares = new uint256[](10);
-        shares[0] = 26;
-        shares[1] = 20;
-        shares[2] = 15;
-        shares[3] = 12;
-        shares[4] = 9;
-        shares[5] = 7;
-        shares[6] = 4;
-        shares[7] = 3;
-        shares[8] = 2;
-        shares[9] = 1;
-        uint lastTotal = 26;
+        shares[0] = 26000;
+        shares[1] = 20000;
+        shares[2] = 15000;
+        shares[3] = 12000;
+        shares[4] = 9000;
+        shares[5] = 7000;
+        shares[6] = 4000;
+        shares[7] = 3000;
+        shares[8] = 2000;
+        shares[9] = 1000;
+        uint lastTotal = 26000;
         uint lastIndex = 0;
         uint lastCount = 1;
         // this will divide shares between winners if multiple have same score
@@ -206,7 +206,7 @@ contract ShibaWarsFactory {
                 ++lastCount;
             } else {
                 for(uint j = 0; j < lastCount; ++j) {
-                    shares[lastIndex + j] = lastTotal.mul(10000).div(lastCount);
+                    shares[lastIndex + j] = lastTotal.div(lastCount);
                 }
                 if(i != 10) {
                     lastTotal = shares[i];
@@ -219,8 +219,8 @@ contract ShibaWarsFactory {
         uint prizepoolLeash = winnersRewardLeash;
         for(uint i = 0; i < 10; ++i) {
             address winner = shibaWars.ownerOf(winners[i]);
-            uint prizeShib = prizepool.ratio(shares[i], 1000000);
-            uint prizeLeash = prizepoolLeash.ratio(shares[i], 1000000);
+            uint prizeShib = prizepool.ratio(shares[i], 100000);
+            uint prizeLeash = prizepoolLeash.ratio(shares[i], 100000);
             IERC20(shibaInu).transfer(winner, prizeShib);
             IERC20(leash).transfer(winner, prizeLeash);
         }
@@ -235,6 +235,17 @@ contract ShibaWarsFactory {
         IERC20(shibaInu).transfer(msg.sender, shibPrize);
         IERC20(leash).transfer(msg.sender, leashPrize);
         prizeClaimed[msg.sender] = true;
+    }
+
+    function claimablePrize(address user) public view returns (uint256 _shib, uint256 _leash) {
+        if(prizeClaimed[user]){
+            _shib = 0;
+            _leash = 0;
+        } else {
+            (uint256 _matchesWon, uint256 _totalMatches) = shibaWarsArena.getMatchesWon(msg.sender);
+            _shib = arenaReward.ratio(_matchesWon, _totalMatches.mul(10));
+            _leash = arenaRewardLeash.ratio(_matchesWon, _totalMatches.mul(10));
+        }
     }
 
     function hasAirdrop(bytes32[] memory proof, address account, uint8 tokenId) public view returns (bool) {
