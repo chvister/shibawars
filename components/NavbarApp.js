@@ -7,11 +7,7 @@ import CircularProgress from '@material-ui/core/CircularProgress'
 import AlertDialog from './AlertDialog'
 
 const NavbarApp = () => {
-    const { authenticate, isAuthenticated, authError, isAuthenticating, logout, web3 } = useMoralis();
-
-    if(window !== undefined) {
-        window.web3 = web3
-    }
+    const { authenticate, isAuthenticated, authError, isAuthenticating, logout } = useMoralis();
 
     return (
         <div className={styles.navbar}>

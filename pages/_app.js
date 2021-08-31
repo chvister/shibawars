@@ -17,23 +17,23 @@ export default function MyApp(props) {
     }
   }, []);
 
-  const appId = "VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC";
-  const serverUrl = "https://xmhlcuysesnk.moralis.io:2053/server";
+const appId = "VENnpo7F7P2IjpTpzdSxwbzbJ8XvfsZg8r8P01yC";
+const serverUrl = "https://xmhlcuysesnk.moralis.io:2053/server";
 
-  return (
-    <React.Fragment>
-      <Head>
-        <title>My page</title>
-        <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
-      </Head>
-      <MoralisProvider appId={appId} serverUrl={serverUrl}>
-        <ThemeProvider theme={theme}>
-          {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
-          <CssBaseline />
-          <Component {...pageProps} />
-        </ThemeProvider>
-      </MoralisProvider>
-    </React.Fragment>
+return (
+  <React.Fragment>
+    <Head>
+      <title>My page</title>
+      <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
+    </Head>
+    <MoralisProvider appId={appId} serverUrl={serverUrl}>
+      <ThemeProvider theme={theme}>
+        {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
+        <CssBaseline />
+        <Component {...pageProps} />
+      </ThemeProvider>
+    </MoralisProvider>
+  </React.Fragment>
   );
 }
 
