@@ -25,7 +25,7 @@ const NavbarApp = () => {
                     : null
                 }
                 {isAuthenticated ? null : 
-                    <Button hidden="true" variant="contained" onClick={() => authenticate() } disabled={isAuthenticating}>
+                    <Button variant="contained" onClick={() => authenticate() } disabled={isAuthenticating}>
                         { isAuthenticating ? <CircularProgress size={20}/> : "Login" }
                     </Button> 
                 }
