@@ -6,7 +6,7 @@ const Footer = () => {
     return (
         <footer className={styles.footer}>
         &copy; 2021 Kriko &amp; Friends &nbsp; 
-        <Link href="https://twitter.com/ShibaWars">
+        <Link href="https://twitter.com/ShibaWars" passHref>
             <Image src="/twitter3.png" alt="Twitter" width={36} height={36}/> 
         </Link> &nbsp;
         <Image src="/etherscan.png" alt="Etherscan" width={36} height={36}/> &nbsp;
