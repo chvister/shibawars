@@ -1,10 +1,7 @@
 import java.awt.image.BufferedImage
 import java.io.File
 import java.io.IOException
-import java.util.*
 import javax.imageio.ImageIO
-import kotlin.collections.ArrayList
-import kotlin.math.abs
 
 object Main {
     const val WIDTH = 1240
@@ -18,7 +15,7 @@ object Main {
 
     @Throws(IOException::class)
     fun processShiba(shibaName: String, shibaId: Int) {
-        val path = MAIN_PATH + shibaName + "/"
+        val path = "$MAIN_PATH$shibaName/"
 
         val backgrounds = path + "background"
         val eyes = path + "eye"
@@ -26,7 +23,8 @@ object Main {
         val chains = path + "chain"
         val miscs = path + "misc"
         val weapons = path + "weapon"
-        val output = MAIN_PATH + "../shibas"
+        val earrings = path + "earring"
+        val output = "$MAIN_PATH../shibas"
 
         val bgLength = File(backgrounds).list()!!.size
         val eyeLength = File(eyes).list()!!.size
@@ -34,15 +32,19 @@ object Main {
         val chainsLength = File(chains).list()!!.size
         val miscLength = File(miscs).list()!!.size
         val wpLength = File(weapons).list()!!.size
+        val earringLength = File(earrings).list()!!.size
 
         val shiba = ImageIO.read(File(path + "shiba/0.png"))
         val combinations = bgLength * (if (eyeLength > 0) eyeLength else 1) * (if (headLength > 0) headLength else 1) *
-                (if (chainsLength > 0) chainsLength else 1) * (if (miscLength > 0) miscLength else 1) * (if (wpLength > 0) wpLength else 1)
+                (if (chainsLength > 0) chainsLength else 1) * (if (miscLength > 0) miscLength else 1) *
+                (if (wpLength > 0) wpLength else 1) * (if (earringLength > 0) earringLength else 1)
 
-        val list = ArrayList<Int>(combinations)
-        for (i in 0 until combinations)
-            list.add(i)
-        val r = Random()
+        println("Gonna do $combinations combinations")
+
+        var done = 0
+        var alloc = 0.1f
+        var next = combinations * alloc
+        val started = System.currentTimeMillis()
 
         for (bgI in 0 until bgLength) {
             val background = ImageIO.read(File("$backgrounds/$bgI.png"))
@@ -58,29 +60,42 @@ object Main {
                         var weaponI = 0
                         while (weaponI < wpLength || weaponI < 1) {
                             val weapon = if (wpLength > 0) ImageIO.read(File("$weapons/$weaponI.png")) else null
-                            var miscI = 0
-                            while (miscI < miscLength || miscI < 1) {
-                                val misc = if (miscLength > 0) ImageIO.read(File("$miscs/$miscI.png")) else null
+                            var earRingI = 0
+                            while (earRingI < earringLength || earRingI < 1) {
+                                val earring = if (earringLength > 0) ImageIO.read(File("$earrings/$earRingI.png")) else null
+                                var miscI = 0
+                                while (miscI < miscLength || miscI < 1) {
+                                    val misc = if (miscLength > 0) ImageIO.read(File("$miscs/$miscI.png")) else null
 
-                                val combined = BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB)
+                                    val combined = BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB)
 
-                                // paint both images, preserving the alpha channels
-                                val g = combined.graphics
-                                g.drawImage(background, 0, 0, null)
-                                g.drawImage(shiba, 0, 0, null)
-                                eye?.let { g.drawImage(it, 0, 0, null) }
-                                head?.let { g.drawImage(it, 0, 0, null) }
-                                chain?.let { g.drawImage(it, 0, 0, null) }
-                                misc?.let { g.drawImage(it, 0, 0, null) }
-                                weapon?.let { g.drawImage(it, 0, 0, null) }
-                                g.dispose()
+                                    // paint both images, preserving the alpha channels
+                                    val g = combined.graphics
+                                    g.drawImage(background, 0, 0, null)
+                                    g.drawImage(shiba, 0, 0, null)
+                                    eye?.let { g.drawImage(it, 0, 0, null) }
+                                    head?.let { g.drawImage(it, 0, 0, null) }
+                                    misc?.let { g.drawImage(it, 0, 0, null) }
+                                    chain?.let { g.drawImage(it, 0, 0, null) }
+                                    weapon?.let { g.drawImage(it, 0, 0, null) }
+                                    earring?.let { g.drawImage(it, 0, 0, null) }
+                                    g.dispose()
 
-                                val index = abs(r.nextInt()) % list.size
-                                val id = (shibaId * 1000000) + list[index]
-                                ImageIO.write(combined, "PNG", File(output, "$id.png"))
-                                println("Shiba $id generated")
-                                list.removeAt(index)
-                                ++miscI
+                                    val name = "$shibaId$bgI${if (eyeLength > 0) eyeI else ""}" +
+                                            "${if (headLength > 0) headI else ""}${if (miscLength > 0) miscI else ""}" +
+                                            "${if (chainsLength > 0) chainI else ""}${if (wpLength > 0) weaponI else ""}" +
+                                            "${if (earringLength > 0) earRingI else ""}.png"
+
+                                    ImageIO.write(combined, "PNG", File(output, name))
+                                    ++done
+                                    if (done >= next) {
+                                        println("${(alloc * 100).toInt()}% done")
+                                        alloc += .1f
+                                        next = combinations * alloc
+                                    }
+                                    ++miscI
+                                }
+                                ++earRingI
                             }
                             ++weaponI
                         }
@@ -91,6 +106,8 @@ object Main {
                 ++eyeI
             }
         }
+
+        println("Finished in ${(System.currentTimeMillis() - started) / 1000}s")
     }
 
 
