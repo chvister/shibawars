@@ -20,7 +20,7 @@ object Main {
         val backgrounds = path + "background"
         val eyes = path + "eye"
         val heads = path + "head"
-        val chains = path + "chain"
+        val necklaces = path + "necklace"
         val miscs = path + "misc"
         val weapons = path + "weapon"
         val earrings = path + "earring"
@@ -29,14 +29,14 @@ object Main {
         val bgLength = File(backgrounds).list()!!.size
         val eyeLength = File(eyes).list()!!.size
         val headLength = File(heads).list()!!.size
-        val chainsLength = File(chains).list()!!.size
+        val necklaceLength = File(necklaces).list()!!.size
         val miscLength = File(miscs).list()!!.size
         val wpLength = File(weapons).list()!!.size
         val earringLength = File(earrings).list()!!.size
 
         val shiba = ImageIO.read(File(path + "shiba/0.png"))
         val combinations = bgLength * (if (eyeLength > 0) eyeLength else 1) * (if (headLength > 0) headLength else 1) *
-                (if (chainsLength > 0) chainsLength else 1) * (if (miscLength > 0) miscLength else 1) *
+                (if (necklaceLength > 0) necklaceLength else 1) * (if (miscLength > 0) miscLength else 1) *
                 (if (wpLength > 0) wpLength else 1) * (if (earringLength > 0) earringLength else 1)
 
         println("Gonna do $combinations combinations")
@@ -54,9 +54,9 @@ object Main {
                 var headI = 0
                 while (headI < headLength || headI < 1) {
                     val head = if (headLength > 0) ImageIO.read(File("$heads/$headI.png")) else null
-                    var chainI = 0
-                    while (chainI < chainsLength || chainI < 1) {
-                        val chain = if (chainsLength > 0) ImageIO.read(File("$chains/$chainI.png")) else null
+                    var necklaceI = 0
+                    while (necklaceI < necklaceLength || necklaceI < 1) {
+                        val necklace = if (necklaceLength > 0) ImageIO.read(File("$necklaces/$necklaceI.png")) else null
                         var weaponI = 0
                         while (weaponI < wpLength || weaponI < 1) {
                             val weapon = if (wpLength > 0) ImageIO.read(File("$weapons/$weaponI.png")) else null
@@ -76,14 +76,14 @@ object Main {
                                     eye?.let { g.drawImage(it, 0, 0, null) }
                                     head?.let { g.drawImage(it, 0, 0, null) }
                                     misc?.let { g.drawImage(it, 0, 0, null) }
-                                    chain?.let { g.drawImage(it, 0, 0, null) }
+                                    necklace?.let { g.drawImage(it, 0, 0, null) }
                                     weapon?.let { g.drawImage(it, 0, 0, null) }
                                     earring?.let { g.drawImage(it, 0, 0, null) }
                                     g.dispose()
 
                                     val name = "$shibaId$bgI${if (eyeLength > 0) eyeI else ""}" +
                                             "${if (headLength > 0) headI else ""}${if (miscLength > 0) miscI else ""}" +
-                                            "${if (chainsLength > 0) chainI else ""}${if (wpLength > 0) weaponI else ""}" +
+                                            "${if (necklaceLength > 0) necklaceI else ""}${if (wpLength > 0) weaponI else ""}" +
                                             "${if (earringLength > 0) earRingI else ""}.png"
 
                                     ImageIO.write(combined, "PNG", File(output, name))
@@ -99,7 +99,7 @@ object Main {
                             }
                             ++weaponI
                         }
-                        ++chainI
+                        ++necklaceI
                     }
                     ++headI
                 }

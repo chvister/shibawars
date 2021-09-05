@@ -25,7 +25,7 @@ SHIBA_INU = 112
 AGGRESIVE_SHIBA_PUP = 113
 SHIBA_PUP = 114
 DOGE_FATHER = 115
-GOLDEN_SHIBA = 116
+FLOKI = 116
 RYOSHI = 117
 SHIBA_GENERAL = 118
 
@@ -35,10 +35,10 @@ GOLDEN = 3
 DIAMOND = 4
 
 def main():
-    write_metadata(SHIBA_WARRIOR, 1, 2, 3, 5, 0, 7, 1)
+    write_metadata(SHIBA_WARRIOR, backgrounds = 1, earrings = 2, eyes = 3, heads = 5, necklaces = 1, miscs = 7, weapons = 1)
 
-def write_metadata(shibaId, backgrounds, earrings, eyes, heads, chains, miscs, weapons):
-    combinations = backgrounds * (earrings if (earrings > 0) else 1) * (eyes if (eyes> 0) else 1) * (heads if (heads > 0) else 1) * (chains if (chains > 0) else 1) * (miscs if (miscs > 0) else 1) * (weapons if (weapons > 0) else 1)
+def write_metadata(shibaId, backgrounds, earrings, eyes, heads, necklaces, miscs, weapons):
+    combinations = backgrounds * (earrings if (earrings > 0) else 1) * (eyes if (eyes> 0) else 1) * (heads if (heads > 0) else 1) * (necklaces if (necklaces > 0) else 1) * (miscs if (miscs > 0) else 1) * (weapons if (weapons > 0) else 1)
     print(combinations)
     ids = list(range(0,  combinations))
     random.shuffle(ids)
@@ -46,7 +46,7 @@ def write_metadata(shibaId, backgrounds, earrings, eyes, heads, chains, miscs, w
         for earringI in range(0, (earrings if (earrings > 0)  else 1)):
             for eyeI in range(0, (eyes if (eyes > 0)  else 1)):
                 for headI in range(0, (heads if (heads > 0)  else 1)):
-                    for chainI in range(0, (chains if (chains > 0)  else 1)):
+                    for neckI in range(0, (necklaces if (necklaces > 0)  else 1)):
                         for miscI in range(0, (miscs if (miscs > 0)  else 1)):
                             for weaponI in range(0, (weapons if (weapons > 0)  else 1)):
                                 id = ids.pop()
@@ -55,7 +55,7 @@ def write_metadata(shibaId, backgrounds, earrings, eyes, heads, chains, miscs, w
                                 if Path(metadata_file_name).exists():
                                     print("Metadata exists")
                                 else:
-                                    imgPath = "../../SHIBAWARS/shibas/{}{}{}{}{}{}{}{}.png".format(shibaId, bgI, eyeI if(eyes > 0) else "", headI if(heads > 0) else "", miscI if(miscs > 0) else "", chainI if(chains > 0) else "", weaponI if(weapons > 0) else "", earringI if(earrings > 0) else "")
+                                    imgPath = "../../SHIBAWARS/shibas/{}{}{}{}{}{}{}{}.png".format(shibaId, bgI, eyeI if(eyes > 0) else "", headI if(heads > 0) else "", miscI if(miscs > 0) else "", neckI if(necklaces > 0) else "", weaponI if(weapons > 0) else "", earringI if(earrings > 0) else "")
                                     if Path(imgPath).exists():
                                         print("Creating metadata")
                                         image = upload_to_ipfs(imgPath, tokenId)
@@ -69,7 +69,7 @@ def write_metadata(shibaId, backgrounds, earrings, eyes, heads, chains, miscs, w
                                                 {"trait_type" : "Earring", "value" : earringName(shibaId, earringI)},
                                                 {"trait_type" : "Eyes", "value" : eyeName(shibaId, eyeI)},
                                                 {"trait_type" : "Headgear", "value" : headName(shibaId, headI)},
-                                                {"trait_type" : "Chain", "value" : chainName(shibaId, chainI)},
+                                                {"trait_type" : "Necklace", "value" : necklaceName(shibaId, neckI)},
                                                 {"trait_type" : "Miscellanous", "value" : miscName(shibaId, miscI)},
                                                 {"trait_type" : "Weapon", "value" : weaponName(shibaId, weaponI)}
                                             ]
@@ -124,8 +124,8 @@ def get_name(token_id):
         return "Shib Pup"
     elif token_id == DOGE_FATHER:
         return "Doge Father"
-    elif token_id == GOLDEN_SHIBA:
-        return "Golden Shiba"
+    elif token_id == FLOKI:
+        return "Floki"
     elif token_id == RYOSHI:
         return "Ryoshi"
     elif token_id == SHIBA_GENERAL:
@@ -174,8 +174,8 @@ def get_description(token_id):
         return "AWWWWWWWWWWWWWWWWWW"
     elif token_id == DOGE_FATHER:
         return "A friend should always underestimate your virtues and an enemy overestimate your faults."
-    elif token_id == GOLDEN_SHIBA:
-        return "A member of very rare race of golden shiba inus"
+    elif token_id == FLOKI:
+        return "Doge Father's young pup"
     elif token_id == RYOSHI:
         return "The one who took us under their wings. Ryoshi."
     elif token_id == SHIBA_GENERAL:
@@ -229,9 +229,10 @@ def headName(tokenId, id):
             return "Diamond Helmet"
     return "None"
 
-def chainName(tokenId, id):
+def necklaceName(tokenId, id):
     if (tokenId == SHIBA_WARRIOR):
-        return "None"
+        if(id == 0):
+            return "Bone Necklace"
     return "None"
 
 def miscName(tokenId, id):

@@ -19,7 +19,7 @@ library ShibaWarsUtils {
     uint constant AGGRESIVE_SHIBA_PUP = 113;
     uint constant SHIBA_PUP = 114;
     uint constant DOGE_FATHER = 115;
-    uint constant GOLDEN_SHIBA = 116;
+    uint constant FLOKI = 116;
     uint constant RYOSHI = 117;
     uint constant SHIBA_GENERAL = 118;
 
@@ -61,7 +61,7 @@ library ShibaWarsUtils {
             return 250;
         } else if (tokenId == RYOSHI) {
             return 225;
-        } else if (tokenId == GOLDEN_SHIBA) {
+        } else if (tokenId == FLOKI) {
             return 200;
         } else if (tokenId == SHIBA_GENERAL) {
             return 200;
@@ -135,7 +135,7 @@ library ShibaWarsUtils {
             tokenId = ShibaWarsUtils.RYOSHI;
         } else if (number < 500) {
             // golden shiba inu
-            tokenId = ShibaWarsUtils.GOLDEN_SHIBA;
+            tokenId = ShibaWarsUtils.FLOKI;
         } else if (number < 1500) {
             // shiba inu
             tokenId = ShibaWarsUtils.AGGRESIVE_SHIBA_INU;
