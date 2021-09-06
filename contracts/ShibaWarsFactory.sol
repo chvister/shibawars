@@ -106,6 +106,21 @@ contract ShibaWarsFactory {
         burnAmount = burnAmount.add(_burn);
     }
 
+    function donateShib(uint256 amount) public {
+        address factory = address(this);
+        IERC20 _shibaInu = IERC20(shibaInu);
+        require(amount > 0, "Shiba Wars: AMOUNT MSUT BE ABOVE ZERO");
+        // does the buyer has enough shib?
+        require(_shibaInu.balanceOf(msg.sender) >= amount, "Shiba Wars: INSUFFICIENT SHIB BALANCE");
+        require(_shibaInu.allowance(msg.sender, factory) >= amount, "Shiba Wars: ALLOW US TO SPEND YOUR SHIB");
+        // transfer shib from buyer to smart contract
+        require(_shibaInu.transferFrom(msg.sender, factory, amount), "Shiba Wars: Can not transfer tokens to the smart contract");
+        uint256 arena = amount.div(2);
+        uint256 winners = amount.sub(arena);
+        arenaReward = arenaReward.add(arenaReward);
+        winnersReward = winnersReward.add(winners);
+    }
+
     function payTheContractLeash(uint256 cost) public {
         address factory = address(this);
         IERC20 _leash = IERC20(leash);
