@@ -1,5 +1,5 @@
 import styles from "../../styles/Home.module.css"
-import { Card, Row, Col, NavDropdown } from "react-bootstrap"
+import { Card, Row, Col } from "react-bootstrap"
 
 const Team = () => {
   return (
@@ -43,7 +43,7 @@ const Team = () => {
           </Card>
         </Col>
         <Col>
-          <Card className={styles.box}>
+          <Card className={styles.box + " " + styles.card}>
             <Card.Img variant="top" src="/kaya.jpg" />
             <Card.Body className={styles.cardBody}>
               <Card.Title className={styles.description}>

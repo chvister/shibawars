@@ -22,7 +22,7 @@ const Footer = () => {
           style={{ height: 40, width: 40, margin: "20px 5px" }}
           fgColor="white"
         />
-        <div>&copy; 2021 Kriko &amp; Friends </div>
+        <div style={{ color: "white" }}>&copy; 2021 Kriko &amp; Friends </div>
       </Container>
     </Card.Footer>
   )
