@@ -1,5 +1,4 @@
 import Header from '../components/Header'
-import Footer from '../components/Footer'
 import Footer from '../components/mainPage/Footer'
 import NavbarApp from '../components/NavbarApp'
 import styles from '../styles/Home.module.css'

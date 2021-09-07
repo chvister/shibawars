@@ -22,9 +22,8 @@ const Team = () => {
                 a.k.a Kriko
               </Card.Title>
               <Card.Text className={styles.cardDescription}>
-                Creator of Shibawars, programming, crypto, blockchain and
-                decentralization fanatic. Worked on both back-end and front-end
-                of Shibawars.
+              Creator of Shibawars, programming, crypto, blockchain, and decentralization fanatic. 
+              Worked on both back-end front-end of Shibawars.
               </Card.Text>
             </Card.Body>
           </Card>
@@ -57,8 +56,8 @@ const Team = () => {
                 a.k.a Chvister
               </Card.Title>
               <Card.Text className={styles.cardDescription}>
-                Passionate artist, who can spend days with her brushes. Worked
-                on Shibawars NFTs and other graphics.
+                Full-stack developer and crypto enthusiast. Shibawars community manager 
+                who also worked on the majority of Shibawars front-end.
               </Card.Text>
             </Card.Body>
           </Card>
