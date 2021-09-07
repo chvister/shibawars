@@ -1,5 +1,5 @@
 import Head from "next/head"
-import MainContent from "../components/mainPage/MainContentWrapper"
+import PageWrapper from "../components/mainPage/PageWrapper"
 import React from "react"
 import styles from "../styles/Home.module.css"
 
@@ -13,7 +13,7 @@ export default function Home() {
         <link rel="icon" href="/shibawars_logo_new.png" />
       </Head>
       <div className={styles.pageBackgroundColor}>
-        <MainContent />
+        <PageWrapper />
       </div>
     </>
   )

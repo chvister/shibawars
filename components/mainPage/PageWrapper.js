@@ -5,7 +5,7 @@ import NavbarHeader from "./NavbarHeader"
 import MiddleSection from "./MiddleSection"
 import styles from "../../styles/Home.module.css"
 
-const MainContent = () => {
+const PageWrapper = () => {
   return (
     <>
       <div className={styles.navbarColor}>
@@ -19,4 +19,4 @@ const MainContent = () => {
   )
 }
 
-export default MainContent
+export default PageWrapper

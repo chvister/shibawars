@@ -4,7 +4,11 @@ import { Card, Row, Col } from "react-bootstrap"
 const Team = () => {
   return (
     <div className={styles.borderCards}>
-      <h1 className={styles.title}>Team</h1>
+      <Card.Img
+        variant="top"
+        src="TEAM.png"
+        className={styles.titlePhotoTeam}
+      />
       <Row>
         <Col>
           <Card className={styles.box}>
@@ -35,7 +39,7 @@ const Team = () => {
               </Card.Title>
               <Card.Title className={styles.description}>a.k.a Kaya</Card.Title>
 
-              <Card.Text style={{ color: "white" }}>
+              <Card.Text className={styles.cardDescription}>
                 Passionate artist, who can spend days with her brushes. Worked
                 on Shibawars NFTs and other graphics.
               </Card.Text>
@@ -43,14 +47,16 @@ const Team = () => {
           </Card>
         </Col>
         <Col>
-          <Card className={styles.box + " " + styles.card}>
-            <Card.Img variant="top" src="/kaya.jpg" />
+          <Card className={styles.box}>
+            <Card.Img variant="top" src="/martinko.jpg" />
             <Card.Body className={styles.cardBody}>
               <Card.Title className={styles.description}>
-                Karolína Václavíková
+                Martin Stolár
               </Card.Title>
-              <Card.Title className={styles.description}>a.k.a Kaya</Card.Title>
-              <Card.Text style={{ color: "white" }}>
+              <Card.Title className={styles.description}>
+                a.k.a Stolo
+              </Card.Title>
+              <Card.Text className={styles.cardDescription}>
                 Passionate artist, who can spend days with her brushes. Worked
                 on Shibawars NFTs and other graphics.
               </Card.Text>

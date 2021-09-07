@@ -7,8 +7,8 @@ const About = () => {
     <div style={{ marginTop: "5rem" }}>
       <Card.Img
         variant="top"
-        src="ABOUT_Orange1.png"
-        className={styles.titlePhoto}
+        src="ABOUT.png"
+        className={styles.titlePhotoAbout}
       />
       <Card.Body className={styles.description}>
         The times of boredom have fallen upon our lands, and the breeders of

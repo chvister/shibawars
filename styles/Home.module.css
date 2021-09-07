@@ -86,6 +86,8 @@
 
 .description {
   color: white;
+  font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono,
+    Bitstream Vera Sans Mono, Courier New, monospace;
 
   line-height: 1.5;
   font-size: 1.5rem;
@@ -236,6 +238,7 @@
   background: #262626 !important;
 }
 .cardBody {
+  height: 15rem;
   background: #262626;
   border-top: none;
 }
@@ -265,8 +268,18 @@
   font-size: 1.25rem;
   line-height: 2;
 }
-.titlePhoto {
+.titlePhotoAbout {
+  width: 30% !important;
+  display: block;
+  margin: auto;
+}
+.titlePhotoWhitepaper {
   width: 50% !important;
+  display: block;
+  margin: auto;
+}
+.titlePhotoTeam {
+  width: 25% !important;
   display: block;
   margin: auto;
 }
@@ -292,7 +305,7 @@
   position: absolute;
   width: 100%;
   height: 1px;
-  background: #262626;
+  background: rgb(197, 197, 197);
   top: 100%;
   left: 0;
   pointer-events: none;
@@ -320,15 +333,15 @@
   transform: scale3d(1, 1, 1);
 }
 .box {
-  width: 15rem !important;
+  width: 16rem !important;
   margin: 20px auto !important;
   padding: 2px;
   /* border: none !important; */
-  background: #262626;
+  background: #262626 !important;
   background-color: #262626;
 }
 .box:hover {
-  width: 15rem;
+  width: 16rem;
   margin: 20px auto;
   padding: 2px;
   background: #262626;
@@ -340,7 +353,7 @@
   background-image: url("data:image/gif;base64,R0lGODlhAQABAPAAAOqrAP///yH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="),
     url("data:image/gif;base64,R0lGODlhAQABAPAAAOqrAP///yH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="),
     url("data:image/gif;base64,R0lGODlhAQABAPAAAP///////yH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="),
-    url("data:image/gif;base64,R0lGODlhAQABAPAAAP///////yH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==");
+    url("data:image/gif;base64,R0lGODlhAQABAPAAAP///////yH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==") !important;
   background-repeat: no-repeat;
   background-size: 0 2px, 0 100%, 0% 2px;
   background-position: top center, top center, bottom center;
@@ -398,7 +411,9 @@
   font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono,
     Bitstream Vera Sans Mono, Courier New, monospace;
 }
-
+.navbarButtonsWrapper {
+  margin-top: 2rem;
+}
 @media (min-width: 1100px) {
   .containerWrapper {
     width: 90%;
@@ -420,7 +435,13 @@
     /* display: block; */
     text-align: center;
   }
-  .titlePhoto {
+  .titlePhotoAbout {
     width: 80% !important;
+  }
+  .titlePhotoWhitepaper {
+    width: 100% !important;
+  }
+  .titlePhotoTeam {
+    width: 60% !important;
   }
 }
