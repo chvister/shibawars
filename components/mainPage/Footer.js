@@ -11,16 +11,22 @@ const Footer = () => {
           url="https://twitter.com/shibawars"
           style={{ height: 40, width: 40, margin: "20px 5px" }}
           fgColor="white"
+          target="_blank"
+          rel="noopener noreferrer"
         />
-        <SocialIcon
+        {/* <SocialIcon
           url="https://discord.com/shibawars"
           style={{ height: 40, width: 40, margin: "20px 5px" }}
           fgColor="white"
-        />
+          target="_blank"
+          rel="noopener noreferrer"
+        /> */}
         <SocialIcon
-          url="https://reddit.com/shibawars"
+          url="https://www.reddit.com/r/ShibaWars/"
           style={{ height: 40, width: 40, margin: "20px 5px" }}
           fgColor="white"
+          target="_blank"
+          rel="noopener noreferrer"
         />
         <div style={{ color: "white" }}>&copy; 2021 Kriko &amp; Friends </div>
       </Container>

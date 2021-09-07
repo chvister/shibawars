@@ -18,10 +18,10 @@ const NavbarMain = () => {
             Enter app
           </button>
         </Link>
-        <Link href="/shibawars_whitepaper.pdf" passHref>
-          <button target="_blank" className={styles.navbarButton}>
-            Whitepaper
-          </button>
+        <Link href="/shibawars_whitepaper.pdf">
+          <a target="_blank">
+            <button className={styles.navbarButton}>Whitepaper</button>
+          </a>
         </Link>
       </div>
     </div>

@@ -62,7 +62,6 @@
 }
 
 .description a {
-  color: #000;
   text-decoration: none;
 }
 
@@ -214,7 +213,12 @@
   );
   position: relative;
 }
-
+.externalLink {
+  color: #ffa509;
+}
+.externalLink:hover {
+  color: orange;
+}
 .borderCard {
   margin-top: 4rem;
   background: #262626;

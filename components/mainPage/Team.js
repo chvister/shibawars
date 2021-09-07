@@ -54,7 +54,7 @@ const Team = () => {
                 Martin Stolár
               </Card.Title>
               <Card.Title className={styles.description}>
-                a.k.a Stolo
+                a.k.a Chvister
               </Card.Title>
               <Card.Text className={styles.cardDescription}>
                 Passionate artist, who can spend days with her brushes. Worked
