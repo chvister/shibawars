@@ -91,21 +91,21 @@ library ShibaWarsUtils {
 
     function getTokenPrice(uint tokenId) public pure returns (uint256) {
         if (tokenId == DOGE_KILLER) {
-            return tokens(millions(100));
+            return tokens(millions(200));
         } else if (tokenId == AGGRESIVE_SHIBA_INU) {
-            return tokens(millions(20));
+            return tokens(millions(100));
         } else if (tokenId == BORED_SHIBA_INU) {
-            return tokens(millions(10));
+            return tokens(millions(50));
         } else if (tokenId == SHIBA_INU) {
-            return tokens(millions(5));
+            return tokens(millions(10));
         } else if (tokenId == AGGRESIVE_SHIBA_PUP) {
-            return tokens(millions(25) / 10);
+            return tokens(millions(5));
         } else if (tokenId == SHIBA_PUP) {
-            return tokens(thousand(500));
-        } else if (tokenId == LUCKY_SHIBA_PACK_GEN_1) {
-            return tokens(millions(4));
-        } else if (tokenId == SHIBAWARS_SUPPORTER) {
             return tokens(millions(15) / 10);
+        } else if (tokenId == LUCKY_SHIBA_PACK_GEN_1) {
+            return tokens(millions(10));
+        } else if (tokenId == SHIBAWARS_SUPPORTER) {
+            return tokens(thousand(500));
         } 
         return 0;
     }
@@ -138,7 +138,7 @@ library ShibaWarsUtils {
             tokenId = ShibaWarsUtils.FLOKI;
         } else if (number < 1500) {
             // shiba inu
-            tokenId = ShibaWarsUtils.AGGRESIVE_SHIBA_INU;
+            tokenId = ShibaWarsUtils.BORED_SHIBA_INU;
         } else if (number < 3000) {
             // akita inu
             tokenId = ShibaWarsUtils.SHIBA_INU; 

@@ -164,9 +164,9 @@ contract ShibaWars is ERC721 {
         uint multiplier = ShibaWarsUtils.getStatsMultiplier(tokenId);
 
         (uint str, uint agi, uint dex) = (tokenId / 100 == 1 && tokenId > ShibaWarsUtils.SHIBAWARS_SUPPORTER) ?
-            (multiplier.mul(10).add(abi.encodePacked(block.difficulty, block.timestamp).random(0, 6).mul(multiplier)),
-            multiplier.mul(10).add(abi.encodePacked(tokenId, block.timestamp).random(0, 6).mul(multiplier)),
-            multiplier.mul(10).add(abi.encodePacked(block.difficulty, tokenId).random(0, 6).mul(multiplier))) :
+            (abi.encodePacked(block.difficulty, block.timestamp).random(10 * multiplier, 16 * multiplier),
+            abi.encodePacked(tokenId, block.timestamp).random(10 * multiplier, 16 * multiplier),
+            abi.encodePacked(block.difficulty, tokenId).random(10 * multiplier, 16 * multiplier)) :
             (multiplier, multiplier, multiplier); 
 
         mint(owner, tokenId, str, agi, dex);

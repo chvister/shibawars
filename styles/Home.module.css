@@ -242,9 +242,10 @@
   background: #262626 !important;
 }
 .cardBody {
-  height: 15rem;
+  height: 18rem;
   background: #262626;
   border-top: none;
+  position: relative;
 }
 
 .cardDescription {
@@ -337,8 +338,9 @@
   transform: scale3d(1, 1, 1);
 }
 .box {
-  width: 16rem !important;
-  margin: 20px auto !important;
+  width: 16rem;
+  height: 40rem;
+  margin: 20px auto;
   padding: 2px;
   /* border: none !important; */
   background: #262626 !important;
@@ -346,6 +348,7 @@
 }
 .box:hover {
   width: 16rem;
+  height: 40rem;
   margin: 20px auto;
   padding: 2px;
   background: #262626;
@@ -448,4 +451,15 @@
   .titlePhotoTeam {
     width: 60% !important;
   }
+}
+
+.teamSocialContainer {
+  position: absolute;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  text-align: center;
+  padding: 10px;
+  bottom: 0;
 }
