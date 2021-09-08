@@ -12,6 +12,8 @@ export default function Home() {
       <Head>
         <title>Shibawars</title>
         <link rel="icon" href="/shibawars_logo_new.png" />
+        <meta property="og:title" content="Shibawars" key="title" />
+        <meta property="og:image" content="/shibawars_logo_new.png"/>
       </Head>
       <div className={styles.pageBackgroundColor}>
         <PageWrapper />
