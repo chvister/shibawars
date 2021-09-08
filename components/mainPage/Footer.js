@@ -1,5 +1,3 @@
-import Image from "next/image"
-import styles from "../../styles/Home.module.css"
 import { SocialIcon } from "react-social-icons"
 import { Container, Card } from "react-bootstrap"
 
@@ -28,7 +26,7 @@ const Footer = () => {
           target="_blank"
           rel="noopener noreferrer"
         />
-        <div style={{ color: "white" }}>&copy; 2021 Kriko &amp; Friends </div>
+        <div style={{ color: "white" }}>&copy; 2021 Naakka Studio </div>
       </Container>
     </Card.Footer>
   )
