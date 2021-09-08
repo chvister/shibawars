@@ -14,7 +14,7 @@ const NavbarMain = () => {
       </div>
       <div className={styles.navbarButtonsWrapper}>
         <Link href="/my_dogs" passHref>
-          <button className={styles.navbarButton} disabled={true}>
+          <button className={styles.navbarButton}>
             Enter app
           </button>
         </Link>
