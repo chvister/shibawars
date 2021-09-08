@@ -12,7 +12,7 @@ const Whitepaper = () => {
       <Card.Body className={styles.description}>
         You can read our whitepaper{" "}
         <a
-          href="/shibawars_whitepaper.pdf"
+          href="/shibawars_whitepaper_103.pdf"
           target="_blank"
           className={styles.externalLink}
         >
