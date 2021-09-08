@@ -5,15 +5,20 @@ import styles from "../styles/Home.module.css"
 import Dog from "../components/Dog"
 import { useMoralis } from "react-moralis"
 import { useEffect } from "react"
+import Web3 from "web3"
 
 export default function MyDogs() {
-  const { isAuthenticated, enableWeb3, isWeb3Enabled } = useMoralis();
+  const { isAuthenticated, enableWeb3, isWeb3Enabled, web3, Moralis } = useMoralis();
 
   useEffect(() => {
-    //if(isAuthenticated) {
+    if(isAuthenticated && !isWeb3Enabled) {
       enableWeb3()
-    //}
-  }, [])
+    }
+    if(isWeb3Enabled) {
+      window.web3 = web3
+      console.log(ethereum.selectedAddress)
+    }
+  }, [isAuthenticated, isWeb3Enabled])
 
   return (
     <div className={styles.container}>
