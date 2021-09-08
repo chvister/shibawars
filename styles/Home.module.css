@@ -338,7 +338,8 @@
   transform: scale3d(1, 1, 1);
 }
 .box {
-  width: 18rem;
+  width: 16rem;
+  height: 39rem;
   margin: 20px auto;
   padding: 2px;
   /* border: none !important; */
@@ -346,7 +347,8 @@
   background-color: #262626;
 }
 .box:hover {
-  width: 18rem;
+  width: 16rem;
+  height: 39rem;
   margin: 20px auto;
   padding: 2px;
   background: #262626;
