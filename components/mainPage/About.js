@@ -15,7 +15,7 @@ const About = () => {
         Shiba Inu have started looking for a way to entertain themselves. And so
         they took their beloved pets and put them into the arena, where they
         fought to entertain their owners. Suddenly the activity became so
-        popular, that breeders started to sell Shibas. And to have even more
+        popular, that breeders started to sell their Shibas. And to have even more
         fun, they started giving out prizes to the best arena fighters.
         Shibawars is a collection of 14 types of Shiba Inu dogs. While some are
         available for anyone to buy, some can only be found in a Lucky Shiba

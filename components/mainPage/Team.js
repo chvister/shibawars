@@ -23,7 +23,7 @@ const Team = () => {
               </Card.Title>
               <Card.Text className={styles.cardDescription}>
               Creator of Shibawars, programming, crypto, blockchain, and decentralization fanatic. 
-              Worked on both back-end front-end of Shibawars.
+              Worked on both back-end and front-end of Shibawars.
               </Card.Text>
             </Card.Body>
           </Card>
