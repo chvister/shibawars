@@ -20,12 +20,12 @@ contract ShibaWarsFactory {
 
     // shib
     uint256 private winnersReward;
-    uint256 private arenaReward;
+    uint256 private matchmakingReward;
     uint256 private devReward;
     uint256 private burnAmount;
     // leash
     uint256 private winnersRewardLeash;
-    uint256 private arenaRewardLeash;
+    uint256 private matchmakingRewardLeash;
     uint256 private devRewardLeash;
     uint256 private burnAmountLeash;
 
@@ -64,12 +64,12 @@ contract ShibaWarsFactory {
     
     // RETURN TOTAL PRIZE POOL TO BE WON BY PLAYERS
     function getPrizePool() public view returns (uint256) {
-        return winnersReward.add(arenaReward);
+        return winnersReward.add(matchmakingReward);
     }
 
     // RETURN TOTAL PRIZE POOL LEASH TO BE WON BY PLAYERS
     function getPrizePoolLeash() public view returns (uint256) {
-        return winnersRewardLeash.add(arenaRewardLeash);
+        return winnersRewardLeash.add(matchmakingRewardLeash);
     }
 
     // SEND DEV REWARD AND BURN BURN AMOUNT
@@ -99,9 +99,9 @@ contract ShibaWarsFactory {
         require(_shibaInu.allowance(msg.sender, factory) >= cost, "Shiba Wars: ALLOW US TO SPEND YOUR SHIB");
         // transfer shib from buyer to smart contract
         require(_shibaInu.transferFrom(msg.sender, factory, cost), "Shiba Wars: Can not transfer tokens to the smart contract");
-        (uint256 _burn, uint256 _dev, uint256 _arena, uint256 _winners) = getFees(cost);
-        winnersReward = arenaReward.add(_winners);
-        arenaReward = arenaReward.add(_arena);
+        (uint256 _burn, uint256 _dev, uint256 _matchmaking, uint256 _winners) = getFees(cost);
+        winnersReward = winnersReward.add(_winners);
+        matchmakingReward = matchmakingReward.add(_matchmaking);
         devReward = devReward.add(_dev);
         burnAmount = burnAmount.add(_burn);
     }
@@ -115,9 +115,9 @@ contract ShibaWarsFactory {
         require(_shibaInu.allowance(msg.sender, factory) >= amount, "Shiba Wars: ALLOW US TO SPEND YOUR SHIB");
         // transfer shib from buyer to smart contract
         require(_shibaInu.transferFrom(msg.sender, factory, amount), "Shiba Wars: Can not transfer tokens to the smart contract");
-        uint256 arena = amount.div(2);
-        uint256 winners = amount.sub(arena);
-        arenaReward = arenaReward.add(arenaReward);
+        uint256 _matchmaking = amount.div(2);
+        uint256 winners = amount.sub(_matchmaking);
+        matchmakingReward = matchmakingReward.add(_matchmaking);
         winnersReward = winnersReward.add(winners);
     }
 
@@ -130,22 +130,22 @@ contract ShibaWarsFactory {
         require(_leash.allowance(msg.sender, factory) >= cost, "Shiba Wars: ALLOW US TO SPEND YOUR LEASH");
         // transfer leash from buyer to smart contract
         require(_leash.transferFrom(msg.sender, factory, cost), "Shiba Wars: Can not transfer tokens to the smart contract");
-        (uint256 _burn, uint256 _dev, uint256 _arena, uint256 _winners) = getFees(cost);
+        (uint256 _burn, uint256 _dev, uint256 _matchmaking, uint256 _winners) = getFees(cost);
         winnersRewardLeash = winnersRewardLeash.add(_winners);
-        arenaRewardLeash = arenaRewardLeash.add(_arena);
+        matchmakingRewardLeash = matchmakingRewardLeash.add(_matchmaking);
         devRewardLeash = devRewardLeash.add(_dev);
         burnAmountLeash = burnAmountLeash.add(_burn);
     }
 
-    function getFees(uint256 cost) public pure returns (uint256 _burn, uint256 _dev, uint256 _arena, uint256 _winners) {
+    function getFees(uint256 cost) public pure returns (uint256 _burn, uint256 _dev, uint256 _matchmaking, uint256 _winners) {
         // 25% burn
         _burn = cost.ratio(25, 100);
         // 25% to dev
         _dev = cost.ratio(25, 100);
         // 25% to the arena
-        _arena = cost.ratio(25, 100);
+        _matchmaking = cost.ratio(25, 100);
         // rest to arena winners
-        _winners = cost.sub(_burn).sub(_dev).sub(_arena);
+        _winners = cost.sub(_burn).sub(_dev).sub(_matchmaking);
     }
 
     function airdropGeneral(address user) public isDev(msg.sender) {
@@ -245,8 +245,8 @@ contract ShibaWarsFactory {
     function claimPrize() public seasonEnded() {
         require(!prizeClaimed[msg.sender], "SHIBAWARS: PRIZE CLAIMED ALREADY!");
         (uint256 _matchesWon, uint256 _totalMatches) = shibaWarsArena.getMatchesWon(msg.sender);
-        uint256 shibPrize = arenaReward.ratio(_matchesWon, _totalMatches.mul(10));
-        uint256 leashPrize = arenaRewardLeash.ratio(_matchesWon, _totalMatches.mul(10));
+        uint256 shibPrize = matchmakingReward.ratio(_matchesWon, _totalMatches.mul(10));
+        uint256 leashPrize = matchmakingRewardLeash.ratio(_matchesWon, _totalMatches.mul(10));
         IERC20(shibaInu).transfer(msg.sender, shibPrize);
         IERC20(leash).transfer(msg.sender, leashPrize);
         prizeClaimed[msg.sender] = true;
@@ -258,8 +258,8 @@ contract ShibaWarsFactory {
             _leash = 0;
         } else {
             (uint256 _matchesWon, uint256 _totalMatches) = shibaWarsArena.getMatchesWon(msg.sender);
-            _shib = arenaReward.ratio(_matchesWon, _totalMatches.mul(10));
-            _leash = arenaRewardLeash.ratio(_matchesWon, _totalMatches.mul(10));
+            _shib = matchmakingReward.ratio(_matchesWon, _totalMatches.mul(10));
+            _leash = matchmakingRewardLeash.ratio(_matchesWon, _totalMatches.mul(10));
         }
     }
 
