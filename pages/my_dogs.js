@@ -3,8 +3,18 @@ import Footer from "../components/mainPage/Footer"
 import NavbarApp from "../components/NavbarApp"
 import styles from "../styles/Home.module.css"
 import Dog from "../components/Dog"
+import { useMoralis } from "react-moralis"
+import { useEffect } from "react"
 
 export default function MyDogs() {
+  const { isAuthenticated, enableWeb3, isWeb3Enabled } = useMoralis();
+
+  useEffect(() => {
+    //if(isAuthenticated) {
+      enableWeb3()
+    //}
+  }, [])
+
   return (
     <div className={styles.container}>
       <Head>
@@ -17,16 +27,20 @@ export default function MyDogs() {
         <div className={styles.section_app}>
           <h1 className={styles.title}>My Dogs</h1>
           <p className={styles.description}>Here are your dogs.</p>
-          <div className={styles.gridContainer}>
-            <Dog dogUrl={"/kriko.jpg"} />
-            <Dog dogUrl={"/kriko.jpg"} />
-            <Dog dogUrl={"/kriko.jpg"} />
-            <Dog dogUrl={"/kriko.jpg"} />
-            <Dog dogUrl={"/kriko.jpg"} />
-            <Dog dogUrl={"/kriko.jpg"} />
-            <Dog dogUrl={"/kriko.jpg"} />
-            <Dog dogUrl={"/kriko.jpg"} />
-          </div>
+            {
+              isAuthenticated && isWeb3Enabled ? 
+              <div className={styles.gridContainer}>
+                <Dog dogUrl={"/kriko.jpg"} />
+                <Dog dogUrl={"/kriko.jpg"} />
+                <Dog dogUrl={"/kriko.jpg"} />
+                <Dog dogUrl={"/kriko.jpg"} />
+                <Dog dogUrl={"/kriko.jpg"} />
+                <Dog dogUrl={"/kriko.jpg"} />
+                <Dog dogUrl={"/kriko.jpg"} />
+                <Dog dogUrl={"/kriko.jpg"} />
+                </div>
+              : null
+            }
         </div>
       </main>
 
