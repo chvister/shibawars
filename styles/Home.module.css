@@ -339,7 +339,7 @@
 }
 .box {
   width: 16rem;
-  height: 39rem;
+  height: 40rem;
   margin: 20px auto;
   padding: 2px;
   /* border: none !important; */
@@ -348,7 +348,7 @@
 }
 .box:hover {
   width: 16rem;
-  height: 39rem;
+  height: 40rem;
   margin: 20px auto;
   padding: 2px;
   background: #262626;
