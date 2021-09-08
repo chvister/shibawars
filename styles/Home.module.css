@@ -242,9 +242,10 @@
   background: #262626 !important;
 }
 .cardBody {
-  height: 15rem;
+  height: 18rem;
   background: #262626;
   border-top: none;
+  position: relative;
 }
 
 .cardDescription {
@@ -448,4 +449,15 @@
   .titlePhotoTeam {
     width: 60% !important;
   }
+}
+
+.teamSocialContainer {
+  position: absolute;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  text-align: center;
+  padding: 10px;
+  bottom: 0;
 }
