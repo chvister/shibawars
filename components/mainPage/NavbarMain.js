@@ -18,7 +18,7 @@ const NavbarMain = () => {
             Enter app
           </button>
         </Link>
-        <Link href="/shibawars_whitepaper_103.pdf">
+        <Link href="/shibawars_whitepaper.pdf">
           <a target="_blank">
             <button className={styles.navbarButton}>Whitepaper</button>
           </a>
