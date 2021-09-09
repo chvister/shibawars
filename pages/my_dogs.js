@@ -1,24 +1,44 @@
 import Head from "next/head"
-import Footer from "../components/mainPage/Footer"
-import NavbarApp from "../components/NavbarApp"
-import styles from "../styles/Home.module.css"
 import Dog from "../components/Dog"
 import { useMoralis } from "react-moralis"
-import { useEffect } from "react"
-import Web3 from "web3"
+import { useState, useEffect } from "react"
+import styles from "../styles/Home.module.css"
+import NavbarApp from "../components/NavbarApp"
+import Footer from "../components/mainPage/Footer"
+import ShibaWarsABI from "../public/ShibaWars.json"
 
 export default function MyDogs() {
-  const { isAuthenticated, enableWeb3, isWeb3Enabled, web3, Moralis } = useMoralis();
+  const { isAuthenticated, enableWeb3, isWeb3Enabled, web3 } = useMoralis();
+  const [account, setAccount] = useState(undefined)
+
+  const shibaWarsContract = new web3.eth.Contract(ShibaWarsABI.abi, process.env.NEXT_PUBLIC_SHIBAWARS_ADDRESS)
 
   useEffect(() => {
-    if(isAuthenticated && !isWeb3Enabled) {
+    if (isAuthenticated && !isWeb3Enabled) {
       enableWeb3()
     }
-    if(isWeb3Enabled) {
-      window.web3 = web3
-      console.log(ethereum.selectedAddress)
+    if (isWeb3Enabled) {
+      initAccount()
+    } else {
+      setAccount(undefined)
     }
   }, [isAuthenticated, isWeb3Enabled])
+
+  useEffect(() => {
+    if (account !== undefined) {
+      getUserTokens()
+    }
+  }, [account])
+
+  async function initAccount() {
+    let accounts = await web3.eth.getAccounts()
+    setAccount(accounts[0])
+  }
+
+  async function getUserTokens() {
+    let userTokens = await shibaWarsContract.methods.getUserTokens(account).call({from : account})
+    console.log(userTokens)
+  }
 
   return (
     <div className={styles.container}>
