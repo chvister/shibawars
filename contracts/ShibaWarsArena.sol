@@ -47,13 +47,23 @@ contract ShibaWarsArena {
             shibaWars.ownerOf(tokenId) != shibaWars.ownerOf(arenaQueue[league]), "Shiba Wars: NO OPPONENT READY FOR THIS SHIBA");
         _;
     }
+
+    modifier canFight(uint tokenId) {
+        ShibaWarsEntity.Shiba memory _shiba = shibaWars.getTokenDetails(tokenId);
+        uint id = _shiba.tokenId;
+        // must be shiba
+        require(id / 100 == 1 && id > ShibaWarsUtils.KAYA_THE_WOLFMOTHER, "Shiba Wars: THIS SHIBA CAN NOT FIGHT!");
+        // can not be in arena
+        require(_shiba.inArena == 0, "Shiba Wars: THIS SHIBA IS IN ARENA ALREADY");
+        require(_shiba.hitPoints > 1, "Shiba Wars: THIS SHIBA IS TOO EXHAUSTED");
+        _;
+    }
  
     constructor (address shibaWars_) {
         shibaWars = IShibaWars(shibaWars_);
     }
 
-    function queueToArena(uint tokenId) public isSeason() hasOpponent(tokenId) {
-        checkCanFight(tokenId);
+    function queueToArena(uint tokenId) public isSeason() hasOpponent(tokenId) myToken(tokenId) canFight(tokenId) {
         ShibaWarsEntity.Shiba memory _shiba = shibaWars.getTokenDetails(tokenId);
         uint league = getLeagueFromScore(_shiba.arenaScore);
         uint enemyId = arenaQueue[league];
@@ -67,15 +77,7 @@ contract ShibaWarsArena {
         }
     }
 
-    function checkCanFight(uint tokenId) private view myToken(tokenId) 
-        returns (ShibaWarsEntity.Shiba memory _shiba) {
-        _shiba = shibaWars.getTokenDetails(tokenId);
-        // must be shiba
-        require(canFight(tokenId), "Shiba Wars: THIS SHIBA CAN NOT FIGHT!");
-        // can not be in arena
-        require(_shiba.inArena == 0, "Shiba Wars: THIS SHIBA IS IN ARENA ALREADY");
-        require(_shiba.hitPoints > 1, "Shiba Wars: THIS SHIBA IS TOO EXHAUSTED");
-    }
+    
 
     function fight(uint256 firstShiba, uint256 secondShiba) private isSeason() {
         require(shibaWars.ownerOf(firstShiba) != shibaWars.ownerOf(secondShiba), "Shiba Wars: CAN NOT FIGHT YOUR OWN SHIBA");
@@ -192,12 +194,6 @@ contract ShibaWarsArena {
         shibaWars.setScore(defenderId, defenderScore);
     }
 
-    // RETURN TRUE IF THIS SHIBA CAN FIGHT IN ARENA
-    function canFight(uint tokenId) public view returns (bool) {
-        uint id =  shibaWars.getTokenDetails(tokenId).tokenId;
-        return id / 100 == 1 && id > ShibaWarsUtils.KAYA_THE_WOLFMOTHER;
-    }
-
     function putShibaOnLeash(uint shibaId, uint leashId) public isSeason() myToken(shibaId) myToken(leashId) {
         // shiba id must be shiba
         require(ShibaWarsUtils.isShiba(shibaWars.getTokenDetails(shibaId).tokenId), "Shiba Wars: CAN ONLY LEASH A SHIBA");
@@ -238,7 +234,7 @@ contract ShibaWarsArena {
         return leashId == 0 ? 0 : shibaWars.getTokenDetails(leashId).id;
     }
 
-    function goOnAdventure(uint shibaId) public myToken(shibaId) {
+    function goOnAdventure(uint shibaId) public myToken(shibaId) canFight(shibaId) {
         // get random enemy
         // get adventure level of this shiba
         uint adventureLevel = adventures[shibaId] + 1;
