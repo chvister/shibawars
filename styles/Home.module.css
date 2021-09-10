@@ -87,9 +87,15 @@
   color: white;
   font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono,
     Bitstream Vera Sans Mono, Courier New, monospace;
-
   line-height: 1.5;
   font-size: 1.5rem;
+}
+.footerText {
+  color: white;
+  font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono,
+    Bitstream Vera Sans Mono, Courier New, monospace;
+  line-height: 1;
+  font-size: 1rem;
 }
 
 .code {
@@ -250,8 +256,10 @@
 
 .cardDescription {
   color: white;
-  font-size: 1rem;
+  font-size: 0.85rem;
   text-align: center;
+  font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono,
+    Bitstream Vera Sans Mono, Courier New, monospace;
 }
 
 .navbarColor {
@@ -428,6 +436,10 @@
   }
 }
 @media (max-width: 576px) {
+  .description {
+    font-size: 1.2rem;
+    transform: scale(0.95);
+  }
   .navbarHeaderWrapper {
     /* max-width: 540px; */
     width: 90%;

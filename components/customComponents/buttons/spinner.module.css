@@ -14,7 +14,7 @@
   width: 24px;
   height: 24px;
   border: 3px solid #fff;
-  margin: 0 0 0 -4px;
+  margin: 2px 0 0 -4px;
   border-radius: 50%;
   animation: ldsRing 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
   border-color: #fff transparent transparent transparent;
@@ -57,6 +57,7 @@
   background-color: #66bb6a;
   border-color: #66bb6a;
   cursor: default;
+  margin: 2px 0 0 0;
 }
 
 .round label:after {
@@ -79,4 +80,21 @@
 
 .round input[type="checkbox"] + label:after {
   opacity: 1;
+}
+
+@media (max-width: 374px) {
+  .round label {
+    margin: -2px 0 0 0;
+  }
+  .ldsRing div {
+    margin: -2px 0 0 -4px;
+  }
+}
+@media (max-width: 767.98px) {
+  .round label {
+    margin: -0px 0 0 0;
+  }
+  .ldsRing div {
+    margin: 0px 0 0 -4px;
+  }
 }

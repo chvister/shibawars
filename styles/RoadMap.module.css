@@ -64,7 +64,7 @@
     Bitstream Vera Sans Mono, Courier New, monospace;
 
   line-height: 1.5;
-  font-size: 1rem;
+  font-size: 1.2rem;
 }
 
 .container.right {
@@ -115,6 +115,9 @@
   .container.right .content {
     padding: 10px 10px 10px 20px;
     border-radius: 5rem;
+  }
+  .container .content p {
+    font-size: 1rem;
   }
 }
 @media (max-width: 374px) {
