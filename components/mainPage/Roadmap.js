@@ -10,7 +10,7 @@ const RoadMap = () => {
     <>
       <Card.Img
         variant="top"
-        src="Roadmap.png"
+        src="roadmap.png"
         className={styles.titlePhotoRoadMap}
       />
 
