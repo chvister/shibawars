@@ -6,6 +6,7 @@ import { useState, useEffect } from "react"
 import styles from "../styles/Home.module.css"
 import NavbarApp from "../components/NavbarApp"
 import Footer from "../components/mainPage/Footer"
+import AlertDialog from "../components/AlertDialog"
 import ShibaWarsABI from "../public/ShibaWars.json"
 import ArenaABI from "../public/ShibaWarsArena.json"
 
@@ -13,6 +14,7 @@ export default function MyDogs() {
   const { isAuthenticated, enableWeb3, isWeb3Enabled, web3, Moralis } = useMoralis();
   const [account, setAccount] = useState(undefined)
   const [shibaTreats, setPowerTreats] = useState(0)
+  const [chainId, setChainId] = useState(0)
   const [userShibas, setUserShibas] = useState([])
 
   const shibaWarsContract = new web3.eth.Contract(ShibaWarsABI.abi, process.env.NEXT_PUBLIC_SHIBAWARS_ADDRESS)
@@ -24,8 +26,11 @@ export default function MyDogs() {
     }
     if (isWeb3Enabled) {
       initAccount()
-      Moralis.Web3.onAccountsChanged(function(accounts){
+      Moralis.Web3.onAccountsChanged(function (accounts) {
         setAccount(accounts[0])
+      })
+      Moralis.Web3.onChainChanged(function (chains) {
+        initAccount()
       })
     } else {
       setAccount(undefined)
@@ -33,30 +38,35 @@ export default function MyDogs() {
   }, [isAuthenticated, isWeb3Enabled])
 
   useEffect(() => {
-    if (account !== undefined) {
+    if (chainId != 1337) {
+      setUserShibas([])
+      setPowerTreats(0)
+    } else if (account !== undefined) {
       getUserTokens()
       getUserPowerTreats()
     }
-  }, [account])
+  }, [account, chainId])
 
   async function initAccount() {
+    let chain = await web3.eth.getChainId()
+    setChainId(chain)
     let accounts = await web3.eth.getAccounts()
     setAccount(accounts[0])
   }
 
   async function getUserPowerTreats() {
-    let shibaTreats_ = await shibaWarsContract.methods.getUserTreatTokens(account).call({from: account});
+    let shibaTreats_ = await shibaWarsContract.methods.getUserTreatTokens(account).call({ from: account });
     setPowerTreats(shibaTreats_)
   }
 
   async function getUserTokens() {
-    let userTokens = await shibaWarsContract.methods.getUserTokens(account).call({from : account})
+    let userTokens = await shibaWarsContract.methods.getUserTokens(account).call({ from: account })
     const userShibas_ = []
     for (var shibaId of userTokens) {
       const dogContent = []
-      let dog = await shibaWarsContract.methods.getTokenDetails(shibaId).call({from : account})
+      let dog = await shibaWarsContract.methods.getTokenDetails(shibaId).call({ from: account })
       dogContent["dog"] = dog
-      let tokenUri = await shibaWarsContract.methods.tokenURI(shibaId).call({from : account})
+      let tokenUri = await shibaWarsContract.methods.tokenURI(shibaId).call({ from: account })
       dogContent["tokenUri"] = tokenUri
       dogContent["treats"] = shibaTreats
       // TODO
@@ -64,7 +74,7 @@ export default function MyDogs() {
       dogContent["leashes"] = []
       dogContent["leashId"] = 0
 
-      userShibas_.push( <React.Fragment key={dog["id"]}><Dog dogData={dogContent} /></React.Fragment>)
+      userShibas_.push(<React.Fragment key={dog["id"]}><Dog dogData={dogContent} /></React.Fragment>)
     }
     setUserShibas(userShibas_)
   }
@@ -76,17 +86,21 @@ export default function MyDogs() {
         <link rel="icon" href="/shibawars_logo_new.png" />
       </Head>
 
+      {
+        chainId == 1337 ? null : <AlertDialog title={"Wrong network"} text={"Please select ganache network."} />
+      }
+
       <NavbarApp />
       <main className={styles.main}>
         <div className={styles.section_app}>
           <h1 className={styles.title}>My Dogs</h1>
           <p className={styles.description}>You have {shibaTreats} Shiba Treats.</p>
           <p className={styles.description}>Here are your dogs.</p>
-            {
-              isAuthenticated && isWeb3Enabled ? 
+          {
+            isAuthenticated && isWeb3Enabled ?
               <div className={styles.gridContainer}>{userShibas}</div>
               : null
-            }
+          }
         </div>
       </main>
 
