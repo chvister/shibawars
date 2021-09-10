@@ -5,7 +5,9 @@ import styles from "../../styles/Home.module.css"
 const Footer = () => {
   return (
     <>
-      <Card.Footer style={{ border: "none", marginTop: "8rem" }}>
+      <Card.Footer
+        style={{ border: "none", marginTop: "8rem", background: "#262626" }}
+      >
         <Container style={{ textAlign: "center" }}>
           <SocialIcon
             url="https://twitter.com/shibawars"

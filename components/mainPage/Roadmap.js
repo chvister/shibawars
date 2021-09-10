@@ -11,7 +11,7 @@ const RoadMap = () => {
       <Card.Img
         variant="top"
         src="Roadmap.png"
-        className={styles.titlePhotoAbout}
+        className={styles.titlePhotoRoadMap}
       />
 
       <Card.Body>
