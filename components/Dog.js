@@ -64,6 +64,8 @@ export default function Dog ({dogData}){
 
     const canFight = Math.floor(tokenId / 100) == 1 && tokenId > 103
 
+    // TODO: button functions
+
     return <div className={styles.dog}>
         {imageUri === undefined ? null : <Image width={512} height={512} src={imageUri}/>}
         <h2>{shibaName} ({uid})</h2>

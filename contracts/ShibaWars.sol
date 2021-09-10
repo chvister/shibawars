@@ -19,12 +19,13 @@ contract ShibaWars is ERC721 {
     address private shibaWarsArena;
     address private factoryAddress;
 
-    string constant baseURI = "https://ipfs.io/ipfs/Qmf4ngHHgzmuRCYXCpVytwr9UsqPonLPK2urmy8faGo1Bu/token_metadata/";
+    string constant baseURI = "https://ipfs.io/ipfs/QmU3ZvwTXYC2magUhB9bsYFNv84xMH62k4DeRqUuzDbu2Y/token_metadata/";
     
     // info about tokens
     uint256 private nextId = 0;
     mapping(uint256 => ShibaWarsEntity.Shiba) private _tokenDetails;
     mapping(address => uint256) private shibaTreats;
+    mapping(uint256 => uint256) private breed;
     uint256 private seasonStart;
 
     uint256 constant SEASON_DURATION = 90 * 24 * 60 * 60;
@@ -55,8 +56,9 @@ contract ShibaWars is ERC721 {
     constructor() ERC721("ShibaWars", "SHIBW") {
         devAddress = msg.sender;
         seasonStart = block.timestamp;
-        mint(msg.sender, 0, 10000, 10000, 10000);
-        mint(msg.sender, 1, 10000, 10000, 10000);
+        mint(msg.sender, 102,/*ShibaWarsUtils.TEAM_OP_SHIBA,*/ 10000, 10000, 10000);
+        mint(msg.sender, 103,/*ShibaWarsUtils.TEAM_OP_SHIBA,*/ 10000, 10000, 10000);
+        //mint(msg.sender, ShibaWarsUtils.TEAM_OP_SHIBA, 10000, 10000, 10000);
         factoryAddress = msg.sender; // just so we can mint ryoshi :) will be set to the proper address later
         mintNFT(0xB8f226dDb7bC672E27dffB67e4adAbFa8c0dFA08, 16);
     }
@@ -65,7 +67,7 @@ contract ShibaWars is ERC721 {
     function mint(address owner, uint tokenId, uint strength, uint agility, uint dexterity) private {
         _tokenDetails[nextId] = 
             ShibaWarsEntity.Shiba(
-                nextId,
+                nextId, breed[tokenId],
                 (uint64)(strength), 
                 (uint64)(agility), 
                 (uint64)(dexterity), 
@@ -76,6 +78,7 @@ contract ShibaWars is ERC721 {
                 (uint64)(dexterity.div(10)), 
                 1, 1, 249, 
                 ShibaWarsUtils.getMaxHp((uint64)(strength)));
+        ++breed[tokenId];
         _safeMint(owner, nextId);
         ++nextId;
     }
@@ -83,6 +86,7 @@ contract ShibaWars is ERC721 {
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
         require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
         ShibaWarsEntity.Shiba memory _shiba = getTokenDetails(tokenId);
+        // TODO: CHANGE - _shiba.breed % ShibaWarsUtils.breeds(tokenId);
         return string(abi.encodePacked(baseURI, (uint256)(_shiba.tokenId).toString(), ".json"));
     }
 

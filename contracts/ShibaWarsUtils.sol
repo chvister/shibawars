@@ -5,23 +5,22 @@ library ShibaWarsUtils {
     // token ids
     uint constant LUCKY_SHIBA_PACK_GEN_1 = 100;
     uint constant SHIBAWARS_SUPPORTER = 101;
-    uint constant BOJAR_DA_KILLA = 102;
-    uint constant KAYA_THE_WOLFMOTHER = 103;
-    uint constant WOOFMEISTER = 104;
-    uint constant SHIBA_WHALE = 105;
-    uint constant OG_SHIBA = 106;
-    uint constant SHIBA_WARLORD = 107;
-    uint constant SHIBA_WARRIOR = 108;
-    uint constant DOGE_KILLER = 109;
-    uint constant AGGRESIVE_SHIBA_INU = 110;
-    uint constant BORED_SHIBA_INU = 111;
-    uint constant SHIBA_INU = 112;
-    uint constant AGGRESIVE_SHIBA_PUP = 113;
-    uint constant SHIBA_PUP = 114;
-    uint constant DOGE_FATHER = 115;
-    uint constant FLOKI = 116;
-    uint constant RYOSHI = 117;
-    uint constant SHIBA_GENERAL = 118;
+    uint constant TEAM_OP_SHIBA = 102;
+    uint constant WOOFMEISTER = 103;
+    uint constant SHIBA_WHALE = 104;
+    uint constant OG_SHIBA = 105;
+    uint constant SHIBA_WARLORD = 106;
+    uint constant SHIBA_WARRIOR = 107;
+    uint constant DOGE_KILLER = 108;
+    uint constant AGGRESIVE_SHIBA_INU = 109;
+    uint constant BORED_SHIBA_INU = 110;
+    uint constant SHIBA_INU = 111;
+    uint constant AGGRESIVE_SHIBA_PUP = 112;
+    uint constant SHIBA_PUP = 113;
+    uint constant DOGE_FATHER = 114;
+    uint constant FLOKI = 115;
+    uint constant RYOSHI = 116;
+    uint constant SHIBA_GENERAL = 117;
 
     uint constant IRON = 1;
     uint constant SILVER = 2;
@@ -33,7 +32,7 @@ library ShibaWarsUtils {
     uint constant TOKEN = 10 ** 18;
 
     function getStatsMultiplier(uint tokenId) public pure returns (uint) {
-        if (tokenId == BOJAR_DA_KILLA || tokenId == KAYA_THE_WOLFMOTHER) {
+        if (tokenId == TEAM_OP_SHIBA) {
             return 1000;
         } else if (tokenId == WOOFMEISTER) {
             return 300;
@@ -75,6 +74,43 @@ library ShibaWarsUtils {
             return 30;
         }
         return 0;
+    }
+
+    function breeds(uint tokenId) public pure returns (uint) {
+        if (tokenId == TEAM_OP_SHIBA) {
+            return 3;
+        } else if (tokenId == WOOFMEISTER) {
+            return 32;
+        } else if (tokenId == SHIBA_WHALE) {
+            return 48;
+        } else if (tokenId == OG_SHIBA) {
+            return 3456;
+        } else if (tokenId == SHIBA_WARLORD) {
+            return 8820;
+        } else if (tokenId == SHIBA_WARRIOR) {
+            return 11340;
+        } else if (tokenId == DOGE_KILLER) {
+            return 1200;
+        } else if (tokenId == AGGRESIVE_SHIBA_INU) {
+            return 1200;
+        } else if (tokenId == BORED_SHIBA_INU) {
+            return 480;
+        } else if (tokenId == SHIBA_INU) {
+            return 480;
+        } else if (tokenId == AGGRESIVE_SHIBA_PUP) {
+            return 480;
+        } else if (tokenId == SHIBA_PUP) {
+            return 480;
+        } else if (tokenId == DOGE_FATHER) {
+            return 96;
+        } else if (tokenId == RYOSHI) {
+            return 216;
+        } else if (tokenId == FLOKI) {
+            return 24000;
+        } else if (tokenId == SHIBA_GENERAL) {
+            return 144;
+        }
+        return 1;
     }
 
     function millions(uint count) private pure returns (uint) {

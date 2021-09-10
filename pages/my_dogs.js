@@ -58,8 +58,8 @@ export default function MyDogs() {
       dogContent["dog"] = dog
       let tokenUri = await shibaWarsContract.methods.tokenURI(shibaId).call({from : account})
       dogContent["tokenUri"] = tokenUri
-      // TODO
       dogContent["treats"] = shibaTreats
+      // TODO
       dogContent["adventure"] = 11
       dogContent["leashes"] = []
       dogContent["leashId"] = 0

@@ -52,7 +52,7 @@ contract ShibaWarsArena {
         ShibaWarsEntity.Shiba memory _shiba = shibaWars.getTokenDetails(tokenId);
         uint id = _shiba.tokenId;
         // must be shiba
-        require(id / 100 == 1 && id > ShibaWarsUtils.KAYA_THE_WOLFMOTHER, "Shiba Wars: THIS SHIBA CAN NOT FIGHT!");
+        require(id / 100 == 1 && id > ShibaWarsUtils.TEAM_OP_SHIBA, "Shiba Wars: THIS SHIBA CAN NOT FIGHT!");
         // can not be in arena
         require(_shiba.inArena == 0, "Shiba Wars: THIS SHIBA IS IN ARENA ALREADY");
         require(_shiba.hitPoints > 1, "Shiba Wars: THIS SHIBA IS TOO EXHAUSTED");
