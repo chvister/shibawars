@@ -77,8 +77,6 @@ contract ShibaWarsArena {
         }
     }
 
-    
-
     function fight(uint256 firstShiba, uint256 secondShiba) private isSeason() {
         require(shibaWars.ownerOf(firstShiba) != shibaWars.ownerOf(secondShiba), "Shiba Wars: CAN NOT FIGHT YOUR OWN SHIBA");
         ShibaWarsEntity.Shiba memory attacker;
