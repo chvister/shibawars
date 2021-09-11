@@ -1,9 +1,9 @@
-import React from "react"
 import styles from "../../styles/Home.module.css"
 import About from "./About"
 import Whitepaper from "./Whitepaper"
 import RoadMap from "./Roadmap"
 import Team from "./Team"
+import ContactUs from "./ContactUs"
 import { Container } from "react-bootstrap"
 
 const middleSection = () => {
@@ -23,6 +23,10 @@ const middleSection = () => {
       <div className={styles.lineBreaker}></div>
       <div id="team">
         <Team />
+      </div>
+      <div className={styles.lineBreaker}></div>
+      <div>
+        <ContactUs />
       </div>
       <div className={styles.lineBreaker}></div>
     </Container>
