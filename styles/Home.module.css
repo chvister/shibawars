@@ -87,9 +87,15 @@
   color: white;
   font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono,
     Bitstream Vera Sans Mono, Courier New, monospace;
-
   line-height: 1.5;
   font-size: 1.5rem;
+}
+.footerText {
+  color: white;
+  font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono,
+    Bitstream Vera Sans Mono, Courier New, monospace;
+  line-height: 1;
+  font-size: 1rem;
 }
 
 .code {
@@ -250,8 +256,10 @@
 
 .cardDescription {
   color: white;
-  font-size: 1rem;
+  font-size: 0.85rem;
   text-align: center;
+  font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono,
+    Bitstream Vera Sans Mono, Courier New, monospace;
 }
 
 .navbarColor {
@@ -274,17 +282,22 @@
   line-height: 2;
 }
 .titlePhotoAbout {
-  width: 30% !important;
+  width: 19rem !important;
   display: block;
   margin: auto;
 }
 .titlePhotoWhitepaper {
-  width: 50% !important;
+  width: 32rem !important;
   display: block;
   margin: auto;
 }
 .titlePhotoTeam {
-  width: 25% !important;
+  width: 15rem !important;
+  display: block;
+  margin: auto;
+}
+.titlePhotoRoadMap {
+  width: 24rem !important;
   display: block;
   margin: auto;
 }
@@ -428,6 +441,10 @@
   }
 }
 @media (max-width: 576px) {
+  .description {
+    font-size: 1.2rem;
+    transform: scale(0.95);
+  }
   .navbarHeaderWrapper {
     /* max-width: 540px; */
     width: 90%;
@@ -443,13 +460,16 @@
     text-align: center;
   }
   .titlePhotoAbout {
-    width: 80% !important;
+    width: 70% !important;
   }
   .titlePhotoWhitepaper {
     width: 100% !important;
   }
   .titlePhotoTeam {
-    width: 60% !important;
+    width: 50% !important;
+  }
+  .titlePhotoRoadMap {
+    width: 80% !important;
   }
 }
 

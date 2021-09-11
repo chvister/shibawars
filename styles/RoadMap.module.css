@@ -1,0 +1,132 @@
+.timeline {
+  position: relative;
+  width: 100%;
+  max-width: 1140px;
+  margin: 0 auto;
+}
+
+.timeline::after {
+  content: "";
+  position: absolute;
+  width: 2px;
+  background: rgba(255, 165, 9, 1);
+  top: 0;
+  bottom: 0;
+  margin: 3rem;
+  left: 10%;
+  margin-left: -1px;
+}
+
+.container {
+  padding: 15px 30px;
+  position: relative;
+  background: inherit;
+  width: 80%;
+}
+
+.container::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: calc(50% - 8px);
+  right: -8px;
+  background: #ffffff;
+  border: 2px solid rgba(255, 165, 9, 1);
+  border-radius: 16px;
+  z-index: 1;
+}
+
+.container::before {
+  content: "";
+  position: absolute;
+  width: 23px;
+  height: 3px;
+  top: calc(50% - 1px);
+  right: 8px;
+  background: rgba(255, 165, 9, 1);
+  z-index: 1;
+}
+
+.container .content {
+  padding: 10px 10px 10px 20px;
+  background: #262626;
+  position: relative;
+  border-radius: 5rem;
+  width: 100%;
+  border: 2px solid rgba(255, 165, 9, 1);
+}
+
+.container .content p {
+  margin: 0;
+  color: white;
+  font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono,
+    Bitstream Vera Sans Mono, Courier New, monospace;
+
+  line-height: 1.5;
+  font-size: 1.2rem;
+}
+
+.container.right {
+  left: 10%;
+}
+
+.container.right .content {
+  padding: 10px 10px 10px 20px;
+  border-radius: 5rem;
+}
+.container.right::before {
+  left: 8px;
+}
+.container.right::after {
+  left: -8px;
+}
+
+@media (max-width: 767.98px) {
+  .timeline::after,
+  .container::after,
+  .container::before {
+    visibility: hidden;
+  }
+
+  .container {
+    width: 100%;
+    min-width: 295px;
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+
+  .container.right {
+    left: 0%;
+  }
+
+  .container.left::after,
+  .container.right::after {
+    left: 82px;
+  }
+
+  .container.left::before,
+  .container.right::before {
+    left: 100px;
+    border-color: transparent rgba(255, 165, 9, 1) transparent transparent;
+  }
+
+  .container.left .content,
+  .container.right .content {
+    padding: 10px 10px 10px 20px;
+    border-radius: 5rem;
+  }
+  .container .content p {
+    font-size: 1rem;
+  }
+}
+@media (max-width: 374px) {
+  .container .content p {
+    font-size: 0.9rem;
+  }
+  .timeline {
+    margin: 0px auto;
+    left: -10px;
+    transform: scale(0.95);
+  }
+}
