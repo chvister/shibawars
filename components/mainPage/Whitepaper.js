@@ -19,7 +19,7 @@ const Whitepaper = () => {
         data-aos="fade-up"
       />
       <Card.Body className={styles.description} data-aos="fade-up">
-        You can read our whitepaper
+        You can read our whitepaper{" "}
         <a
           href="/shibawars_whitepaper.pdf"
           target="_blank"
