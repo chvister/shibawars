@@ -25,7 +25,7 @@ const Whitepaper = () => {
           target="_blank"
           className={styles.externalLink}
         >
-          here
+          here.
         </a>
       </Card.Body>
     </>
