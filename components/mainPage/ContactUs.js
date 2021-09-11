@@ -16,7 +16,7 @@ const ContactUs = () => {
         <Card.Img
           variant="top"
           src="cotactUs.png"
-          className={styles.titlePhotoAbout}
+          className={styles.titleContactUS}
           data-aos="fade-up"
         />
         <Card.Body className={styles.description} data-aos="fade-up">

@@ -301,6 +301,11 @@
   display: block;
   margin: auto;
 }
+.titleContactUS {
+  width: 28rem !important;
+  display: block;
+  margin: auto;
+}
 
 .link {
   cursor: pointer;
@@ -470,6 +475,9 @@
   }
   .titlePhotoRoadMap {
     width: 80% !important;
+  }
+  .titleContactUS {
+    width: 90% !important;
   }
 }
 
