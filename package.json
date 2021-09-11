@@ -11,6 +11,7 @@
   "dependencies": {
     "@material-ui/core": "^4.12.3",
     "@openzeppelin/contracts": "^4.3.0",
+    "aos": "^3.0.0-beta.6",
     "babel-plugin-styled-components": "^1.13.2",
     "bootstrap": "^5.1.0",
     "moralis": "0.0.42",

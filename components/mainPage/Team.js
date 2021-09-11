@@ -1,18 +1,27 @@
+import { useEffect } from "react"
 import styles from "../../styles/Home.module.css"
 import { Card, Row, Col } from "react-bootstrap"
 import { SocialIcon } from "react-social-icons"
+import AOS from "aos"
+import "aos/dist/aos.css"
 
 const Team = () => {
+  useEffect(() => {
+    AOS.init({
+      duration: 800,
+    })
+  }, [])
   return (
     <div className={styles.borderCards}>
       <Card.Img
         variant="top"
         src="TEAM.png"
         className={styles.titlePhotoTeam}
+        data-aos="fade-up"
       />
       <Row>
         <Col>
-          <Card className={styles.box}>
+          <Card className={styles.box} data-aos="fade-up">
             <Card.Img variant="top" src="/kriko.jpg" />
 
             <Card.Body className={styles.cardBody}>
@@ -48,7 +57,7 @@ const Team = () => {
         </Col>
 
         <Col>
-          <Card className={styles.box}>
+          <Card className={styles.box} data-aos="fade-up">
             <Card.Img variant="top" src="/kaya.jpg" />
             <Card.Body className={styles.cardBody}>
               <Card.Title className={styles.description}>
@@ -80,7 +89,7 @@ const Team = () => {
           </Card>
         </Col>
         <Col>
-          <Card className={styles.box}>
+          <Card className={styles.box} data-aos="fade-up">
             <Card.Img variant="top" src="/martinko.jpg" />
             <Card.Body className={styles.cardBody}>
               <Card.Title className={styles.description}>
