@@ -9,6 +9,7 @@ import Footer from "../components/mainPage/Footer"
 import AlertDialog from "../components/AlertDialog"
 import ShibaWarsABI from "../build/contracts/ShibaWars.json"
 import ArenaABI from "../build/contracts/ShibaWarsArena.json"
+import FactoryABI from "../build/contracts/ShibaWarsFactory.json"
 
 export default function MyDogs() {
   const { isAuthenticated, enableWeb3, isWeb3Enabled, web3, Moralis } = useMoralis();
@@ -19,6 +20,7 @@ export default function MyDogs() {
 
   const shibaWarsContract = new web3.eth.Contract(ShibaWarsABI.abi, process.env.NEXT_PUBLIC_SHIBAWARS_ADDRESS)
   const arenaContract = new web3.eth.Contract(ArenaABI.abi, process.env.NEXT_PUBLIC_ARENA_ADDRESS)
+  const factoryContract = new web3.eth.Contract(FactoryABI.abi, process.env.NEXT_PUBLIC_FACTORY_ADDRESS)
 
   useEffect(() => {
     if (isAuthenticated && !isWeb3Enabled) {
@@ -74,7 +76,11 @@ export default function MyDogs() {
       dogContent["leashes"] = []
       dogContent["leashId"] = 0
 
-      userShibas_.push(<React.Fragment key={dog["id"]}><Dog dogData={dogContent} /></React.Fragment>)
+      userShibas_.push(
+        <React.Fragment key={dog["id"]}>
+          <Dog dogData={dogContent} factoryContract={factoryContract} account={account} onOpen={() => { getUserTokens() }} />
+        </React.Fragment>
+      )
     }
     setUserShibas(userShibas_)
   }

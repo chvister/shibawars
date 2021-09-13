@@ -4,7 +4,7 @@ import Image from 'next/dist/client/image'
 import { useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
 
-export default function Dog({ dogData }) {
+export default function Dog({ dogData, factoryContract, account, onOpen }) {
     const data = dogData["dog"]
     const [uri] = useState(dogData["tokenUri"])
     const userShibaTreats = dogData["treats"]
@@ -66,12 +66,20 @@ export default function Dog({ dogData }) {
 
     // TODO: button functions
 
+    async function openPack() {
+        factoryContract.methods.openPack(uid).send({ from: account, gasLimit: 500000 })
+            .on("receipt", (async (receipt) => {
+                onOpen()
+            }))
+    }
+
     if (tokenId <= 101) {
         return (
             <div className={styles.dog}>
                 {imageUri === undefined ? null : <Image width={512} height={512} src={imageUri} />}
                 <h2>{shibaName} ({uid})</h2>
                 <p>{shibaDesc}</p>
+                {tokenId == 100 ? <Button variant="contained" onClick={() => { openPack() }}>Open pack</Button> : null}
             </div>)
     }
 
