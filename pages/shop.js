@@ -2,6 +2,7 @@ import Header from '../components/Header'
 import { useMoralis } from "react-moralis"
 import LeashABI from "../public/Leash.json"
 import { useState, useEffect } from 'react'
+import Button from '@material-ui/core/Button'
 import ShibaSale from "../components/DogShop"
 import styles from "../styles/Home.module.css"
 import NavbarApp from "../components/NavbarApp"
@@ -15,6 +16,8 @@ export default function Shop() {
   const [chainId, setChainId] = useState(0)
   const [shibaInu, setShibaInu] = useState("0")
   const [leash, setLeash] = useState("0")
+  const [shibAllowed, setShibAllowed] = useState(false)
+  const [leashAllowed, setLeashAllowed] = useState(false)
 
   const shibaInuContract = new web3.eth.Contract(ShibaInuABI.abi, process.env.NEXT_PUBLIC_SHIBA_INU_ADDRESS)
   const leashContract = new web3.eth.Contract(LeashABI.abi, process.env.NEXT_PUBLIC_LEASH_ADDRESS)
@@ -53,13 +56,21 @@ export default function Shop() {
   }
 
   async function getUserErc20() {
-    let shib_ = await shibaInuContract.methods.balanceOf(account).call({ from: account });
+    let shib_ = await shibaInuContract.methods.balanceOf(account).call({ from: account })
     if (shib_.length <= 18) {
       setShibaInu("0")
     } else {
       setShibaInu(thousandSeparator(shib_.substring(0, shib_.length - 18)))
     }
-    let leash_ = await leashContract.methods.balanceOf(account).call({ from: account });
+
+    let shibAllowance = await shibaInuContract.methods.allowance(account, process.env.NEXT_PUBLIC_FACTORY_ADDRESS).call({ from: account })
+    if (shibAllowance == 0) {
+      setShibAllowed(false)
+    } else {
+      setShibAllowed(true)
+    }
+
+    let leash_ = await leashContract.methods.balanceOf(account).call({ from: account })
     if (leash_.length <= 18) {
       if (leash_.length <= 16) {
         setLeash("0")
@@ -73,6 +84,27 @@ export default function Shop() {
     } else {
       setLeash(thousandSeparator(leash_.substring(0, leash_.length - 18)))
     }
+
+    let leashAllowance = await leashContract.methods.allowance(account, process.env.NEXT_PUBLIC_FACTORY_ADDRESS).call({ from: account })
+    if (leashAllowance == 0) {
+      setLeashAllowed(false)
+    } else {
+      setLeashAllowed(true)
+    }
+  }
+
+  async function allowShib() {
+    shibaInuContract.methods.approve(process.env.NEXT_PUBLIC_FACTORY_ADDRESS, "1000000000000000000000000000000000")
+      .send({ from: account }).on("receipt", (() => {
+        getUserErc20()
+      }))
+  }
+
+  async function allowLeash() {
+    leashContract.methods.approve(process.env.NEXT_PUBLIC_FACTORY_ADDRESS, "100000000000000000000000")
+      .send({ from: account }).on("receipt", (() => {
+        getUserErc20()
+      }))
   }
 
   return (
@@ -84,8 +116,14 @@ export default function Shop() {
         <div className={styles.section_app}>
           <h1 className={styles.title}>Shop</h1>
           <p className={styles.description}>Here you can buy a new Shiba Inu</p>
-          <p className={styles.description}>Your $SHIB balance: {shibaInu}</p>
-          <p className={styles.description}>Your $LEASH balance: {leash}</p>
+          <p className={styles.description}>
+            Your $SHIB balance: {shibaInu}
+            {shibAllowed ? null : <Button variant="contained" onClick={() => { allowShib() }}>Allow us to spend your $SHIB</Button>}
+          </p>
+          <p className={styles.description}>
+            Your $LEASH balance: {leash}
+            {leashAllowed ? null : <Button variant="contained" onClick={() => { allowLeash() }}>Allow us to spend your $LEASH</Button>}
+          </p>
           <div className={styles.gridContainer}>
             <ShibaSale
               dogName={"Doge Killer"}
