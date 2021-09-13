@@ -181,13 +181,13 @@ def get_description(token_id):
     elif token_id == SHIBA_GENERAL:
         return "When the times are difficult, the Shiba Generals embrace the morale of ShibaArmy."
     elif token_id == IRON:
-        return "Increases the stats of your doge in fight by 15%"
+        return "Increases the stats of your shiba in fight by 15%"
     elif token_id == SILVER:
-        return "Increases the stats of your doge in fight by 20%"
+        return "Increases the stats of your shiba in fight by 20%"
     elif token_id == GOLDEN:
-        return "Increases the stats of your doge in fight by 25%"
+        return "Increases the stats of your shiba in fight by 25%"
     elif token_id == DIAMOND:
-        return "Increases the stats of your doge in fight by 30%"
+        return "Increases the stats of your shiba in fight by 30%"
     else:
         return ""
 
