@@ -19,7 +19,7 @@ contract ShibaWars is ERC721 {
     address private shibaWarsArena;
     address private factoryAddress;
 
-    string constant baseURI = "https://ipfs.io/ipfs/QmU3ZvwTXYC2magUhB9bsYFNv84xMH62k4DeRqUuzDbu2Y/token_metadata/";
+    string constant baseURI = "https://ipfs.io/ipfs/QmVMU7GdBnkZg55CedeeVxEehW9v5rbHf391frzoBnYs6q/";
     
     // info about tokens
     uint256 private nextId = 0;

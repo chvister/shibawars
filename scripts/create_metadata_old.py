@@ -18,7 +18,7 @@ def write_metadata():
         if Path(metadata_file_name).exists():
             print("Metadata exists")
         else:
-            imgPath = "./client/img/token-" + str(token_id) + ".png"
+            imgPath = "../../SHIBAWARS/img_old/token-" + str(token_id) + ".png"
             if Path(imgPath).exists():
                 print("Creating metadata")
                 image = upload_to_ipfs(imgPath, token_id)
