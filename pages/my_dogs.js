@@ -7,8 +7,8 @@ import styles from "../styles/Home.module.css"
 import NavbarApp from "../components/NavbarApp"
 import Footer from "../components/mainPage/Footer"
 import AlertDialog from "../components/AlertDialog"
-import ShibaWarsABI from "../public/ShibaWars.json"
-import ArenaABI from "../public/ShibaWarsArena.json"
+import ShibaWarsABI from "../build/contracts/ShibaWars.json"
+import ArenaABI from "../build/contracts/ShibaWarsArena.json"
 
 export default function MyDogs() {
   const { isAuthenticated, enableWeb3, isWeb3Enabled, web3, Moralis } = useMoralis();

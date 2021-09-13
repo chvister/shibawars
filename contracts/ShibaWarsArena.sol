@@ -41,14 +41,17 @@ contract ShibaWarsArena {
     }
 
     modifier hasOpponent(uint tokenId) {
+        {
         ShibaWarsEntity.Shiba memory _shiba = shibaWars.getTokenDetails(tokenId);
         uint league = getLeagueFromScore(_shiba.arenaScore);
         require(arenaQueue[league] == 0 || 
             shibaWars.ownerOf(tokenId) != shibaWars.ownerOf(arenaQueue[league]), "Shiba Wars: NO OPPONENT READY FOR THIS SHIBA");
+        }
         _;
     }
 
     modifier canFight(uint tokenId) {
+        {
         ShibaWarsEntity.Shiba memory _shiba = shibaWars.getTokenDetails(tokenId);
         uint id = _shiba.tokenId;
         // must be shiba
@@ -56,6 +59,7 @@ contract ShibaWarsArena {
         // can not be in arena
         require(_shiba.inArena == 0, "Shiba Wars: THIS SHIBA IS IN ARENA ALREADY");
         require(_shiba.hitPoints > 1, "Shiba Wars: THIS SHIBA IS TOO EXHAUSTED");
+        }
         _;
     }
  
