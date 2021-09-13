@@ -3,6 +3,7 @@ import { useMoralis } from "react-moralis"
 import LeashABI from "../public/Leash.json"
 import { useState, useEffect } from 'react'
 import Button from '@material-ui/core/Button'
+import { TextField } from '@material-ui/core'
 import ShibaSale from "../components/ShibaSale"
 import styles from "../styles/Home.module.css"
 import NavbarApp from "../components/NavbarApp"
@@ -25,6 +26,9 @@ export default function Shop() {
   const [boughtTokenId, setBoughtTokenId] = useState(0)
   const [imageUri, setImageUri] = useState("")
   const [name, setName] = useState("")
+  const [buyTreatsCount, setBuyTreatsCount] = useState(1500000)
+  const [notEnoughTreats, setNotEnoughTreats] = useState(false)
+  const [shibaTreats, setShibaTreats] = useState(0)
 
   const shibaInuContract = new web3.eth.Contract(ShibaInuABI.abi, process.env.NEXT_PUBLIC_SHIBA_INU_ADDRESS)
   const leashContract = new web3.eth.Contract(LeashABI.abi, process.env.NEXT_PUBLIC_LEASH_ADDRESS)
@@ -105,6 +109,9 @@ export default function Shop() {
 
     let trainerTokens = await factoryContract.methods.userTrainerTokens(account).call({ from: account })
     setTrainerTokens(trainerTokens)
+
+    let shibaTreats = await shibaWarsContract.methods.getUserTreatTokens(account).call({ from: account })
+    setShibaTreats(thousandSeparator(shibaTreats))
   }
 
   async function allowShib() {
@@ -157,6 +164,22 @@ export default function Shop() {
     setBoughtTokenId(0)
     setImageUri("")
     setName("")
+    setNotEnoughTreats(false)
+  }
+
+  async function buyShibaTreats() {
+    if (buyTreatsCount < 1) {
+      setNotEnoughTreats(true)
+      return
+    }
+    factoryContract.methods.buyTreats(buyTreatsCount).send({ from: account, gasLimit: 150000 })
+      .on("receipt", (async (receipt) => {
+        getUserErc20()
+      }))
+  }
+
+  function handleChange(event) {
+    setBuyTreatsCount(event.target.value)
   }
 
   return (
@@ -167,6 +190,10 @@ export default function Shop() {
         boughtTokenId == 0 ? null :
           <AlertDialog title={"Item Bought!"} text={name} imageUri={imageUri} onClose={() => closeAlert()} />
       }
+      {
+        notEnoughTreats ?
+          <AlertDialog title={"Error!"} text={"Number of Shiba Treats must be at least 1!"} onClose={() => closeAlert()} /> : null
+      }
 
       <NavbarApp />
       <main className={styles.main}>
@@ -174,6 +201,7 @@ export default function Shop() {
           <h1 className={styles.title}>Shop</h1>
           <p className={styles.description}>Here you can buy a new Shiba Inu</p>
           <p className={styles.description}>Your trainer tokens: {trainerTokens}</p>
+          <p className={styles.description}>Your Shiba Treats: {shibaTreats}</p>
           <p className={styles.description}>
             Your $SHIB balance: {shibaInu}
             {shibAllowed ? null :
@@ -183,6 +211,12 @@ export default function Shop() {
             Your $LEASH balance: {leash}
             {leashAllowed ? null :
               <Button variant="contained" onClick={() => { allowLeash() }}>Allow us to spend your $LEASH</Button>}
+          </p>
+          <p>
+            <TextField id="treats-count" variant="outlined" defaultValue={buyTreatsCount} type="number" onChange={handleChange} />
+            <Button variant="contained" onClick={() => { buyShibaTreats() }}>
+              Buy {thousandSeparator(buyTreatsCount)} Shiba Treats for {thousandSeparator(buyTreatsCount / 10)} $SHIB
+            </Button>
           </p>
           <div className={styles.gridContainer}>
             <ShibaSale

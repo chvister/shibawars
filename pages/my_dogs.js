@@ -100,7 +100,7 @@ export default function MyDogs() {
       <main className={styles.main}>
         <div className={styles.section_app}>
           <h1 className={styles.title}>My Dogs</h1>
-          <p className={styles.description}>You have {shibaTreats} Shiba Treats.</p>
+          <p className={styles.description}>You have {thousandSeparator(shibaTreats)} Shiba Treats.</p>
           <p className={styles.description}>Here are your dogs.</p>
           {
             isAuthenticated && isWeb3Enabled ?
@@ -113,4 +113,13 @@ export default function MyDogs() {
       <Footer />
     </div>
   )
+}
+
+function thousandSeparator(x) {
+  for (var i = x.toString().length - 3; i > 0; i -= 3) {
+    var left = x.toString().substring(0, i)
+    var right = x.toString().substring(i)
+    x = left + "." + right
+  }
+  return x
 }
