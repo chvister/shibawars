@@ -4,7 +4,7 @@ import Image from 'next/dist/client/image'
 import { useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
 
-export default function Dog ({dogData}){
+export default function Dog({ dogData }) {
     const data = dogData["dog"]
     const [uri] = useState(dogData["tokenUri"])
     const userShibaTreats = dogData["treats"]
@@ -66,8 +66,17 @@ export default function Dog ({dogData}){
 
     // TODO: button functions
 
+    if (tokenId <= 101) {
+        return (
+            <div className={styles.dog}>
+                {imageUri === undefined ? null : <Image width={512} height={512} src={imageUri} />}
+                <h2>{shibaName} ({uid})</h2>
+                <p>{shibaDesc}</p>
+            </div>)
+    }
+
     return <div className={styles.dog}>
-        {imageUri === undefined ? null : <Image width={512} height={512} src={imageUri}/>}
+        {imageUri === undefined ? null : <Image width={512} height={512} src={imageUri} />}
         <h2>{shibaName} ({uid})</h2>
         <p>{shibaDesc}</p>
         <p>Level: {level}</p>
@@ -76,22 +85,22 @@ export default function Dog ({dogData}){
         <p>Dexterity: {dexterity / 100}</p>
         <p>HP: {hp / 100} / {maxHp(strength) / 100}</p>
         <p>Arena score: {score}</p>
-        {userShibaTreats >= levelUpCost(level) ? 
-        <Button variant="contained">Level up ({thousandSeparator(levelUpCost(level))} treats)</Button> : 
-        <p>Need {thousandSeparator(levelUpCost(level) - userShibaTreats)} treats to level up</p>}
-        {canFight ?  <Button variant="contained">Find match</Button> : <p>This dog can not fight</p>}
+        {userShibaTreats >= levelUpCost(level) ?
+            <Button variant="contained">Level up ({thousandSeparator(levelUpCost(level))} treats)</Button> :
+            <p>Need {thousandSeparator(levelUpCost(level) - userShibaTreats)} treats to level up</p>}
+        {canFight ? <Button variant="contained">Find match</Button> : <p>This dog can not fight</p>}
         {hp < maxHp(strength) ? <Button variant="contained">Feed</Button> : <p>This dog is not hungry</p>}
         {canFight ? <Button variant="contained">Go on adventure (level {shibaAdventureLevel})</Button> : <p>This dog can not go on an adventure</p>}
         {
             leashId == 0 ?
                 userLeashes.length > 0 ? <Button variant="contained">Leash</Button> : <p>You have no free leashes</p>
-            : <Button variant="contained">Unleash {leashName(leashId)}</Button>
+                : <Button variant="contained">Unleash {leashName(leashId)}</Button>
         }
     </div>
 }
 
 function thousandSeparator(x) {
-    for(var i = x.toString().length - 3; i > 0; i -= 3) {
+    for (var i = x.toString().length - 3; i > 0; i -= 3) {
         var left = x.toString().substring(0, i)
         var right = x.toString().substring(i)
         x = left + "." + right

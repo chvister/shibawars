@@ -3,10 +3,10 @@ import { useMoralis } from "react-moralis"
 import LeashABI from "../public/Leash.json"
 import { useState, useEffect } from 'react'
 import Button from '@material-ui/core/Button'
-import ShibaSale from "../components/DogShop"
+import ShibaSale from "../components/ShibaSale"
 import styles from "../styles/Home.module.css"
 import NavbarApp from "../components/NavbarApp"
-import LeashSale from "../components/LeashShop"
+import LeashSale from "../components/LeashSale"
 import ShibaInuABI from "../public/ShibaInu.json"
 import Footer from "../components/mainPage/Footer"
 import FactoryABI from "../build/contracts/ShibaWarsFactory.json"
@@ -116,6 +116,13 @@ export default function Shop() {
       }))
   }
 
+  async function buyLeash(leashId) {
+    factoryContract.methods.buyLeash(leashId).send({ from: account, gasLimit: 500000 })
+      .on("receipt", (() => {
+        getUserErc20()
+      }))
+  }
+
   return (
     <div className={styles.container}>
       <Header />
@@ -180,26 +187,30 @@ export default function Shop() {
               leashName={"Diamond Leash"}
               leashPrice={10}
               leashUrl={"https://ipfs.io/ipfs/QmWSjmVuznZEhF22rtZfg5f5eNMkL2QhpX4ec7FsjcfmPX?filename=token-4.png"}
+              onClick={() => { buyLeash(4) }}
             />
             <LeashSale
               leashName={"Golden Leash"}
               leashPrice={1}
               leashUrl={"https://ipfs.io/ipfs/Qmeixw393YfE5ynBWCtYrv65RXveDAXMYcmuseN55YR98h?filename=token-3.png"}
+              onClick={() => { buyLeash(3) }}
             />
             <LeashSale
               leashName={"Silver Leash"}
               leashPrice={0.1}
               leashUrl={"https://ipfs.io/ipfs/QmcAvCTzq8f2rTjDXB3Xdk5kUbUCx4rv5Hqgzn95brgEBB?filename=token-2.png"}
+              onClick={() => { buyLeash(2) }}
             />
             <LeashSale
               leashName={"Iron Leash"}
               leashPrice={0.01}
               leashUrl={"https://ipfs.io/ipfs/QmctEAYnAgkzKB3vxcgnWxnpZD4QaTz5LL9NhdHWim33kz?filename=token-1.png"}
+              onClick={() => { buyLeash(1) }}
             />
             <ShibaSale
               dogName={"ShibaWars Supporter Badge"}
               dogPrice={500000}
-              dogUrl={"https://ipfs.io/ipfs/QmQWq4kGwieHvxxNvNgDcW5ActvfLjxWaz8pvifAi3po92?filename=token-101.png"}
+              dogUrl={"https://ipfs.io/ipfs/QmPWkTwp4Zy8pBrRr37zTTVvv136kpAwd4sLqDQqGTxn7H?filename=token-101.png"}
               onClick={() => { buyShiba(101) }}
             />
           </div>
