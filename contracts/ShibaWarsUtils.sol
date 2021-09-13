@@ -21,6 +21,8 @@ library ShibaWarsUtils {
     uint constant FLOKI = 115;
     uint constant RYOSHI = 116;
     uint constant SHIBA_GENERAL = 117;
+    uint constant SHIBA_MAGE = 118;
+    uint constant EXCLUSIVE_SHIBA = 119;
 
     uint constant IRON = 1;
     uint constant SILVER = 2;
@@ -37,13 +39,15 @@ library ShibaWarsUtils {
         } else if (tokenId == WOOFMEISTER) {
             return 300;
         } else if (tokenId == SHIBA_WHALE) {
-            return 225;
-        } else if (tokenId == OG_SHIBA) {
             return 200;
-        } else if (tokenId == SHIBA_WARLORD) {
+        } else if (tokenId == OG_SHIBA) {
             return 175;
-        } else if (tokenId == SHIBA_WARRIOR) {
+        } else if (tokenId == SHIBA_WARLORD) {
             return 150;
+        } else if (tokenId == SHIBA_WARRIOR) {
+            return 125;
+        } else if (tokenId == SHIBA_MAGE) {
+            return 125;
         } else if (tokenId == DOGE_KILLER) {
             return 200;
         } else if (tokenId == AGGRESIVE_SHIBA_INU) {
@@ -63,6 +67,8 @@ library ShibaWarsUtils {
         } else if (tokenId == FLOKI) {
             return 200;
         } else if (tokenId == SHIBA_GENERAL) {
+            return 200;
+        } else if (tokenId == EXCLUSIVE_SHIBA) {
             return 200;
         } else if (tokenId == IRON) {
             return 15;
@@ -109,6 +115,10 @@ library ShibaWarsUtils {
             return 24000;
         } else if (tokenId == SHIBA_GENERAL) {
             return 144;
+        } else if (tokenId == EXCLUSIVE_SHIBA) {
+            return 10000;
+        } else if (tokenId == SHIBA_MAGE) {
+            return 5400;
         }
         return 1;
     }
