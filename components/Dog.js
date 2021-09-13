@@ -12,6 +12,7 @@ export default function Dog({ dogData, factoryContract, account, onOpen }) {
     const userLeashes = dogData["leashes"]
     const leashId = dogData["leashId"]
     const leashTokenId = dogData["leashTokenId"]
+    const [trainerTokenReward, setTrainerTokenReward] = useState(0)
 
     const [imageUri, setImageUri] = useState(undefined)
     const [shibaName, setName] = useState("")
@@ -27,6 +28,15 @@ export default function Dog({ dogData, factoryContract, account, onOpen }) {
         setImageUri(json["image"])
         setName(json["name"])
         setDescription(json["description"])
+        const reward = await factoryContract.methods.getTrainerTokenReward(data["tokenId"]).call({ from: account })
+        setTrainerTokenReward(reward)
+    }
+
+    async function recycleShiba() {
+        factoryContract.methods.recycleShiba(data["id"]).send({ from: account, gasLimit: 100000 })
+            .on("receipt", (async () => {
+                onOpen()
+            }))
     }
 
     function maxHp(strength) {
@@ -103,6 +113,9 @@ export default function Dog({ dogData, factoryContract, account, onOpen }) {
             leashId == 0 ?
                 userLeashes.length > 0 ? <Button variant="contained">Leash</Button> : <p>You have no free leashes</p>
                 : <Button variant="contained">Unleash {leashName(leashId)}</Button>
+        }
+        {
+            trainerTokenReward != 0 ? <Button variant="contained" onClick={() => { recycleShiba() }}>Recycle for {trainerTokenReward} Trainer Tokens</Button> : null
         }
     </div>
 }

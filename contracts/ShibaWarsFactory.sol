@@ -328,4 +328,8 @@ contract ShibaWarsFactory {
         return h == merkleRoot;
     }
 
+    function getTrainerTokenReward(uint tokenId) public pure returns (uint256) {
+        return ShibaWarsUtils.getTrainerTokenReward(tokenId);
+    }
+
 }
