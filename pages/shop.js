@@ -72,7 +72,8 @@ export default function Shop() {
       setShibaInu(thousandSeparator(shib_.substring(0, shib_.length - 18)))
     }
 
-    let shibAllowance = await shibaInuContract.methods.allowance(account, process.env.NEXT_PUBLIC_FACTORY_ADDRESS).call({ from: account })
+    let shibAllowance = await shibaInuContract.methods.allowance(account, process.env.NEXT_PUBLIC_FACTORY_ADDRESS)
+      .call({ from: account })
     if (shibAllowance == 0) {
       setShibAllowed(false)
     } else {
@@ -94,7 +95,8 @@ export default function Shop() {
       setLeash(thousandSeparator(leash_.substring(0, leash_.length - 18)))
     }
 
-    let leashAllowance = await leashContract.methods.allowance(account, process.env.NEXT_PUBLIC_FACTORY_ADDRESS).call({ from: account })
+    let leashAllowance = await leashContract.methods.allowance(account, process.env.NEXT_PUBLIC_FACTORY_ADDRESS)
+      .call({ from: account })
     if (leashAllowance == 0) {
       setLeashAllowed(false)
     } else {
@@ -174,11 +176,13 @@ export default function Shop() {
           <p className={styles.description}>Your trainer tokens: {trainerTokens}</p>
           <p className={styles.description}>
             Your $SHIB balance: {shibaInu}
-            {shibAllowed ? null : <Button variant="contained" onClick={() => { allowShib() }}>Allow us to spend your $SHIB</Button>}
+            {shibAllowed ? null :
+              <Button variant="contained" onClick={() => { allowShib() }}>Allow us to spend your $SHIB</Button>}
           </p>
           <p className={styles.description}>
             Your $LEASH balance: {leash}
-            {leashAllowed ? null : <Button variant="contained" onClick={() => { allowLeash() }}>Allow us to spend your $LEASH</Button>}
+            {leashAllowed ? null :
+              <Button variant="contained" onClick={() => { allowLeash() }}>Allow us to spend your $LEASH</Button>}
           </p>
           <div className={styles.gridContainer}>
             <ShibaSale
