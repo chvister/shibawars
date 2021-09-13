@@ -4,7 +4,7 @@ import Image from 'next/dist/client/image'
 import { useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
 
-export default function Dog({ dogData, factoryContract, account, onOpen }) {
+export default function Dog({ dogData, factoryContract, account, onOpen, shibaWarsContract }) {
     const data = dogData["dog"]
     const [uri] = useState(dogData["tokenUri"])
     const userShibaTreats = dogData["treats"]
@@ -28,7 +28,7 @@ export default function Dog({ dogData, factoryContract, account, onOpen }) {
         setImageUri(json["image"])
         setName(json["name"])
         setDescription(json["description"])
-        const reward = await factoryContract.methods.getTrainerTokenReward(data["tokenId"]).call({ from: account })
+        const reward = await factoryContract.methods.getTrainerTokenReward(data["tokenId"]).call({ from: account, gasLimit: 125000 })
         setTrainerTokenReward(reward)
     }
 
@@ -74,11 +74,16 @@ export default function Dog({ dogData, factoryContract, account, onOpen }) {
 
     const canFight = Math.floor(tokenId / 100) == 1 && tokenId > 103
 
-    // TODO: button functions
-
     async function openPack() {
         factoryContract.methods.openPack(uid).send({ from: account, gasLimit: 500000 })
-            .on("receipt", (async (receipt) => {
+            .on("receipt", (async () => {
+                onOpen()
+            }))
+    }
+
+    async function levelUp() {
+        shibaWarsContract.methods.levelUp(uid).send({ from: account })
+            .on("receipt", (async () => {
                 onOpen()
             }))
     }
@@ -104,7 +109,7 @@ export default function Dog({ dogData, factoryContract, account, onOpen }) {
         <p>HP: {hp / 100} / {maxHp(strength) / 100}</p>
         <p>Arena score: {score}</p>
         {userShibaTreats >= levelUpCost(level) ?
-            <Button variant="contained">Level up ({thousandSeparator(levelUpCost(level))} treats)</Button> :
+            <Button variant="contained" onClick={() => { levelUp() }}>Level up ({thousandSeparator(levelUpCost(level))} treats)</Button> :
             <p>Need {thousandSeparator(levelUpCost(level) - userShibaTreats)} treats to level up</p>}
         {canFight ? <Button variant="contained">Find match</Button> : <p>This dog can not fight</p>}
         {hp < maxHp(strength) ? <Button variant="contained">Feed</Button> : <p>This dog is not hungry</p>}

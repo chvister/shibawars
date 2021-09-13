@@ -85,6 +85,10 @@ library ShibaWarsUtils {
     function getTrainerTokenReward(uint tokenId) public pure returns (uint) {
         if (tokenId == WOOFMEISTER) {
             return 200000;
+        } else if (tokenId == DOGE_KILLER) {
+            return 400;
+        } else if (tokenId == AGGRESIVE_SHIBA_INU) {
+            return 200;
         } else if (tokenId == BORED_SHIBA_INU) {
             return 100;
         } else if (tokenId == SHIBA_INU) {

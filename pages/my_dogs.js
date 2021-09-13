@@ -45,7 +45,6 @@ export default function MyDogs() {
       setPowerTreats(0)
     } else if (account !== undefined) {
       getUserTokens()
-      getUserPowerTreats()
     }
   }, [account, chainId])
 
@@ -56,12 +55,9 @@ export default function MyDogs() {
     setAccount(accounts[0])
   }
 
-  async function getUserPowerTreats() {
+  async function getUserTokens() {
     let shibaTreats_ = await shibaWarsContract.methods.getUserTreatTokens(account).call({ from: account });
     setPowerTreats(shibaTreats_)
-  }
-
-  async function getUserTokens() {
     let userTokens = await shibaWarsContract.methods.getUserTokens(account).call({ from: account })
     const userShibas_ = []
     for (var shibaId of userTokens) {
@@ -70,7 +66,7 @@ export default function MyDogs() {
       dogContent["dog"] = dog
       let tokenUri = await shibaWarsContract.methods.tokenURI(shibaId).call({ from: account })
       dogContent["tokenUri"] = tokenUri
-      dogContent["treats"] = shibaTreats
+      dogContent["treats"] = shibaTreats_
       // TODO
       dogContent["adventure"] = 11
       dogContent["leashes"] = []
@@ -78,7 +74,7 @@ export default function MyDogs() {
 
       userShibas_.push(
         <React.Fragment key={dog["id"]}>
-          <Dog dogData={dogContent} factoryContract={factoryContract} account={account} onOpen={() => { getUserTokens() }} />
+          <Dog dogData={dogContent} factoryContract={factoryContract} account={account} onOpen={() => { getUserTokens() }} shibaWarsContract={shibaWarsContract} />
         </React.Fragment>
       )
     }
