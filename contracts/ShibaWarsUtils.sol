@@ -82,6 +82,27 @@ library ShibaWarsUtils {
         return 0;
     }
 
+    function getTrainerTokenReward(uint tokenId) public pure returns (uint) {
+        if (tokenId == WOOFMEISTER) {
+            return 200000;
+        } else if (tokenId == BORED_SHIBA_INU) {
+            return 100;
+        } else if (tokenId == SHIBA_INU) {
+            return 20;
+        } else if (tokenId == AGGRESIVE_SHIBA_PUP) {
+            return 10;
+        } else if (tokenId == SHIBA_PUP) {
+            return 3;
+        } else if (tokenId == DOGE_FATHER) {
+            return 20000;
+        } else if (tokenId == RYOSHI) {
+            return 2250;
+        } else if (tokenId == FLOKI) {
+            return 500;
+        }
+        return 0;
+    }
+
     function breeds(uint tokenId) public pure returns (uint) {
         if (tokenId == TEAM_OP_SHIBA) {
             return 3;
@@ -152,6 +173,27 @@ library ShibaWarsUtils {
             return tokens(millions(10));
         } else if (tokenId == SHIBAWARS_SUPPORTER) {
             return tokens(thousand(500));
+        } 
+        return 0;
+    }
+
+    function getTokenPriceTrainerTokens(uint tokenId) public pure returns (uint256) {
+        if (tokenId == DOGE_KILLER) {
+            return 800;
+        } else if (tokenId == AGGRESIVE_SHIBA_INU) {
+            return 400;
+        } else if (tokenId == BORED_SHIBA_INU) {
+            return 200;
+        } else if (tokenId == SHIBA_INU) {
+            return 40;
+        } else if (tokenId == AGGRESIVE_SHIBA_PUP) {
+            return 20;
+        } else if (tokenId == SHIBA_PUP) {
+            return 6;
+        } else if (tokenId == LUCKY_SHIBA_PACK_GEN_1) {
+            return 40;
+        } else if (tokenId == SHIBAWARS_SUPPORTER) {
+            return 2;
         } 
         return 0;
     }

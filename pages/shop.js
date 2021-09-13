@@ -19,6 +19,7 @@ export default function Shop() {
   const [chainId, setChainId] = useState(0)
   const [shibaInu, setShibaInu] = useState("0")
   const [leash, setLeash] = useState("0")
+  const [trainerTokens, setTrainerTokens] = useState("0")
   const [shibAllowed, setShibAllowed] = useState(false)
   const [leashAllowed, setLeashAllowed] = useState(false)
   const [boughtTokenId, setBoughtTokenId] = useState(0)
@@ -99,6 +100,9 @@ export default function Shop() {
     } else {
       setLeashAllowed(true)
     }
+
+    let trainerTokens = await factoryContract.methods.userTrainerTokens(account).call({ from: account })
+    setTrainerTokens(trainerTokens)
   }
 
   async function allowShib() {
@@ -118,29 +122,33 @@ export default function Shop() {
   async function buyShiba(shibaId) {
     factoryContract.methods.buyShiba(shibaId).send({ from: account, gasLimit: 500000 })
       .on("receipt", (async (receipt) => {
-        getUserErc20()
-        let id = receipt.events["TokenBought"].returnValues[0]
-        let uri = await shibaWarsContract.methods.tokenURI(id).call({ from: account })
-        let response = await fetch(uri)
-        let json = await response.json()
-        setImageUri(json["image"])
-        setName(json["name"])
-        setBoughtTokenId(shibaId)
+        processPurchase(receipt)
+      }))
+  }
+
+  async function buyShibaTT(shibaId) {
+    factoryContract.methods.buyShibaWithTrainerTokens(shibaId).send({ from: account, gasLimit: 500000 })
+      .on("receipt", (async (receipt) => {
+        processPurchase(receipt)
       }))
   }
 
   async function buyLeash(leashId) {
     factoryContract.methods.buyLeash(leashId).send({ from: account, gasLimit: 500000 })
       .on("receipt", (async (receipt) => {
-        getUserErc20()
-        let id = receipt.events["TokenBought"].returnValues[0]
-        let uri = await shibaWarsContract.methods.tokenURI(id).call({ from: account })
-        let response = await fetch(uri)
-        let json = await response.json()
-        setImageUri(json["image"])
-        setName(json["name"])
-        setBoughtTokenId(id)
+        processPurchase(receipt)
       }))
+  }
+
+  async function processPurchase(receipt) {
+    getUserErc20()
+    let id = receipt.events["TokenBought"].returnValues[0]
+    let uri = await shibaWarsContract.methods.tokenURI(id).call({ from: account })
+    let response = await fetch(uri)
+    let json = await response.json()
+    setImageUri(json["image"])
+    setName(json["name"])
+    setBoughtTokenId(shibaId)
   }
 
   function closeAlert() {
@@ -162,6 +170,7 @@ export default function Shop() {
         <div className={styles.section_app}>
           <h1 className={styles.title}>Shop</h1>
           <p className={styles.description}>Here you can buy a new Shiba Inu</p>
+          <p className={styles.description}>Your trainer tokens: {trainerTokens}</p>
           <p className={styles.description}>
             Your $SHIB balance: {shibaInu}
             {shibAllowed ? null : <Button variant="contained" onClick={() => { allowShib() }}>Allow us to spend your $SHIB</Button>}
@@ -176,42 +185,55 @@ export default function Shop() {
               dogPrice={200000000}
               dogUrl={"https://ipfs.io/ipfs/QmR3sbzQQNGCi6egS2Ba9mSb1EucgXo52jEJzJm14B4H3K?filename=token-109.png"}
               onClick={() => { buyShiba(108) }}
+              dogPriceTT={800}
+              onClickTT={() => { buyShibaTT(108) }}
             />
             <ShibaSale
               dogName={"Aggresive Shiba Inu"}
               dogPrice={100000000}
               dogUrl={"https://ipfs.io/ipfs/QmZo2BVWNtCEy3qcRm31t5rLFJS7sGXuYp9TZFma7s9HYV?filename=token-110.png"}
               onClick={() => { buyShiba(109) }}
+              onClickTT={() => { buyShibaTT(109) }}
+              dogPriceTT={400}
             />
             <ShibaSale
               dogName={"Bored Shiba Inu"}
               dogPrice={50000000}
               dogUrl={"https://ipfs.io/ipfs/QmZJcKUCbCkPBfMHLyuAxj8rqUUZFDw8ESeWzMoSQWahjt?filename=token-111.png"}
               onClick={() => { buyShiba(110) }}
+              onClickTT={() => { buyShibaTT(110) }}
+              dogPriceTT={200}
             />
             <ShibaSale
               dogName={"Shiba Inu"}
               dogPrice={10000000}
               dogUrl={"https://ipfs.io/ipfs/QmZkGv9FiKtLFhtaoeux3kLoCbKgLPzVu6v2rRv8ZR5djv?filename=token-112.png"}
               onClick={() => { buyShiba(111) }}
+              onClickTT={() => { buyShibaTT(111) }}
+              dogPriceTT={40}
             />
             <ShibaSale
               dogName={"Aggresive Shiba Pup"}
               dogPrice={5000000}
               dogUrl={"https://ipfs.io/ipfs/QmeTqPuKfeUEE2t3Km8Vn7XRJ5pSbm1ELX9jHAh1DinZQX?filename=token-113.png"}
               onClick={() => { buyShiba(112) }}
+              onClickTT={() => { buyShibaTT(112) }}
+              dogPriceTT={20}
             />
             <ShibaSale
               dogName={"Shiba Pup"}
               dogPrice={1500000}
               dogUrl={"https://ipfs.io/ipfs/QmPkDhuQWa7nQaf32n6VmZDhDHbM7yxMVGrbgxXppcQBY9?filename=token-114.png"}
               onClick={() => { buyShiba(113) }}
+              onClickTT={() => { buyShibaTT(113) }}
+              dogPriceTT={6}
             />
             <ShibaSale
               dogName={"Lucky Shiba Pack"}
               dogPrice={10000000}
               dogUrl={"https://ipfs.io/ipfs/QmQWq4kGwieHvxxNvNgDcW5ActvfLjxWaz8pvifAi3po92?filename=token-100.png"}
               onClick={() => { buyShiba(100) }}
+              dogPriceTT={40}
             />
             <LeashSale
               leashName={"Diamond Leash"}
@@ -242,6 +264,8 @@ export default function Shop() {
               dogPrice={500000}
               dogUrl={"https://ipfs.io/ipfs/QmPWkTwp4Zy8pBrRr37zTTVvv136kpAwd4sLqDQqGTxn7H?filename=token-101.png"}
               onClick={() => { buyShiba(101) }}
+              onClickTT={() => { buyShibaTT(101) }}
+              dogPriceTT={2}
             />
           </div>
         </div>

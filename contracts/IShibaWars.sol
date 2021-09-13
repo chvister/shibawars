@@ -16,7 +16,7 @@ interface IShibaWars {
 
     function mintNFT(address owner, uint tokenId) external returns (uint256);
 
-    function openPack(uint256 id, address caller) external;
+    function recycle(uint256 id, address caller) external;
 
     function addTreats(address user, uint256 count) external;
 

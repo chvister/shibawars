@@ -33,6 +33,7 @@ contract ShibaWarsFactory {
     bytes32 constant merkleRoot = 0x3ec34dbb7ba6997c3cc877559af6f99873409a96f669760d4f24b17c0e75a49b;
     mapping(address => bool) private airdropClaimed;
     mapping(address => bool) private prizeClaimed;
+    mapping(address => uint256) private trainerTokens;
 
     event TokenBought(uint tokenId, address buyer);
 
@@ -165,6 +166,23 @@ contract ShibaWarsFactory {
         emit TokenBought(id, msg.sender);
     }
 
+    function buyShibaWithTrainerTokens(uint tokenId) public isSeason() isUser() {
+        uint256 tokenPrice = ShibaWarsUtils.getTokenPriceTrainerTokens(tokenId);
+        require(tokenPrice != 0, "SHBIAWARS: This token can not be bought with trianer tokens");
+        require(trainerTokens[msg.sender] >= tokenPrice, "SHIBAWARS: Not enough trainer tokens!");
+        trainerTokens[msg.sender] -= tokenPrice;
+        uint id = shibaWars.mintNFT(msg.sender, tokenId);
+        emit TokenBought(id, msg.sender);
+    }
+
+    function recycleShiba(uint shibaId) public isSeason() {
+        ShibaWarsEntity.Shiba memory shiba_ = shibaWars.getTokenDetails(shibaId);
+        uint256 tokenId = shiba_.tokenId;
+        uint256 reward = ShibaWarsUtils.getTrainerTokenReward(tokenId);
+        shibaWars.recycle(shibaId, msg.sender);
+        trainerTokens[msg.sender] += reward;
+    }
+
     // BUY LEASH FROM SHOP
     function buyLeash(uint tokenId) public isSeason() isUser() {
         payTheContractLeash(ShibaWarsUtils.getTokenPriceLeash(tokenId));
@@ -183,7 +201,7 @@ contract ShibaWarsFactory {
     function openPack(uint256 id) public isUser() {
         // open pack
         // burn the token
-        shibaWars.openPack(id, msg.sender);
+        shibaWars.recycle(id, msg.sender);
         // mint random token
         uint tokenId = ShibaWarsUtils.getRandomId(abi.encodePacked(block.difficulty, block.timestamp, id).random(0, 10000));
         shibaWars.mintNFT(msg.sender, tokenId);
@@ -280,6 +298,10 @@ contract ShibaWarsFactory {
         require(hasAirdrop(proof, msg.sender, tokenId), "Shiba Wars: Address is not eligible for this airdrop");
         shibaWars.mintNFT(msg.sender, tokenId);
         airdropClaimed[msg.sender] = true;
+    }
+
+    function userTrainerTokens(address user) public view returns (uint256) {
+        return trainerTokens[user];
     }
 
     function getHash(address account, uint8 tokenId) public pure returns(bytes32) {

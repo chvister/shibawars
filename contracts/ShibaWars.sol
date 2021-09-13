@@ -191,10 +191,7 @@ contract ShibaWars is ERC721 {
         _tokenDetails[id].dexterity += _shiba.dexterityGain;
     }
 
-    // OPEN LUCKY SHIBA PACK
-    function openPack(uint256 id, address caller) public isShibaWars(msg.sender) isOwner(id, caller) {
-        // open pack
-        // burn the token
+    function recycle(uint256 id, address caller) public isShibaWars(msg.sender) isOwner(id, caller) {
         _burn(id);
         delete _tokenDetails[id];
     }
