@@ -34,6 +34,8 @@ contract ShibaWarsFactory {
     mapping(address => bool) private airdropClaimed;
     mapping(address => bool) private prizeClaimed;
 
+    event TokenBought(uint tokenId, address buyer);
+
     modifier isSeason() {
         require(block.timestamp >= IShibaWars(shibaWars).getSeasonStart() && block.timestamp <= IShibaWars(shibaWars).getSeasonStart() + SEASON_DURATION,
             "Shiba Wars: Can only be called during the season!");
@@ -159,13 +161,15 @@ contract ShibaWarsFactory {
     // BUY SHIBA FROM SHOP
     function buyShiba(uint tokenId) public isSeason() isUser() {
         payTheContract(ShibaWarsUtils.getTokenPrice(tokenId));
-        shibaWars.mintNFT(msg.sender, tokenId);
+        uint id = shibaWars.mintNFT(msg.sender, tokenId);
+        emit TokenBought(id, msg.sender);
     }
 
     // BUY LEASH FROM SHOP
     function buyLeash(uint tokenId) public isSeason() isUser() {
         payTheContractLeash(ShibaWarsUtils.getTokenPriceLeash(tokenId));
-        shibaWars.mintNFT(msg.sender, tokenId);
+        uint id = shibaWars.mintNFT(msg.sender, tokenId);
+        emit TokenBought(id, msg.sender);
     }
 
     // BUY SHIBA TREAT TOKENS

@@ -14,7 +14,7 @@ interface IShibaWars {
 
     function setScore(uint256 id, uint score) external;
 
-    function mintNFT(address owner, uint tokenId) external;
+    function mintNFT(address owner, uint tokenId) external returns (uint256);
 
     function openPack(uint256 id, address caller) external;
 

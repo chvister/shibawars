@@ -9,6 +9,8 @@ import NavbarApp from "../components/NavbarApp"
 import LeashSale from "../components/LeashSale"
 import ShibaInuABI from "../public/ShibaInu.json"
 import Footer from "../components/mainPage/Footer"
+import AlertDialog from '../components/AlertDialog'
+import ShibaWarsABI from "../build/contracts/ShibaWars.json"
 import FactoryABI from "../build/contracts/ShibaWarsFactory.json"
 
 export default function Shop() {
@@ -19,10 +21,14 @@ export default function Shop() {
   const [leash, setLeash] = useState("0")
   const [shibAllowed, setShibAllowed] = useState(false)
   const [leashAllowed, setLeashAllowed] = useState(false)
+  const [boughtTokenId, setBoughtTokenId] = useState(0)
+  const [imageUri, setImageUri] = useState("")
+  const [name, setName] = useState("")
 
   const shibaInuContract = new web3.eth.Contract(ShibaInuABI.abi, process.env.NEXT_PUBLIC_SHIBA_INU_ADDRESS)
   const leashContract = new web3.eth.Contract(LeashABI.abi, process.env.NEXT_PUBLIC_LEASH_ADDRESS)
   const factoryContract = new web3.eth.Contract(FactoryABI.abi, process.env.NEXT_PUBLIC_FACTORY_ADDRESS)
+  const shibaWarsContract = new web3.eth.Contract(ShibaWarsABI.abi, process.env.NEXT_PUBLIC_SHIBAWARS_ADDRESS)
 
   useEffect(() => {
     if (isAuthenticated && !isWeb3Enabled) {
@@ -111,21 +117,45 @@ export default function Shop() {
 
   async function buyShiba(shibaId) {
     factoryContract.methods.buyShiba(shibaId).send({ from: account, gasLimit: 500000 })
-      .on("receipt", (() => {
+      .on("receipt", (async (receipt) => {
         getUserErc20()
+        let id = receipt.events["TokenBought"].returnValues[0]
+        let uri = await shibaWarsContract.methods.tokenURI(id).call({ from: account })
+        let response = await fetch(uri)
+        let json = await response.json()
+        setImageUri(json["image"])
+        setName(json["name"])
+        setBoughtTokenId(shibaId)
       }))
   }
 
   async function buyLeash(leashId) {
     factoryContract.methods.buyLeash(leashId).send({ from: account, gasLimit: 500000 })
-      .on("receipt", (() => {
+      .on("receipt", (async (receipt) => {
         getUserErc20()
+        let id = receipt.events["TokenBought"].returnValues[0]
+        let uri = await shibaWarsContract.methods.tokenURI(id).call({ from: account })
+        let response = await fetch(uri)
+        let json = await response.json()
+        setImageUri(json["image"])
+        setName(json["name"])
+        setBoughtTokenId(id)
       }))
+  }
+
+  function closeAlert() {
+    setBoughtTokenId(0)
+    setImageUri("")
+    setName("")
   }
 
   return (
     <div className={styles.container}>
       <Header />
+
+      {
+        boughtTokenId == 0 ? null : <AlertDialog title={"Item Bought!"} text={name} imageUri={imageUri} onClose={() => closeAlert()} />
+      }
 
       <NavbarApp />
       <main className={styles.main}>

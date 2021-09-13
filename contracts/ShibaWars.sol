@@ -64,7 +64,7 @@ contract ShibaWars is ERC721 {
     }
 
     // MINT NEW TOKEN
-    function mint(address owner, uint tokenId, uint strength, uint agility, uint dexterity) private {
+    function mint(address owner, uint tokenId, uint strength, uint agility, uint dexterity) private returns (uint256) {
         _tokenDetails[nextId] = 
             ShibaWarsEntity.Shiba(
                 nextId, breed[tokenId],
@@ -80,7 +80,7 @@ contract ShibaWars is ERC721 {
                 ShibaWarsUtils.getMaxHp((uint64)(strength)));
         ++breed[tokenId];
         _safeMint(owner, nextId);
-        ++nextId;
+        return nextId++;
     }
 
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
@@ -164,7 +164,7 @@ contract ShibaWars is ERC721 {
     }
 
     // SETS STATS OF NEW SHIBA AND MINTS
-    function mintNFT(address owner, uint tokenId) public isShibaWars(msg.sender) {
+    function mintNFT(address owner, uint tokenId) public isShibaWars(msg.sender) returns (uint256) {
         uint multiplier = ShibaWarsUtils.getStatsMultiplier(tokenId);
 
         (uint str, uint agi, uint dex) = (tokenId / 100 == 1 && tokenId > ShibaWarsUtils.SHIBAWARS_SUPPORTER) ?
@@ -173,7 +173,7 @@ contract ShibaWars is ERC721 {
             abi.encodePacked(block.difficulty, tokenId).random(10 * multiplier, 16 * multiplier)) :
             (multiplier, multiplier, multiplier); 
 
-        mint(owner, tokenId, str, agi, dex);
+        return mint(owner, tokenId, str, agi, dex);
     }
 
     // LEVEL UP SHIBA
