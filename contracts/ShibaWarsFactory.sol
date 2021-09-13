@@ -35,13 +35,13 @@ contract ShibaWarsFactory {
     mapping(address => bool) private prizeClaimed;
 
     modifier isSeason() {
-        require(block.timestamp >= IShibaWars(shibaWars).seasonStart() && block.timestamp <= IShibaWars(shibaWars).seasonStart() + SEASON_DURATION,
+        require(block.timestamp >= IShibaWars(shibaWars).getSeasonStart() && block.timestamp <= IShibaWars(shibaWars).getSeasonStart() + SEASON_DURATION,
             "Shiba Wars: Can only be called during the season!");
         _;
     }
 
     modifier seasonEnded() {
-        require(block.timestamp > IShibaWars(shibaWars).seasonStart() + SEASON_DURATION,
+        require(block.timestamp > IShibaWars(shibaWars).getSeasonStart() + SEASON_DURATION,
             "Shiba Wars: Can only be called after season has ended!");
         _;
     }

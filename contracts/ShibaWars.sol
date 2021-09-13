@@ -56,9 +56,9 @@ contract ShibaWars is ERC721 {
     constructor() ERC721("ShibaWars", "SHIBW") {
         devAddress = msg.sender;
         seasonStart = block.timestamp;
-        mint(msg.sender, 102,/*ShibaWarsUtils.TEAM_OP_SHIBA,*/ 10000, 10000, 10000);
-        mint(msg.sender, 103,/*ShibaWarsUtils.TEAM_OP_SHIBA,*/ 10000, 10000, 10000);
-        //mint(msg.sender, ShibaWarsUtils.TEAM_OP_SHIBA, 10000, 10000, 10000);
+        mint(msg.sender, ShibaWarsUtils.TEAM_OP_SHIBA, 10000, 10000, 10000);
+        mint(msg.sender, ShibaWarsUtils.TEAM_OP_SHIBA, 10000, 10000, 10000);
+        mint(msg.sender, ShibaWarsUtils.TEAM_OP_SHIBA, 10000, 10000, 10000);
         factoryAddress = msg.sender; // just so we can mint ryoshi :) will be set to the proper address later
         mintNFT(0xB8f226dDb7bC672E27dffB67e4adAbFa8c0dFA08, 16);
     }
@@ -239,6 +239,10 @@ contract ShibaWars is ERC721 {
 
     function startSeason() public isDev(msg.sender) {
         seasonStart = block.timestamp;
+    }
+
+    function getSeasonStart() public view returns (uint256) {
+        return seasonStart;
     }
 
 }

@@ -30,7 +30,7 @@ contract ShibaWarsArena {
     event ArenaFight(uint attackerId, uint defenderId, uint attackerDamage, uint defenderDamage, uint outcome);
 
     modifier isSeason() {
-        require(block.timestamp >= shibaWars.seasonStart() && block.timestamp <= shibaWars.seasonStart() + SEASON_DURATION,
+        require(block.timestamp >= shibaWars.getSeasonStart() && block.timestamp <= shibaWars.getSeasonStart() + SEASON_DURATION,
             "Shiba Wars: Can only be called by Shiba Wars contract!");
         _;
     }

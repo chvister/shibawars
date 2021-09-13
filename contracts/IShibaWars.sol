@@ -20,7 +20,7 @@ interface IShibaWars {
 
     function addTreats(address user, uint256 count) external;
 
-    function seasonStart() external view returns (uint256); 
+    function getSeasonStart() external view returns (uint256); 
     
     function getWinners() external view returns (uint256[] memory winners, uint256[] memory scores);
 
