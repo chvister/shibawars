@@ -9,6 +9,7 @@ import NavbarApp from "../components/NavbarApp"
 import LeashSale from "../components/LeashShop"
 import ShibaInuABI from "../public/ShibaInu.json"
 import Footer from "../components/mainPage/Footer"
+import FactoryABI from "../build/contracts/ShibaWarsFactory.json"
 
 export default function Shop() {
   const { isAuthenticated, enableWeb3, isWeb3Enabled, web3, Moralis } = useMoralis();
@@ -21,6 +22,7 @@ export default function Shop() {
 
   const shibaInuContract = new web3.eth.Contract(ShibaInuABI.abi, process.env.NEXT_PUBLIC_SHIBA_INU_ADDRESS)
   const leashContract = new web3.eth.Contract(LeashABI.abi, process.env.NEXT_PUBLIC_LEASH_ADDRESS)
+  const factoryContract = new web3.eth.Contract(FactoryABI.abi, process.env.NEXT_PUBLIC_FACTORY_ADDRESS)
 
   useEffect(() => {
     if (isAuthenticated && !isWeb3Enabled) {
@@ -107,6 +109,13 @@ export default function Shop() {
       }))
   }
 
+  async function buyShiba(shibaId) {
+    factoryContract.methods.buyShiba(shibaId).send({ from: account, gasLimit: 500000 })
+      .on("receipt", (() => {
+        getUserErc20()
+      }))
+  }
+
   return (
     <div className={styles.container}>
       <Header />
@@ -129,36 +138,43 @@ export default function Shop() {
               dogName={"Doge Killer"}
               dogPrice={200000000}
               dogUrl={"https://ipfs.io/ipfs/QmR3sbzQQNGCi6egS2Ba9mSb1EucgXo52jEJzJm14B4H3K?filename=token-109.png"}
+              onClick={() => { buyShiba(108) }}
             />
             <ShibaSale
               dogName={"Aggresive Shiba Inu"}
               dogPrice={100000000}
               dogUrl={"https://ipfs.io/ipfs/QmZo2BVWNtCEy3qcRm31t5rLFJS7sGXuYp9TZFma7s9HYV?filename=token-110.png"}
+              onClick={() => { buyShiba(109) }}
             />
             <ShibaSale
               dogName={"Bored Shiba Inu"}
               dogPrice={50000000}
               dogUrl={"https://ipfs.io/ipfs/QmZJcKUCbCkPBfMHLyuAxj8rqUUZFDw8ESeWzMoSQWahjt?filename=token-111.png"}
+              onClick={() => { buyShiba(110) }}
             />
             <ShibaSale
               dogName={"Shiba Inu"}
               dogPrice={10000000}
               dogUrl={"https://ipfs.io/ipfs/QmZkGv9FiKtLFhtaoeux3kLoCbKgLPzVu6v2rRv8ZR5djv?filename=token-112.png"}
+              onClick={() => { buyShiba(111) }}
             />
             <ShibaSale
               dogName={"Aggresive Shiba Pup"}
               dogPrice={5000000}
               dogUrl={"https://ipfs.io/ipfs/QmeTqPuKfeUEE2t3Km8Vn7XRJ5pSbm1ELX9jHAh1DinZQX?filename=token-113.png"}
+              onClick={() => { buyShiba(112) }}
             />
             <ShibaSale
               dogName={"Shiba Pup"}
               dogPrice={1500000}
               dogUrl={"https://ipfs.io/ipfs/QmPkDhuQWa7nQaf32n6VmZDhDHbM7yxMVGrbgxXppcQBY9?filename=token-114.png"}
+              onClick={() => { buyShiba(113) }}
             />
             <ShibaSale
               dogName={"Lucky Shiba Pack"}
               dogPrice={10000000}
               dogUrl={"https://ipfs.io/ipfs/QmQWq4kGwieHvxxNvNgDcW5ActvfLjxWaz8pvifAi3po92?filename=token-100.png"}
+              onClick={() => { buyShiba(100) }}
             />
             <LeashSale
               leashName={"Diamond Leash"}
@@ -184,6 +200,7 @@ export default function Shop() {
               dogName={"ShibaWars Supporter Badge"}
               dogPrice={500000}
               dogUrl={"https://ipfs.io/ipfs/QmQWq4kGwieHvxxNvNgDcW5ActvfLjxWaz8pvifAi3po92?filename=token-101.png"}
+              onClick={() => { buyShiba(101) }}
             />
           </div>
         </div>
