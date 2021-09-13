@@ -148,7 +148,7 @@ export default function Shop() {
     let json = await response.json()
     setImageUri(json["image"])
     setName(json["name"])
-    setBoughtTokenId(shibaId)
+    setBoughtTokenId(id)
   }
 
   function closeAlert() {
@@ -162,7 +162,8 @@ export default function Shop() {
       <Header />
 
       {
-        boughtTokenId == 0 ? null : <AlertDialog title={"Item Bought!"} text={name} imageUri={imageUri} onClose={() => closeAlert()} />
+        boughtTokenId == 0 ? null :
+          <AlertDialog title={"Item Bought!"} text={name} imageUri={imageUri} onClose={() => closeAlert()} />
       }
 
       <NavbarApp />
