@@ -70,7 +70,14 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
     }
 
     async function levelUp() {
-        shibaWarsContract.methods.levelUp(uid).send({ from: account })
+        shibaWarsContract.methods.levelUp(uid).send({ from: account, gasLimit: 100000 })
+            .on("receipt", (async () => {
+                onOpen()
+            }))
+    }
+
+    async function feed() {
+        shibaWarsContract.methods.feed(uid).send({ from: account })
             .on("receipt", (async () => {
                 onOpen()
             }))
@@ -125,7 +132,9 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
                 <Button variant="contained" onClick={() => { queueToArena() }}>Find match</Button>
                 : hp == 1 ? <p>This dog is too exhausted to fight</p> : <p>This dog is waiting for a fight</p>
             : <p>This dog can not fight</p>}
-        {hp < maxHp(strength) ? <Button variant="contained">Feed</Button> : <p>This dog is not hungry</p>}
+        {hp < maxHp(strength) && userShibaTreats >= maxHp(strength) - hp ?
+            <Button variant="contained" onClick={() => { feed() }}>Feed ({thousandSeparator(maxHp(strength) - hp)} treats)</Button>
+            : hp < maxHp(strength) ? <p>Not enough Treats to feed this Shiba</p> : <p>This dog is not hungry</p>}
         {canFight ? <Button variant="contained">Go on adventure (level {shibaAdventureLevel})</Button> : <p>This dog can not go on an adventure</p>}
         {
             leashId == 0 ?
