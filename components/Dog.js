@@ -62,6 +62,14 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
             }))
     }
 
+    async function goOnAdventure() {
+        arenaContract.methods.goOnAdventure(uid).send({ from: account, gasLimit: 150000 })
+            .on("receipt", (async (receipt) => {
+                onOpen()
+                showFight(receipt)
+            }))
+    }
+
     async function openPack() {
         factoryContract.methods.openPack(uid).send({ from: account, gasLimit: 500000 })
             .on("receipt", (async () => {
@@ -77,7 +85,7 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
     }
 
     async function feed() {
-        shibaWarsContract.methods.feed(uid).send({ from: account })
+        shibaWarsContract.methods.feed(uid).send({ from: account, gasLimit: 75000 })
             .on("receipt", (async () => {
                 onOpen()
             }))
@@ -135,7 +143,11 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
         {hp < maxHp(strength) && userShibaTreats >= maxHp(strength) - hp ?
             <Button variant="contained" onClick={() => { feed() }}>Feed ({thousandSeparator(maxHp(strength) - hp)} treats)</Button>
             : hp < maxHp(strength) ? <p>Not enough Treats to feed this Shiba</p> : <p>This dog is not hungry</p>}
-        {canFight ? <Button variant="contained">Go on adventure (level {shibaAdventureLevel})</Button> : <p>This dog can not go on an adventure</p>}
+        {canFight ?
+            inArena == 0 && hp > 1 ?
+                <Button variant="contained" onClick={() => { goOnAdventure() }}>Go on adventure (level {shibaAdventureLevel})</Button>
+                : hp == 1 ? <p>This dog is too exhausted to go on an adventure</p> : <p>This dog is waiting for a fight</p>
+            : <p>This dog can not go on an adventure</p>}
         {
             leashId == 0 ?
                 userLeashes.length > 0 ? <Button variant="contained">Leash</Button> : <p>You have no free leashes</p>

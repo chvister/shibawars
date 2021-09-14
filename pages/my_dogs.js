@@ -58,8 +58,23 @@ export default function MyDogs() {
 
   async function showFight(receipt, shibaId) {
     let event = receipt.events["ArenaFight"]
-    if (event === undefined) {
+    let adventure = receipt.events["AdventureFight"]
+    if (event === undefined && adventure === undefined) {
       setFightResult("Your Shiba is now waiting for a fight in arena")
+    } else if (adventure !== undefined) {
+      let values = adventure["returnValues"]
+      let attackerId = values["shibaId"]
+      let attackerDamage = values["shibaStrength"]
+      let defenderId = values["enemyId"]
+      let defenderDamage = values["enemyStrength"]
+      let reward = values["reward"]
+      setFightResult(<p>
+        <p>Fight ({attackerId}, Attacker) vs ({defenderId == 0 ? "Wild Shiba" : defenderId == 1 ? "Wolf" : "Bear"}, Defender)</p>
+        <p>Attacker did {attackerDamage / 100} damage and defender did {defenderDamage / 100} damage</p>
+        {attackerDamage <= defenderDamage && reward > 0 ? <p>Defender fainted</p> : null}
+        {defenderDamage <= attackerDamage && reward == 0 ? <p>Attacker fainted</p> : null}
+        <p>{reward > 0 ? "Attacker won " + thousandSeparator(reward) + " treats." : "Defender won"}</p>
+      </p>)
     } else {
       let values = event["returnValues"]
       let attackerId = values["attackerId"]
@@ -90,8 +105,8 @@ export default function MyDogs() {
       let tokenUri = await shibaWarsContract.methods.tokenURI(shibaId).call({ from: account })
       dogContent["tokenUri"] = tokenUri
       dogContent["treats"] = shibaTreats_
+      dogContent["adventure"] = parseInt(await arenaContract.methods.getAdventureLevel(shibaId).call({ from: account })) + 1
       // TODO
-      dogContent["adventure"] = 11
       dogContent["leashes"] = []
       dogContent["leashId"] = 0
 
