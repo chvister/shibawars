@@ -1,6 +1,5 @@
 import Header from '../components/Header'
 import { useMoralis } from "react-moralis"
-import LeashABI from "../public/Leash.json"
 import { useState, useEffect } from 'react'
 import Button from '@material-ui/core/Button'
 import { TextField } from '@material-ui/core'
@@ -8,9 +7,10 @@ import ShibaSale from "../components/ShibaSale"
 import styles from "../styles/Home.module.css"
 import NavbarApp from "../components/NavbarApp"
 import LeashSale from "../components/LeashSale"
-import ShibaInuABI from "../public/ShibaInu.json"
 import Footer from "../components/mainPage/Footer"
 import AlertDialog from '../components/AlertDialog'
+import LeashABI from "../build/contracts/Leash.json"
+import ShibaInuABI from "../build/contracts/ShibaInu.json"
 import ShibaWarsABI from "../build/contracts/ShibaWars.json"
 import FactoryABI from "../build/contracts/ShibaWarsFactory.json"
 

@@ -17,6 +17,7 @@ export default function MyDogs() {
   const [shibaTreats, setPowerTreats] = useState(0)
   const [chainId, setChainId] = useState(0)
   const [userShibas, setUserShibas] = useState([])
+  const [fightResult, setFightResult] = useState(undefined)
 
   const shibaWarsContract = new web3.eth.Contract(ShibaWarsABI.abi, process.env.NEXT_PUBLIC_SHIBAWARS_ADDRESS)
   const arenaContract = new web3.eth.Contract(ArenaABI.abi, process.env.NEXT_PUBLIC_ARENA_ADDRESS)
@@ -55,6 +56,28 @@ export default function MyDogs() {
     setAccount(accounts[0])
   }
 
+  async function showFight(receipt, shibaId) {
+    let event = receipt.events["ArenaFight"]
+    if (event === undefined) {
+      setFightResult("Your Shiba is now waiting for a fight in arena")
+    } else {
+      let values = event["returnValues"]
+      let attackerId = values["attackerId"]
+      let attackerDamage = values["attackerDamage"]
+      let defenderId = values["defenderId"]
+      let defenderDamage = values["defenderDamage"]
+      let result = values["outcome"]
+      setFightResult(<p>
+        <p>Fight ({attackerId}, Attacker) vs ({defenderId}, Defender)</p>
+        <p>Your Shiba was the {shibaId == attackerId ? "attacker" : "defender"}</p>
+        <p>Attacker did {attackerDamage / 100} damage and defender did {defenderDamage / 100} damage</p>
+        {attackerDamage <= defenderDamage && result == 1 ? <p>Defender fainted</p> : null}
+        {defenderDamage <= attackerDamage && result == 2 ? <p>Attacker fainted</p> : null}
+        <p>{result == 1 ? "Attacker won" : result == 2 ? "Defender won" : "It was a draw"}</p>
+      </p>)
+    }
+  }
+
   async function getUserTokens() {
     let shibaTreats_ = await shibaWarsContract.methods.getUserTreatTokens(account).call({ from: account });
     setPowerTreats(shibaTreats_)
@@ -74,7 +97,8 @@ export default function MyDogs() {
 
       userShibas_.push(
         <React.Fragment key={dog["id"]}>
-          <Dog dogData={dogContent} factoryContract={factoryContract} account={account} onOpen={() => { getUserTokens() }} shibaWarsContract={shibaWarsContract} />
+          <Dog arenaContract={arenaContract} dogData={dogContent} factoryContract={factoryContract} account={account}
+            onOpen={() => { getUserTokens() }} shibaWarsContract={shibaWarsContract} showFight={(receipt) => { showFight(receipt, dog["id"]) }} />
         </React.Fragment>
       )
     }
@@ -90,6 +114,9 @@ export default function MyDogs() {
 
       {
         chainId == 1337 ? null : <AlertDialog title={"Wrong network"} text={"Please select ganache network."} />
+      }
+      {
+        fightResult === undefined ? null : <AlertDialog title={"Fight result"} text={fightResult} onClose={() => { setFightResult(undefined) }} />
       }
 
       <NavbarApp />

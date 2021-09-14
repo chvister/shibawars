@@ -4,7 +4,7 @@ import Image from 'next/dist/client/image'
 import { useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
 
-export default function Dog({ dogData, factoryContract, account, onOpen, shibaWarsContract }) {
+export default function Dog({ dogData, factoryContract, account, onOpen, shibaWarsContract, arenaContract, showFight }) {
     const data = dogData["dog"]
     const [uri] = useState(dogData["tokenUri"])
     const userShibaTreats = dogData["treats"]
@@ -18,6 +18,21 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
     const [shibaName, setName] = useState("")
     const [shibaDesc, setDescription] = useState("")
 
+    const level = data["level"]
+
+    const strength = data["strength"]
+    const agility = data["agility"]
+    const dexterity = data["dexterity"]
+
+    const score = data["arenaScore"]
+    const hp = data["hitPoints"]
+    const uid = data["id"]
+
+    const tokenId = data["tokenId"]
+    const inArena = data["inArena"]
+
+    const canFight = Math.floor(tokenId / 100) == 1 && tokenId > 103
+
     useEffect(() => {
         loadJson(uri)
     }, [uri])
@@ -28,12 +43,34 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
         setImageUri(json["image"])
         setName(json["name"])
         setDescription(json["description"])
-        const reward = await factoryContract.methods.getTrainerTokenReward(data["tokenId"]).call({ from: account, gasLimit: 125000 })
+        const reward = await factoryContract.methods.getTrainerTokenReward(uid).call({ from: account, gasLimit: 125000 })
         setTrainerTokenReward(reward)
     }
 
     async function recycleShiba() {
         factoryContract.methods.recycleShiba(data["id"]).send({ from: account, gasLimit: 100000 })
+            .on("receipt", (async () => {
+                onOpen()
+            }))
+    }
+
+    async function queueToArena() {
+        arenaContract.methods.queueToArena(uid).send({ from: account, gasLimit: 325000 })
+            .on("receipt", (async (receipt) => {
+                onOpen()
+                showFight(receipt)
+            }))
+    }
+
+    async function openPack() {
+        factoryContract.methods.openPack(uid).send({ from: account, gasLimit: 500000 })
+            .on("receipt", (async () => {
+                onOpen()
+            }))
+    }
+
+    async function levelUp() {
+        shibaWarsContract.methods.levelUp(uid).send({ from: account })
             .on("receipt", (async () => {
                 onOpen()
             }))
@@ -60,34 +97,6 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
         return "";
     }
 
-    const level = data["level"]
-
-    const strength = data["strength"]
-    const agility = data["agility"]
-    const dexterity = data["dexterity"]
-
-    const score = data["arenaScore"]
-    const hp = data["hitPoints"]
-    const uid = data["id"]
-
-    const tokenId = data["tokenId"]
-
-    const canFight = Math.floor(tokenId / 100) == 1 && tokenId > 103
-
-    async function openPack() {
-        factoryContract.methods.openPack(uid).send({ from: account, gasLimit: 500000 })
-            .on("receipt", (async () => {
-                onOpen()
-            }))
-    }
-
-    async function levelUp() {
-        shibaWarsContract.methods.levelUp(uid).send({ from: account })
-            .on("receipt", (async () => {
-                onOpen()
-            }))
-    }
-
     if (tokenId <= 101) {
         return (
             <div className={styles.dog}>
@@ -111,7 +120,11 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
         {userShibaTreats >= levelUpCost(level) ?
             <Button variant="contained" onClick={() => { levelUp() }}>Level up ({thousandSeparator(levelUpCost(level))} treats)</Button> :
             <p>Need {thousandSeparator(levelUpCost(level) - userShibaTreats)} treats to level up</p>}
-        {canFight ? <Button variant="contained">Find match</Button> : <p>This dog can not fight</p>}
+        {canFight ?
+            inArena == 0 && hp > 1 ?
+                <Button variant="contained" onClick={() => { queueToArena() }}>Find match</Button>
+                : hp == 1 ? <p>This dog is too exhausted to fight</p> : <p>This dog is waiting for a fight</p>
+            : <p>This dog can not fight</p>}
         {hp < maxHp(strength) ? <Button variant="contained">Feed</Button> : <p>This dog is not hungry</p>}
         {canFight ? <Button variant="contained">Go on adventure (level {shibaAdventureLevel})</Button> : <p>This dog can not go on an adventure</p>}
         {
