@@ -1,6 +1,7 @@
 const ShibaWars = artifacts.require("ShibaWars");
 const ShibaInu = artifacts.require("ShibaInu");
 const Leash = artifacts.require("Leash");
+const FlokiInu = artifacts.require("FlokiInu");
 const ShibaWarsUtils = artifacts.require("ShibaWarsUtils");
 const ShibaWarsEntity = artifacts.require("ShibaWarsEntity");
 const ShibaMath = artifacts.require("ShibaMath");
@@ -8,6 +9,10 @@ const ShibaWarsArena = artifacts.require("ShibaWarsArena");
 const ShibaWarsFactory = artifacts.require("ShibaWarsFactory");
 
 module.exports = async function (deployer, networks, accounts) {
+  /*await deployer.deploy(FlokiInu);
+  let flokiInu = await FlokiInu.deployed();
+  let flokiInuAddress = flokiInu['address'];
+  console.log(flokiInuAddress);*/
   // deploy libs
   await deployer.deploy(ShibaWarsUtils);
   await deployer.link(ShibaWarsUtils, ShibaWars);  

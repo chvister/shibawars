@@ -13,6 +13,7 @@ contract ShibaWarsFactory {
 
     address constant shibaInu = 0xAC27f67D1D2321FBa609107d41Ff603c43fF6931;
     address constant leash = 0x70bE14767cC790a668BCF6d0E6B4bC815A1bCf05;
+    address constant floki = 0xEe9Fc0576a6d3dcC806B231261BD85E037ef45a4;
     IShibaWars immutable shibaWars;
     IShibaWarsArena immutable shibaWarsArena;
 
@@ -23,6 +24,11 @@ contract ShibaWarsFactory {
     uint256 private matchmakingReward;
     uint256 private devReward;
     uint256 private burnAmount;
+    // floki
+    uint256 private winnersRewardFloki;
+    uint256 private matchmakingRewardFloki;
+    uint256 private devRewardFloki;
+    uint256 private burnAmountFloki;
     // leash
     uint256 private winnersRewardLeash;
     uint256 private matchmakingRewardLeash;
@@ -75,8 +81,14 @@ contract ShibaWarsFactory {
         return winnersRewardLeash.add(matchmakingRewardLeash);
     }
 
+    // RETURN TOTAL PRIZE POOL LEASH TO BE WON BY PLAYERS
+    function getPrizePoolFloki() public view returns (uint256) {
+        return winnersRewardFloki.add(matchmakingRewardFloki);
+    }
+
     // SEND DEV REWARD AND BURN BURN AMOUNT
     function redeemDevReward() public {
+        // TODO CHECK FOR 0 TRANSFERS!
         IERC20 _shibaInu = IERC20(shibaInu);
         // burn shib
         _shibaInu.transfer(0xdEAD000000000000000042069420694206942069, burnAmount);
@@ -91,6 +103,13 @@ contract ShibaWarsFactory {
         // pay teh dev
         _leash.transfer(devAddress, devRewardLeash.min(_leash.balanceOf(address(this))));
         devRewardLeash = 0;
+        IERC20 _flokiInu = IERC20(floki);
+        // burn floki
+        _flokiInu.transfer(0x000000000000000000000000000000000000dEaD, burnAmountFloki);
+        burnAmountFloki = 0;
+        // pay teh dev
+        _flokiInu.transfer(devAddress, devRewardFloki.min(_flokiInu.balanceOf(address(this))));
+        devRewardFloki = 0;
     }
 
     function payTheContract(uint256 cost) public {
@@ -109,21 +128,6 @@ contract ShibaWarsFactory {
         burnAmount = burnAmount.add(_burn);
     }
 
-    function donateShib(uint256 amount) public {
-        address factory = address(this);
-        IERC20 _shibaInu = IERC20(shibaInu);
-        require(amount > 0, "Shiba Wars: AMOUNT MSUT BE ABOVE ZERO");
-        // does the buyer has enough shib?
-        require(_shibaInu.balanceOf(msg.sender) >= amount, "Shiba Wars: INSUFFICIENT SHIB BALANCE");
-        require(_shibaInu.allowance(msg.sender, factory) >= amount, "Shiba Wars: ALLOW US TO SPEND YOUR SHIB");
-        // transfer shib from buyer to smart contract
-        require(_shibaInu.transferFrom(msg.sender, factory, amount), "Shiba Wars: Can not transfer tokens to the smart contract");
-        uint256 _matchmaking = amount.div(2);
-        uint256 winners = amount.sub(_matchmaking);
-        matchmakingReward = matchmakingReward.add(_matchmaking);
-        winnersReward = winnersReward.add(winners);
-    }
-
     function payTheContractLeash(uint256 cost) public {
         address factory = address(this);
         IERC20 _leash = IERC20(leash);
@@ -138,6 +142,40 @@ contract ShibaWarsFactory {
         matchmakingRewardLeash = matchmakingRewardLeash.add(_matchmaking);
         devRewardLeash = devRewardLeash.add(_dev);
         burnAmountLeash = burnAmountLeash.add(_burn);
+    }
+
+    function payTheContractFloki(uint256 cost) public {
+        address factory = address(this);
+        IERC20 _floki = IERC20(floki);
+        require(cost > 0, "Shiba Wars: THIS TOKEN CAN NOT BE BOUGHT");
+        // does the buyer has enough floki?
+        require(_floki.balanceOf(msg.sender) >= cost, "Shiba Wars: INSUFFICIENT FLOKI BALANCE");
+        require(_floki.allowance(msg.sender, factory) >= cost, "Shiba Wars: ALLOW US TO SPEND YOUR FLOKI");
+        // transfer floki from buyer to smart contract
+        uint256 balance = _floki.balanceOf(address(this));
+        require(_floki.transferFrom(msg.sender, factory, cost), "Shiba Wars: Can not transfer tokens to the smart contract");
+        uint256 realCost = _floki.balanceOf(address(this)).sub(balance);
+        (uint256 _burn, uint256 _dev, uint256 _matchmaking, uint256 _winners) = getFees(realCost);
+        winnersRewardFloki = winnersRewardFloki.add(_winners);
+        matchmakingRewardFloki = matchmakingRewardFloki.add(_matchmaking);
+        devRewardFloki = devRewardFloki.add(_dev);
+        burnAmountFloki = burnAmountFloki.add(_burn);
+    }
+
+    function donateShib(uint256 amount) public {
+        // TODO donate any token
+        address factory = address(this);
+        IERC20 _shibaInu = IERC20(shibaInu);
+        require(amount > 0, "Shiba Wars: AMOUNT MSUT BE ABOVE ZERO");
+        // does the buyer has enough shib?
+        require(_shibaInu.balanceOf(msg.sender) >= amount, "Shiba Wars: INSUFFICIENT SHIB BALANCE");
+        require(_shibaInu.allowance(msg.sender, factory) >= amount, "Shiba Wars: ALLOW US TO SPEND YOUR SHIB");
+        // transfer shib from buyer to smart contract
+        require(_shibaInu.transferFrom(msg.sender, factory, amount), "Shiba Wars: Can not transfer tokens to the smart contract");
+        uint256 _matchmaking = amount.div(2);
+        uint256 winners = amount.sub(_matchmaking);
+        matchmakingReward = matchmakingReward.add(_matchmaking);
+        winnersReward = winnersReward.add(winners);
     }
 
     function getFees(uint256 cost) public pure returns (uint256 _burn, uint256 _dev, uint256 _matchmaking, uint256 _winners) {
@@ -175,12 +213,10 @@ contract ShibaWarsFactory {
         emit TokenBought(id, msg.sender);
     }
 
-    function recycleShiba(uint shibaId) public isSeason() {
-        ShibaWarsEntity.Shiba memory shiba_ = shibaWars.getTokenDetails(shibaId);
-        uint256 tokenId = shiba_.tokenId;
-        uint256 reward = ShibaWarsUtils.getTrainerTokenReward(tokenId);
-        shibaWars.recycle(shibaId, msg.sender);
-        trainerTokens[msg.sender] += reward;
+    function buyShibaWithFloki(uint tokenId) public isSeason() isUser() {
+        payTheContractFloki(ShibaWarsUtils.getTokenPriceFloki(tokenId));
+        uint id = shibaWars.mintNFT(msg.sender, tokenId);
+        emit TokenBought(id, msg.sender);
     }
 
     // BUY LEASH FROM SHOP
@@ -195,6 +231,14 @@ contract ShibaWarsFactory {
         payTheContract(count.mul(10 ** 17));
         shibaWars.addTreats(msg.sender, count);
     } 
+
+    function recycleShiba(uint shibaId) public isSeason() {
+        ShibaWarsEntity.Shiba memory shiba_ = shibaWars.getTokenDetails(shibaId);
+        uint256 tokenId = shiba_.tokenId;
+        uint256 reward = ShibaWarsUtils.getTrainerTokenReward(tokenId);
+        shibaWars.recycle(shibaId, msg.sender);
+        trainerTokens[msg.sender] += reward;
+    }
 
     // OPEN LUCKY SHIBA PACK
     // we will prevent calling this function from smart contracts
@@ -254,12 +298,15 @@ contract ShibaWarsFactory {
         }
         uint prizepool = winnersReward;
         uint prizepoolLeash = winnersRewardLeash;
+        uint prizepoolFloki = winnersRewardFloki;
         for(uint i = 0; i < 10; ++i) {
             address winner = shibaWars.ownerOf(winners[i]);
             uint prizeShib = prizepool.ratio(shares[i], 100000);
             uint prizeLeash = prizepoolLeash.ratio(shares[i], 100000);
+            uint prizeFloki = prizepoolFloki.ratio(shares[i], 100000);
             IERC20(shibaInu).transfer(winner, prizeShib);
             IERC20(leash).transfer(winner, prizeLeash);
+            IERC20(floki).transfer(winner, prizeFloki);
         }
         redeemDevReward();
     }
@@ -269,12 +316,14 @@ contract ShibaWarsFactory {
         (uint256 _matchesWon, uint256 _totalMatches) = shibaWarsArena.getMatchesWon(msg.sender);
         uint256 shibPrize = matchmakingReward.ratio(_matchesWon, _totalMatches.mul(10));
         uint256 leashPrize = matchmakingRewardLeash.ratio(_matchesWon, _totalMatches.mul(10));
+        uint256 flokiPrize = matchmakingRewardFloki.ratio(_matchesWon, _totalMatches.mul(10));
         IERC20(shibaInu).transfer(msg.sender, shibPrize);
         IERC20(leash).transfer(msg.sender, leashPrize);
+        IERC20(floki).transfer(msg.sender, flokiPrize);
         prizeClaimed[msg.sender] = true;
     }
 
-    function claimablePrize(address user) public view returns (uint256 _shib, uint256 _leash) {
+    function claimablePrize(address user) public view returns (uint256 _shib, uint256 _leash, uint256 _floki) {
         if(prizeClaimed[user]){
             _shib = 0;
             _leash = 0;
@@ -282,6 +331,7 @@ contract ShibaWarsFactory {
             (uint256 _matchesWon, uint256 _totalMatches) = shibaWarsArena.getMatchesWon(msg.sender);
             _shib = matchmakingReward.ratio(_matchesWon, _totalMatches.mul(10));
             _leash = matchmakingRewardLeash.ratio(_matchesWon, _totalMatches.mul(10));
+            _floki = matchmakingRewardFloki.ratio(_matchesWon, _totalMatches.mul(10));
         }
     }
 
@@ -302,6 +352,10 @@ contract ShibaWarsFactory {
 
     function userTrainerTokens(address user) public view returns (uint256) {
         return trainerTokens[user];
+    }
+
+    function getTrainerTokenReward(uint tokenId) public pure returns (uint256) {
+        return ShibaWarsUtils.getTrainerTokenReward(tokenId);
     }
 
     function getHash(address account, uint8 tokenId) public pure returns(bytes32) {
@@ -326,10 +380,6 @@ contract ShibaWarsFactory {
         }
 
         return h == merkleRoot;
-    }
-
-    function getTrainerTokenReward(uint tokenId) public pure returns (uint256) {
-        return ShibaWarsUtils.getTrainerTokenReward(tokenId);
     }
 
 }

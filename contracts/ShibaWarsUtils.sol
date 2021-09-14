@@ -202,6 +202,27 @@ library ShibaWarsUtils {
         return 0;
     }
 
+    function getTokenPriceFloki(uint tokenId) public pure returns (uint256) {
+        if (tokenId == DOGE_KILLER) {
+            return tokens(millions(35));
+        } else if (tokenId == AGGRESIVE_SHIBA_INU) {
+            return tokens(millions(175) / 10);
+        } else if (tokenId == BORED_SHIBA_INU) {
+            return tokens(millions(875) / 100);
+        } else if (tokenId == SHIBA_INU) {
+            return tokens(millions(175) / 100);
+        } else if (tokenId == AGGRESIVE_SHIBA_PUP) {
+            return tokens(thousand(875));
+        } else if (tokenId == SHIBA_PUP) {
+            return tokens(thousand(2625) / 10);
+        } else if (tokenId == LUCKY_SHIBA_PACK_GEN_1) {
+            return tokens(millions(175) / 100);
+        } else if (tokenId == SHIBAWARS_SUPPORTER) {
+            return tokens(thousand(875) / 10);
+        } 
+        return 0;
+    }
+
     function getTokenPriceLeash(uint tokenId) public pure returns (uint256) {
         if (tokenId == IRON) {
             return tokens(1) / 100;
