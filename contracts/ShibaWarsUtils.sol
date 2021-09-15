@@ -97,6 +97,8 @@ library ShibaWarsUtils {
             return 10;
         } else if (tokenId == SHIBA_PUP) {
             return 3;
+        } else if (tokenId == SHIBAWARS_SUPPORTER) {
+            return 1;
         } else if (tokenId == DOGE_FATHER) {
             return 20000;
         } else if (tokenId == RYOSHI) {
