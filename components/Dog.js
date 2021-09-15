@@ -23,6 +23,7 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
     const strength = data["strength"]
     const agility = data["agility"]
     const dexterity = data["dexterity"]
+    const power = data["power"]
 
     const score = data["arenaScore"]
     const hp = data["hitPoints"]
@@ -43,12 +44,12 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
         setImageUri(json["image"])
         setName(json["name"])
         setDescription(json["description"])
-        const reward = await factoryContract.methods.getTrainerTokenReward(uid).call({ from: account, gasLimit: 125000 })
+        const reward = await factoryContract.methods.getTrainerTokenReward(tokenId).call({ from: account, gasLimit: 125000 })
         setTrainerTokenReward(reward)
     }
 
     async function recycleShiba() {
-        factoryContract.methods.recycleShiba(data["id"]).send({ from: account, gasLimit: 100000 })
+        factoryContract.methods.recycleShiba(data["id"]).send({ from: account, gasLimit: 150000 })
             .on("receipt", (async () => {
                 onOpen()
             }))
@@ -130,6 +131,7 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
         <p>Strength: {strength / 100}</p>
         <p>Agility: {agility / 100}</p>
         <p>Dexterity: {dexterity / 100}</p>
+        <p>Power: {power / 100}%</p>
         <p>HP: {hp / 100} / {maxHp(strength) / 100}</p>
         <p>Arena score: {score}</p>
         {userShibaTreats >= levelUpCost(level) ?

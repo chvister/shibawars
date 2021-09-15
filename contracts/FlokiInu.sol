@@ -5,7 +5,7 @@ import "../node_modules/@openzeppelin/contracts/token/ERC20/extensions/ERC20Burn
 contract FlokiInu is ERC20Burnable {
 
     constructor() ERC20("FlokiInu", "FLOKI") {
-        _mint(msg.sender, 10 ** 12 * 10 ** 18);
+        _mint(msg.sender, 10 ** 13 * 10 ** 18);
     }
 
 }

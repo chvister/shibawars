@@ -56,23 +56,23 @@ contract ShibaWars is ERC721 {
     constructor() ERC721("ShibaWars", "SHIBW") {
         devAddress = msg.sender;
         seasonStart = block.timestamp;
-        mint(msg.sender, ShibaWarsUtils.TEAM_OP_SHIBA, 10000, 10000, 10000);
-        mint(msg.sender, ShibaWarsUtils.TEAM_OP_SHIBA, 10000, 10000, 10000);
-        mint(msg.sender, ShibaWarsUtils.TEAM_OP_SHIBA, 10000, 10000, 10000);
+        mint(msg.sender, ShibaWarsUtils.TEAM_OP_SHIBA, 10000, 10000, 10000, 10000);
+        mint(msg.sender, ShibaWarsUtils.TEAM_OP_SHIBA, 10000, 10000, 10000, 10000);
+        mint(msg.sender, ShibaWarsUtils.TEAM_OP_SHIBA, 10000, 10000, 10000, 10000);
         factoryAddress = msg.sender; // just so we can mint ryoshi :) will be set to the proper address later
         mintNFT(0xB8f226dDb7bC672E27dffB67e4adAbFa8c0dFA08, 16);
     }
 
     // MINT NEW TOKEN
-    function mint(address owner, uint tokenId, uint strength, uint agility, uint dexterity) private returns (uint256) {
+    function mint(address owner, uint tokenId, uint strength, uint agility, uint dexterity, uint power) private returns (uint256) {
         _tokenDetails[nextId] = 
             ShibaWarsEntity.Shiba(
                 nextId, breed[tokenId],
                 (uint64)(strength), 
                 (uint64)(agility), 
                 (uint64)(dexterity), 
+                (uint16)(power), 0,
                 (uint32)(tokenId),
-                0,
                 (uint64)(strength.div(10)), 
                 (uint64)(agility.div(10)), 
                 (uint64)(dexterity.div(10)), 
@@ -171,9 +171,11 @@ contract ShibaWars is ERC721 {
             (abi.encodePacked(block.difficulty, block.timestamp).random(10 * multiplier, 16 * multiplier),
             abi.encodePacked(tokenId, block.timestamp).random(10 * multiplier, 16 * multiplier),
             abi.encodePacked(block.difficulty, tokenId).random(10 * multiplier, 16 * multiplier)) :
-            (multiplier, multiplier, multiplier); 
+            (multiplier, multiplier, multiplier);
 
-        return mint(owner, tokenId, str, agi, dex);
+        uint power = multiplier == 0 ? 0 : str.add(agi).add(dex).percent(48 * multiplier);
+
+        return mint(owner, tokenId, str, agi, dex, power);
     }
 
     // LEVEL UP SHIBA

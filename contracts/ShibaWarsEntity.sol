@@ -10,8 +10,9 @@ library ShibaWarsEntity {
         uint64 agility;         // evasion, crit chance
         uint64 dexterity;       // aim, crit chance decrease
 
+        uint16 power;           // % of max power
+        uint16 inArena;         // 0 false 1 true
         uint32 tokenId;         // id of shiba    
-        uint32 inArena;         // 0 false 1 true
 
         uint64 strengthGain;    // strength gain per level
         uint64 agilityGain;     // agility gain per level

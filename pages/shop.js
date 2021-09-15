@@ -39,7 +39,7 @@ export default function Shop() {
   // smart contracts
   const shibaInuContract = new web3.eth.Contract(ShibaInuABI.abi, process.env.NEXT_PUBLIC_SHIBA_INU_ADDRESS)
   const leashContract = new web3.eth.Contract(LeashABI.abi, process.env.NEXT_PUBLIC_LEASH_ADDRESS)
-  const flokiContract = new web3.eth.Contract(FlokiInuABI.abi, process.env.NEXT_PUBLIC_FLOKI_ADDRESS)
+  const flokiInuContract = new web3.eth.Contract(FlokiInuABI.abi, process.env.NEXT_PUBLIC_FLOKI_ADDRESS)
   const factoryContract = new web3.eth.Contract(FactoryABI.abi, process.env.NEXT_PUBLIC_FACTORY_ADDRESS)
   const shibaWarsContract = new web3.eth.Contract(ShibaWarsABI.abi, process.env.NEXT_PUBLIC_SHIBAWARS_ADDRESS)
 
@@ -96,6 +96,21 @@ export default function Shop() {
       setShibAllowed(true)
     }
 
+    let floki_ = await flokiInuContract.methods.balanceOf(account).call({ from: account })
+    if (floki_.length <= 18) {
+      setFloki("0")
+    } else {
+      setFloki(thousandSeparator(floki_.substring(0, floki_.length - 18)))
+    }
+
+    let flokiAllowance = await flokiInuContract.methods.allowance(account, process.env.NEXT_PUBLIC_FACTORY_ADDRESS)
+      .call({ from: account })
+    if (flokiAllowance == 0) {
+      setFlokiAllowed(false)
+    } else {
+      setFlokiAllowed(true)
+    }
+
     let leash_ = await leashContract.methods.balanceOf(account).call({ from: account })
     if (leash_.length <= 18) {
       if (leash_.length <= 16) {
@@ -145,6 +160,13 @@ export default function Shop() {
       }))
   }
 
+  async function allowFloki() {
+    flokiInuContract.methods.approve(process.env.NEXT_PUBLIC_FACTORY_ADDRESS, "10000000000000000000000000000000")
+      .send({ from: account }).on("receipt", (() => {
+        getUserErc20()
+      }))
+  }
+
   /**
    * 
    * SHOP FUNCTIONS
@@ -153,6 +175,13 @@ export default function Shop() {
 
   async function buyShiba(shibaId) {
     factoryContract.methods.buyShiba(shibaId).send({ from: account, gasLimit: 500000 })
+      .on("receipt", (async (receipt) => {
+        processPurchase(receipt)
+      }))
+  }
+
+  async function buyShibaWithFloki(shibaId) {
+    factoryContract.methods.buyShibaWithFloki(shibaId).send({ from: account, gasLimit: 500000 })
       .on("receipt", (async (receipt) => {
         processPurchase(receipt)
       }))
@@ -243,6 +272,11 @@ export default function Shop() {
               <Button variant="contained" onClick={() => { allowShib() }}>Allow us to spend your $SHIB</Button>}
           </p>
           <p className={styles.description}>
+            Your $FLOKI balance: {floki}
+            {flokiAllowed ? null :
+              <Button variant="contained" onClick={() => { allowFloki() }}>Allow us to spend your $FLOKI</Button>}
+          </p>
+          <p className={styles.description}>
             Your $LEASH balance: {leash}
             {leashAllowed ? null :
               <Button variant="contained" onClick={() => { allowLeash() }}>Allow us to spend your $LEASH</Button>}
@@ -257,57 +291,72 @@ export default function Shop() {
             <ShibaSale
               dogName={"Doge Killer"}
               dogPrice={200000000}
+              dogPriceFloki={35000000}
+              dogPriceTT={800}
               dogUrl={"https://ipfs.io/ipfs/QmR3sbzQQNGCi6egS2Ba9mSb1EucgXo52jEJzJm14B4H3K?filename=token-109.png"}
               onClick={() => { buyShiba(108) }}
-              dogPriceTT={800}
+              onClickFloki={() => { buyShibaWithFloki(108) }}
               onClickTT={() => { buyShibaTT(108) }}
             />
             <ShibaSale
               dogName={"Aggresive Shiba Inu"}
               dogPrice={100000000}
+              dogPriceFloki={17500000}
+              dogPriceTT={400}
               dogUrl={"https://ipfs.io/ipfs/QmZo2BVWNtCEy3qcRm31t5rLFJS7sGXuYp9TZFma7s9HYV?filename=token-110.png"}
               onClick={() => { buyShiba(109) }}
+              onClickFloki={() => { buyShibaWithFloki(109) }}
               onClickTT={() => { buyShibaTT(109) }}
-              dogPriceTT={400}
             />
             <ShibaSale
               dogName={"Bored Shiba Inu"}
               dogPrice={50000000}
+              dogPriceFloki={8750000}
+              dogPriceTT={200}
               dogUrl={"https://ipfs.io/ipfs/QmZJcKUCbCkPBfMHLyuAxj8rqUUZFDw8ESeWzMoSQWahjt?filename=token-111.png"}
               onClick={() => { buyShiba(110) }}
+              onClickFloki={() => { buyShibaWithFloki(110) }}
               onClickTT={() => { buyShibaTT(110) }}
-              dogPriceTT={200}
             />
             <ShibaSale
               dogName={"Shiba Inu"}
               dogPrice={10000000}
+              dogPriceFloki={1750000}
+              dogPriceTT={40}
               dogUrl={"https://ipfs.io/ipfs/QmZkGv9FiKtLFhtaoeux3kLoCbKgLPzVu6v2rRv8ZR5djv?filename=token-112.png"}
               onClick={() => { buyShiba(111) }}
+              onClickFloki={() => { buyShibaWithFloki(111) }}
               onClickTT={() => { buyShibaTT(111) }}
-              dogPriceTT={40}
             />
             <ShibaSale
               dogName={"Aggresive Shiba Pup"}
               dogPrice={5000000}
+              dogPriceFloki={875000}
+              dogPriceTT={20}
               dogUrl={"https://ipfs.io/ipfs/QmeTqPuKfeUEE2t3Km8Vn7XRJ5pSbm1ELX9jHAh1DinZQX?filename=token-113.png"}
               onClick={() => { buyShiba(112) }}
+              onClickFloki={() => { buyShibaWithFloki(112) }}
               onClickTT={() => { buyShibaTT(112) }}
-              dogPriceTT={20}
             />
             <ShibaSale
               dogName={"Shiba Pup"}
               dogPrice={1500000}
+              dogPriceFloki={262500}
+              dogPriceTT={6}
               dogUrl={"https://ipfs.io/ipfs/QmPkDhuQWa7nQaf32n6VmZDhDHbM7yxMVGrbgxXppcQBY9?filename=token-114.png"}
               onClick={() => { buyShiba(113) }}
+              onClickFloki={() => { buyShibaWithFloki(113) }}
               onClickTT={() => { buyShibaTT(113) }}
-              dogPriceTT={6}
             />
             <ShibaSale
               dogName={"Lucky Shiba Pack"}
               dogPrice={10000000}
+              dogPriceFloki={1750000}
+              dogPriceTT={40}
               dogUrl={"https://ipfs.io/ipfs/QmQWq4kGwieHvxxNvNgDcW5ActvfLjxWaz8pvifAi3po92?filename=token-100.png"}
               onClick={() => { buyShiba(100) }}
-              dogPriceTT={40}
+              onClickFloki={() => { buyShibaWithFloki(100) }}
+              onClickTT={() => { buyShibaTT(100) }}
             />
             <LeashSale
               leashName={"Diamond Leash"}
@@ -336,10 +385,12 @@ export default function Shop() {
             <ShibaSale
               dogName={"ShibaWars Supporter Badge"}
               dogPrice={500000}
+              dogPriceFloki={87500}
+              dogPriceTT={2}
               dogUrl={"https://ipfs.io/ipfs/QmPWkTwp4Zy8pBrRr37zTTVvv136kpAwd4sLqDQqGTxn7H?filename=token-101.png"}
               onClick={() => { buyShiba(101) }}
+              onClickFloki={() => { buyShibaWithFloki(101) }}
               onClickTT={() => { buyShibaTT(101) }}
-              dogPriceTT={2}
             />
           </div>
         </div>
