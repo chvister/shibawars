@@ -12,16 +12,26 @@ import ArenaABI from "../build/contracts/ShibaWarsArena.json"
 import FactoryABI from "../build/contracts/ShibaWarsFactory.json"
 
 export default function MyDogs() {
+  // web3
   const { isAuthenticated, enableWeb3, isWeb3Enabled, web3, Moralis } = useMoralis();
   const [account, setAccount] = useState(undefined)
-  const [shibaTreats, setPowerTreats] = useState(0)
   const [chainId, setChainId] = useState(0)
+  // game stats
+  const [shibaTreats, setPowerTreats] = useState(0)
+  // erc20
   const [userShibas, setUserShibas] = useState([])
+  // ui
   const [fightResult, setFightResult] = useState(undefined)
-
+  // smart contracts
   const shibaWarsContract = new web3.eth.Contract(ShibaWarsABI.abi, process.env.NEXT_PUBLIC_SHIBAWARS_ADDRESS)
   const arenaContract = new web3.eth.Contract(ArenaABI.abi, process.env.NEXT_PUBLIC_ARENA_ADDRESS)
   const factoryContract = new web3.eth.Contract(FactoryABI.abi, process.env.NEXT_PUBLIC_FACTORY_ADDRESS)
+
+  /**
+   * 
+   * WEB3 FUNCTIONS
+   * 
+   */
 
   useEffect(() => {
     if (isAuthenticated && !isWeb3Enabled) {
@@ -55,6 +65,12 @@ export default function MyDogs() {
     let accounts = await web3.eth.getAccounts()
     setAccount(accounts[0])
   }
+
+  /**
+   * 
+   * UI FUNCTIONS
+   * 
+   */
 
   async function showFight(receipt, shibaId) {
     let event = receipt.events["ArenaFight"]
@@ -119,6 +135,12 @@ export default function MyDogs() {
     }
     setUserShibas(userShibas_)
   }
+
+  /**
+   * 
+   * RENDER FUNCTION
+   * 
+   */
 
   return (
     <div className={styles.container}>
