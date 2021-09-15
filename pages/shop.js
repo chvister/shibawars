@@ -10,31 +10,40 @@ import LeashSale from "../components/LeashSale"
 import Footer from "../components/mainPage/Footer"
 import AlertDialog from '../components/AlertDialog'
 import LeashABI from "../build/contracts/Leash.json"
+import FlokiInuABI from "../build/contracts/FlokiInu.json"
 import ShibaInuABI from "../build/contracts/ShibaInu.json"
 import ShibaWarsABI from "../build/contracts/ShibaWars.json"
 import FactoryABI from "../build/contracts/ShibaWarsFactory.json"
 
 export default function Shop() {
-  const { isAuthenticated, enableWeb3, isWeb3Enabled, web3, Moralis } = useMoralis();
+  // web3
+  const { isAuthenticated, enableWeb3, isWeb3Enabled, web3, Moralis } = useMoralis()
   const [account, setAccount] = useState(undefined)
   const [chainId, setChainId] = useState(0)
+  // erc-20
   const [shibaInu, setShibaInu] = useState("0")
-  const [leash, setLeash] = useState("0")
-  const [trainerTokens, setTrainerTokens] = useState("0")
   const [shibAllowed, setShibAllowed] = useState(false)
+  const [leash, setLeash] = useState("0")
   const [leashAllowed, setLeashAllowed] = useState(false)
+  const [floki, setFloki] = useState("0")
+  const [flokiAllowed, setFlokiAllowed] = useState(false)
+  // game stats
+  const [trainerTokens, setTrainerTokens] = useState("0")
+  const [shibaTreats, setShibaTreats] = useState(0)
+  // purchase info
   const [boughtTokenId, setBoughtTokenId] = useState(0)
   const [imageUri, setImageUri] = useState("")
   const [name, setName] = useState("")
   const [buyTreatsCount, setBuyTreatsCount] = useState(1500000)
   const [notEnoughTreats, setNotEnoughTreats] = useState(false)
-  const [shibaTreats, setShibaTreats] = useState(0)
-
+  // smart contracts
   const shibaInuContract = new web3.eth.Contract(ShibaInuABI.abi, process.env.NEXT_PUBLIC_SHIBA_INU_ADDRESS)
   const leashContract = new web3.eth.Contract(LeashABI.abi, process.env.NEXT_PUBLIC_LEASH_ADDRESS)
+  const flokiContract = new web3.eth.Contract(FlokiInuABI.abi, process.env.NEXT_PUBLIC_FLOKI_ADDRESS)
   const factoryContract = new web3.eth.Contract(FactoryABI.abi, process.env.NEXT_PUBLIC_FACTORY_ADDRESS)
   const shibaWarsContract = new web3.eth.Contract(ShibaWarsABI.abi, process.env.NEXT_PUBLIC_SHIBAWARS_ADDRESS)
 
+  // init web3
   useEffect(() => {
     if (isAuthenticated && !isWeb3Enabled) {
       enableWeb3()
@@ -52,6 +61,7 @@ export default function Shop() {
     }
   }, [isAuthenticated, isWeb3Enabled])
 
+  // web3 attribute changed
   useEffect(() => {
     if (chainId != 1337) {
       setShibaInu("0")
@@ -61,6 +71,7 @@ export default function Shop() {
     }
   }, [account, chainId])
 
+  // web3 attribute changed
   async function initAccount() {
     let chain = await web3.eth.getChainId()
     setChainId(chain)
@@ -68,6 +79,7 @@ export default function Shop() {
     setAccount(accounts[0])
   }
 
+  // erc20 info
   async function getUserErc20() {
     let shib_ = await shibaInuContract.methods.balanceOf(account).call({ from: account })
     if (shib_.length <= 18) {
@@ -114,6 +126,11 @@ export default function Shop() {
     setShibaTreats(thousandSeparator(shibaTreats))
   }
 
+  /**
+   * 
+   * TOKENS FUNCTIONS
+   * 
+   */
   async function allowShib() {
     shibaInuContract.methods.approve(process.env.NEXT_PUBLIC_FACTORY_ADDRESS, "1000000000000000000000000000000000")
       .send({ from: account }).on("receipt", (() => {
@@ -127,6 +144,12 @@ export default function Shop() {
         getUserErc20()
       }))
   }
+
+  /**
+   * 
+   * SHOP FUNCTIONS
+   * 
+   */
 
   async function buyShiba(shibaId) {
     factoryContract.methods.buyShiba(shibaId).send({ from: account, gasLimit: 500000 })
@@ -149,6 +172,23 @@ export default function Shop() {
       }))
   }
 
+  async function buyShibaTreats() {
+    if (buyTreatsCount < 1) {
+      setNotEnoughTreats(true)
+      return
+    }
+    factoryContract.methods.buyTreats(buyTreatsCount).send({ from: account, gasLimit: 150000 })
+      .on("receipt", (async () => {
+        getUserErc20()
+      }))
+  }
+
+  /**
+   * 
+   * UI FUNCTIONS
+   * 
+   */
+
   async function processPurchase(receipt) {
     getUserErc20()
     let id = receipt.events["TokenBought"].returnValues[0]
@@ -167,20 +207,15 @@ export default function Shop() {
     setNotEnoughTreats(false)
   }
 
-  async function buyShibaTreats() {
-    if (buyTreatsCount < 1) {
-      setNotEnoughTreats(true)
-      return
-    }
-    factoryContract.methods.buyTreats(buyTreatsCount).send({ from: account, gasLimit: 150000 })
-      .on("receipt", (async (receipt) => {
-        getUserErc20()
-      }))
-  }
-
   function handleChange(event) {
     setBuyTreatsCount(event.target.value)
   }
+
+  /**
+   * 
+   * RENDER FUNCTION
+   * 
+   */
 
   return (
     <div className={styles.container}>
