@@ -176,7 +176,7 @@ library ShibaWarsUtils {
         } else if (tokenId == SHIBA_PUP) {
             return tokens(millions(15) / 10);
         } else if (tokenId == LUCKY_SHIBA_PACK_GEN_1) {
-            return tokens(millions(10));
+            return tokens(millions(15));
         } else if (tokenId == SHIBAWARS_SUPPORTER) {
             return tokens(thousand(500));
         } 
@@ -197,7 +197,7 @@ library ShibaWarsUtils {
         } else if (tokenId == SHIBA_PUP) {
             return 6;
         } else if (tokenId == LUCKY_SHIBA_PACK_GEN_1) {
-            return 40;
+            return 60;
         } else if (tokenId == SHIBAWARS_SUPPORTER) {
             return 2;
         } 
@@ -218,7 +218,7 @@ library ShibaWarsUtils {
         } else if (tokenId == SHIBA_PUP) {
             return tokens(thousand(2625) / 10);
         } else if (tokenId == LUCKY_SHIBA_PACK_GEN_1) {
-            return tokens(millions(175) / 100);
+            return tokens(thousand(2625));
         } else if (tokenId == SHIBAWARS_SUPPORTER) {
             return tokens(thousand(875) / 10);
         } 
