@@ -36,6 +36,12 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
 
     const canFight = Math.floor(tokenId / 100) == 1 && tokenId > 102
 
+    /**
+     * 
+     * SETUP FUNCTIONS
+     * 
+     */
+
     useEffect(() => {
         loadJson(uri)
     }, [uri])
@@ -49,6 +55,12 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
         const reward = await factoryContract.methods.getTrainerTokenReward(tokenId).call({ from: account, gasLimit: 125000 })
         setTrainerTokenReward(reward)
     }
+
+    /**
+     * 
+     * WEB3 METHODS
+     * 
+     */
 
     async function recycleShiba() {
         factoryContract.methods.recycleShiba(data["id"]).send({ from: account, gasLimit: 150000 })
@@ -108,6 +120,12 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
             }))
     }
 
+    /**
+     * 
+     * STAT FUNCTIONS
+     * 
+     */
+
     function maxHp(strength) {
         return strength * 5 + 5000
     }
@@ -115,6 +133,12 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
     function levelUpCost(level) {
         return level * 150000
     }
+
+    /**
+     * 
+     * UI FUNCTIONS
+     * 
+     */
 
     function leashName(id) {
         if (id == 1) {
@@ -129,16 +153,6 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
         return "";
     }
 
-    if (tokenId <= 101) {
-        return (
-            <div className={styles.dog}>
-                {imageUri === undefined ? null : <Image width={512} height={512} src={imageUri} />}
-                <h2>{shibaName} ({uid})</h2>
-                <p>{shibaDesc}</p>
-                {tokenId == 100 ? <Button variant="contained" onClick={() => { openPack() }}>Open pack</Button> : null}
-            </div>)
-    }
-
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget)
     }
@@ -150,17 +164,20 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
         }
     }
 
-    function getLeashName(leashId) {
-        if (leashId == 1) {
-            return "Iron Leash"
-        } else if (leashId == 2) {
-            return "Silver Leash"
-        } else if (leashId == 3) {
-            return "Golden Leash"
-        } else if (leashId == 4) {
-            return "Diamond Leash"
-        }
-        return ""
+    /**
+     * 
+     * RENDER FUNCTIONS
+     * 
+     */
+
+    if (tokenId <= 101) {
+        return (
+            <div className={styles.dog}>
+                {imageUri === undefined ? null : <Image width={512} height={512} src={imageUri} />}
+                <h2>{shibaName} ({uid})</h2>
+                <p>{shibaDesc}</p>
+                {tokenId == 100 ? <Button variant="contained" onClick={() => { openPack() }}>Open pack</Button> : null}
+            </div>)
     }
 
     return <div className={styles.dog}>
@@ -200,7 +217,7 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
                         <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
                             {userLeashes.map((option) =>
                             (<MenuItem key={option} selected={false} onClick={() => handleClose(option[0])}>
-                                Leash with {getLeashName(option[1])} ({option[0]})
+                                Leash with {leashName(option[1])} ({option[0]})
                             </MenuItem>))}
                         </Menu>
                     </p>
