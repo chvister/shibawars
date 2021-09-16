@@ -3,6 +3,7 @@ import { Button } from '@material-ui/core'
 import Image from 'next/dist/client/image'
 import { useEffect, useState } from 'react'
 import styles from '../styles/Home.module.css'
+import { List, ListItem, Menu, MenuItem } from '@material-ui/core'
 
 export default function Dog({ dogData, factoryContract, account, onOpen, shibaWarsContract, arenaContract, showFight }) {
     const data = dogData["dog"]
@@ -11,8 +12,9 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
     const shibaAdventureLevel = dogData["adventure"]
     const userLeashes = dogData["leashes"]
     const leashId = dogData["leashId"]
-    const leashTokenId = dogData["leashTokenId"]
+    const leashTokenId = dogData["leashToken"].tokenId
     const [trainerTokenReward, setTrainerTokenReward] = useState(0)
+    const [anchorEl, setAnchorEl] = useState(null);
 
     const [imageUri, setImageUri] = useState(undefined)
     const [shibaName, setName] = useState("")
@@ -32,7 +34,7 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
     const tokenId = data["tokenId"]
     const inArena = data["inArena"]
 
-    const canFight = Math.floor(tokenId / 100) == 1 && tokenId > 103
+    const canFight = Math.floor(tokenId / 100) == 1 && tokenId > 102
 
     useEffect(() => {
         loadJson(uri)
@@ -92,6 +94,20 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
             }))
     }
 
+    async function leashShiba(leashId) {
+        arenaContract.methods.putShibaOnLeash(uid, leashId).send({ from: account, gasLimit: 125000 })
+            .on("receipt", (async () => {
+                onOpen()
+            }))
+    }
+
+    async function unleash() {
+        arenaContract.methods.unleashShiba(uid).send({ from: account, gasLimit: 40000 })
+            .on("receipt", (async () => {
+                onOpen()
+            }))
+    }
+
     function maxHp(strength) {
         return strength * 5 + 5000
     }
@@ -123,6 +139,30 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
             </div>)
     }
 
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget)
+    }
+
+    const handleClose = (leashId) => {
+        setAnchorEl(null)
+        if (!Number.isNaN(parseInt(leashId))) {
+            leashShiba(leashId)
+        }
+    }
+
+    function getLeashName(leashId) {
+        if (leashId == 1) {
+            return "Iron Leash"
+        } else if (leashId == 2) {
+            return "Silver Leash"
+        } else if (leashId == 3) {
+            return "Golden Leash"
+        } else if (leashId == 4) {
+            return "Diamond Leash"
+        }
+        return ""
+    }
+
     return <div className={styles.dog}>
         {imageUri === undefined ? null : <Image width={512} height={512} src={imageUri} />}
         <h2>{shibaName} ({uid})</h2>
@@ -152,8 +192,20 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
             : <p>This dog can not go on an adventure</p>}
         {
             leashId == 0 ?
-                userLeashes.length > 0 ? <Button variant="contained">Leash</Button> : <p>You have no free leashes</p>
-                : <Button variant="contained">Unleash {leashName(leashId)}</Button>
+                userLeashes.length > 0 ?
+                    <p>
+                        <Button variant="contained" aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
+                            Leash this shiba
+                        </Button>
+                        <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
+                            {userLeashes.map((option) =>
+                            (<MenuItem key={option} selected={false} onClick={() => handleClose(option[0])}>
+                                Leash with {getLeashName(option[1])} ({option[0]})
+                            </MenuItem>))}
+                        </Menu>
+                    </p>
+                    : <p>You have no free leashes</p>
+                : <Button variant="contained" onClick={() => { unleash() }}>Unleash from {leashName(leashTokenId)}</Button>
         }
         {
             trainerTokenReward != 0 ? <Button variant="contained" onClick={() => { recycleShiba() }}>Recycle for {trainerTokenReward} Trainer Tokens</Button> : null

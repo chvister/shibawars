@@ -109,11 +109,26 @@ export default function MyDogs() {
     }
   }
 
+  async function filterLeashes(tokens) {
+    let userLeashes = []
+    for (let tokenId of tokens) {
+      let dogeData = await shibaWarsContract.methods.getTokenDetails(tokenId).call({ from: ethereum.selectedAddress })
+      if (dogeData.tokenId >= 1 && dogeData.tokenId <= 4) {
+        let isLeashUsed = await arenaContract.methods.isLeashUsed(tokenId).call({ from: ethereum.selectedAddress })
+        if (!isLeashUsed) {
+          userLeashes.push([tokenId, dogeData.tokenId])
+        }
+      }
+    }
+    return userLeashes
+  }
+
   async function getUserTokens() {
     let shibaTreats_ = await shibaWarsContract.methods.getUserTreatTokens(account).call({ from: account });
     setPowerTreats(shibaTreats_)
     let userTokens = await shibaWarsContract.methods.getUserTokens(account).call({ from: account })
     const userShibas_ = []
+    const leashes = await filterLeashes(userTokens)
     for (var shibaId of userTokens) {
       const dogContent = []
       let dog = await shibaWarsContract.methods.getTokenDetails(shibaId).call({ from: account })
@@ -122,9 +137,9 @@ export default function MyDogs() {
       dogContent["tokenUri"] = tokenUri
       dogContent["treats"] = shibaTreats_
       dogContent["adventure"] = parseInt(await arenaContract.methods.getAdventureLevel(shibaId).call({ from: account })) + 1
-      // TODO
-      dogContent["leashes"] = []
-      dogContent["leashId"] = 0
+      dogContent["leashes"] = leashes
+      dogContent["leashId"] = await arenaContract.methods.getLeashId(shibaId).call({ from: account })
+      dogContent["leashToken"] = await shibaWarsContract.methods.getTokenDetails(dogContent["leashId"]).call({ from: account })
 
       userShibas_.push(
         <React.Fragment key={dog["id"]}>
