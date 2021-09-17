@@ -232,7 +232,7 @@ contract ShibaWarsArena {
     }
 
     function getLeashId(uint shibaId) public view returns (uint256) {
-        uint leashId = leashedShibas[shibaId];
+        return leashedShibas[shibaId];
     }
 
     function goOnAdventure(uint shibaId) public myToken(shibaId) canFight(shibaId) {

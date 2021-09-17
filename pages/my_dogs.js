@@ -96,7 +96,7 @@ export default function MyDogs() {
         <p>Attacker did {attackerDamage / 100} damage and defender did {defenderDamage / 100} damage</p>
         {attackerDamage <= defenderDamage && reward > 0 ? <p>Defender fainted</p> : null}
         {defenderDamage <= attackerDamage && reward == 0 ? <p>Attacker fainted</p> : null}
-        <p>{reward > 0 ? "Attacker won " + formatNumber(reward) + " treats." : "Defender won"}</p>
+        <p>{reward > 0 ? "Attacker won " + thousandSeparator(reward) + " treats." : "Defender won"}</p>
       </p>)
     } else {
       let values = event["returnValues"]
@@ -201,7 +201,7 @@ export default function MyDogs() {
       }
       ++i;
     }
-    factoryContract.methods.claimAirdrop(proof, airdropId).send({ from: account })
+    factoryContract.methods.claimAirdrop(proof, airdropId).send({ from: account, gasLimit: 350000 })
       .on("receipt", (async (receipt) => {
         getUserTokens()
         let id = receipt.events["TokenBought"].returnValues[0]
@@ -254,7 +254,7 @@ export default function MyDogs() {
       <main className={styles.main}>
         <div className={styles.section_app}>
           <h1 className={styles.title}>My Dogs</h1>
-          <p className={styles.description}>You have {formatNumber(shibaTreats)} Shiba Treats.</p>
+          <p className={styles.description}>You have {thousandSeparator(shibaTreats)} Shiba Treats.</p>
           <p className={styles.description}>Here are your dogs.</p>
           <p> {account !== undefined && chainId == 1337 ? <Button variant="contained" onClick={() => claimAirdrop()}>Claim Airdrop</Button> : null}</p>
           {
@@ -293,4 +293,13 @@ function formatNumber(x) {
     integer = left + "." + right
   }
   return integer + (decimal == "00" ? "" : "," + decimal)
+}
+
+function thousandSeparator(x) {
+  for (var i = x.toString().length - 3; i > 0; i -= 3) {
+    var left = x.toString().substring(0, i)
+    var right = x.toString().substring(i)
+    x = left + "." + right
+  }
+  return x
 }

@@ -234,6 +234,7 @@ contract ShibaWarsFactory {
 
     function recycleShiba(uint shibaId) public isSeason() {
         ShibaWarsEntity.Shiba memory shiba_ = shibaWars.getTokenDetails(shibaId);
+        require(shiba_.inArena == 0, "SHIBAWARS: This dog is waiting for a fight!");
         uint256 tokenId = shiba_.tokenId;
         uint256 reward = ShibaWarsUtils.getTrainerTokenReward(tokenId);
         shibaWars.recycle(shibaId, msg.sender);

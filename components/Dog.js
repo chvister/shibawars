@@ -12,6 +12,7 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
     const shibaAdventureLevel = dogData["adventure"]
     const userLeashes = dogData["leashes"]
     const leashId = dogData["leashId"]
+    console.log(leashId)
     const leashTokenId = dogData["leashToken"].tokenId
     const [trainerTokenReward, setTrainerTokenReward] = useState(0)
     const [anchorEl, setAnchorEl] = useState(null);
@@ -78,7 +79,7 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
     }
 
     async function goOnAdventure() {
-        arenaContract.methods.goOnAdventure(uid).send({ from: account, gasLimit: 150000 })
+        arenaContract.methods.goOnAdventure(uid).send({ from: account, gasLimit: 200000 })
             .on("receipt", (async (receipt) => {
                 onOpen()
                 showFight(receipt)
@@ -177,6 +178,9 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
                 <h2>{shibaName} ({uid})</h2>
                 <p>{shibaDesc}</p>
                 {tokenId == 100 ? <Button variant="contained" onClick={() => { openPack() }}>Open pack</Button> : null}
+                {
+                    trainerTokenReward != 0 ? <Button variant="contained" onClick={() => { recycleShiba() }}>Recycle for {trainerTokenReward} Trainer Tokens</Button> : null
+                }
             </div>)
     }
 

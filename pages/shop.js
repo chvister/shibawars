@@ -118,7 +118,7 @@ export default function Shop() {
     setTrainerTokens(trainerTokens)
 
     let shibaTreats = await shibaWarsContract.methods.getUserTreatTokens(account).call({ from: account })
-    setShibaTreats(formatNumber(shibaTreats))
+    setShibaTreats(thousandSeparator(shibaTreats))
   }
 
   /**
@@ -264,7 +264,7 @@ export default function Shop() {
           <p>
             <TextField id="treats-count" variant="outlined" defaultValue={buyTreatsCount} type="number" onChange={handleChange} />
             <Button variant="contained" onClick={() => { buyShibaTreats() }}>
-              Buy {formatNumber(buyTreatsCount)} Shiba Treats for {formatNumber(buyTreatsCount / 10)} $SHIB
+              Buy {thousandSeparator(buyTreatsCount)} Shiba Treats for {thousandSeparator(buyTreatsCount / 10)} $SHIB
             </Button>
           </p>
           <div className={styles.gridContainer}>
@@ -330,9 +330,9 @@ export default function Shop() {
             />
             <ShibaSale
               dogName={"Lucky Shiba Pack"}
-              dogPrice={10000000}
-              dogPriceFloki={1750000}
-              dogPriceTT={40}
+              dogPrice={15000000}
+              dogPriceFloki={2625000}
+              dogPriceTT={60}
               dogUrl={"https://ipfs.io/ipfs/QmQWq4kGwieHvxxNvNgDcW5ActvfLjxWaz8pvifAi3po92?filename=token-100.png"}
               onClick={() => { buyShiba(100) }}
               onClickFloki={() => { buyShibaWithFloki(100) }}
@@ -404,4 +404,13 @@ function formatNumber(x) {
     integer = left + "." + right
   }
   return integer + (decimal == "00" ? "" : "," + decimal)
+}
+
+function thousandSeparator(x) {
+  for (var i = x.toString().length - 3; i > 0; i -= 3) {
+      var left = x.toString().substring(0, i)
+      var right = x.toString().substring(i)
+      x = left + "." + right
+  }
+  return x
 }
