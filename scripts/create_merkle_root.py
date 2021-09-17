@@ -92,21 +92,22 @@ merkleFile = open('merkle.csv', 'w')
 
 #print testing sequence
 root = storeHash[0].hex()
+print(root)
 hash = "0x46bfa01cd74df005bb90c4600b4b53e4a05d0d5dfc5e3bf736f76be4294ad067"
 
 i = 0
 
 print("Test sequence:")
 
-while(hash != root):
-	print(hash)
-	if(i % 2 == 0):
-		hash = siblings[hash] 
-	else:
-		hash = parents[hash]
-	i += 1
-
-print(hash)
+#while(hash != root):
+#	print(hash)
+#	if(i % 2 == 0):
+#		hash = siblings[hash] 
+#	else:
+#		hash = parents[hash]
+#	i += 1
+#
+#print(hash)
 
 jsonString = json.dumps(parents)
 jsonFile = open("./parents.json", "w")

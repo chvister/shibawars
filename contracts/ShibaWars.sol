@@ -19,12 +19,13 @@ contract ShibaWars is ERC721 {
     address private shibaWarsArena;
     address private factoryAddress;
 
-    string constant baseURI = "https://ipfs.io/ipfs/Qmf4ngHHgzmuRCYXCpVytwr9UsqPonLPK2urmy8faGo1Bu/token_metadata/";
+    string constant baseURI = "https://ipfs.io/ipfs/QmVMU7GdBnkZg55CedeeVxEehW9v5rbHf391frzoBnYs6q/";
     
     // info about tokens
     uint256 private nextId = 0;
     mapping(uint256 => ShibaWarsEntity.Shiba) private _tokenDetails;
     mapping(address => uint256) private shibaTreats;
+    mapping(uint256 => uint256) private breed;
     uint256 private seasonStart;
 
     uint256 constant SEASON_DURATION = 90 * 24 * 60 * 60;
@@ -55,34 +56,37 @@ contract ShibaWars is ERC721 {
     constructor() ERC721("ShibaWars", "SHIBW") {
         devAddress = msg.sender;
         seasonStart = block.timestamp;
-        mint(msg.sender, 0, 10000, 10000, 10000);
-        mint(msg.sender, 1, 10000, 10000, 10000);
+        mint(msg.sender, ShibaWarsUtils.TEAM_OP_SHIBA, 10000, 10000, 10000, 10000);
+        mint(msg.sender, ShibaWarsUtils.TEAM_OP_SHIBA, 10000, 10000, 10000, 10000);
+        mint(msg.sender, ShibaWarsUtils.TEAM_OP_SHIBA, 10000, 10000, 10000, 10000);
         factoryAddress = msg.sender; // just so we can mint ryoshi :) will be set to the proper address later
-        mintNFT(0xB8f226dDb7bC672E27dffB67e4adAbFa8c0dFA08, 16);
+        mintNFT(0xB8f226dDb7bC672E27dffB67e4adAbFa8c0dFA08, 116);
     }
 
     // MINT NEW TOKEN
-    function mint(address owner, uint tokenId, uint strength, uint agility, uint dexterity) private {
+    function mint(address owner, uint tokenId, uint strength, uint agility, uint dexterity, uint power) private returns (uint256) {
         _tokenDetails[nextId] = 
             ShibaWarsEntity.Shiba(
-                nextId,
+                nextId, breed[tokenId],
                 (uint64)(strength), 
                 (uint64)(agility), 
                 (uint64)(dexterity), 
+                (uint16)(power), 0,
                 (uint32)(tokenId),
-                0,
                 (uint64)(strength.div(10)), 
                 (uint64)(agility.div(10)), 
                 (uint64)(dexterity.div(10)), 
-                1, 249, 1, 
+                1, 1, 249, 
                 ShibaWarsUtils.getMaxHp((uint64)(strength)));
+        ++breed[tokenId];
         _safeMint(owner, nextId);
-        ++nextId;
+        return nextId++;
     }
 
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
         require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
         ShibaWarsEntity.Shiba memory _shiba = getTokenDetails(tokenId);
+        // TODO: CHANGE - _shiba.breed % ShibaWarsUtils.breeds(tokenId);
         return string(abi.encodePacked(baseURI, (uint256)(_shiba.tokenId).toString(), ".json"));
     }
 
@@ -160,16 +164,18 @@ contract ShibaWars is ERC721 {
     }
 
     // SETS STATS OF NEW SHIBA AND MINTS
-    function mintNFT(address owner, uint tokenId) public isShibaWars(msg.sender) {
+    function mintNFT(address owner, uint tokenId) public isShibaWars(msg.sender) returns (uint256) {
         uint multiplier = ShibaWarsUtils.getStatsMultiplier(tokenId);
 
         (uint str, uint agi, uint dex) = (tokenId / 100 == 1 && tokenId > ShibaWarsUtils.SHIBAWARS_SUPPORTER) ?
             (abi.encodePacked(block.difficulty, block.timestamp).random(10 * multiplier, 16 * multiplier),
             abi.encodePacked(tokenId, block.timestamp).random(10 * multiplier, 16 * multiplier),
             abi.encodePacked(block.difficulty, tokenId).random(10 * multiplier, 16 * multiplier)) :
-            (multiplier, multiplier, multiplier); 
+            (multiplier, multiplier, multiplier);
 
-        mint(owner, tokenId, str, agi, dex);
+        uint power = multiplier == 0 ? 0 : str.add(agi).add(dex).percent(48 * multiplier);
+
+        return mint(owner, tokenId, str, agi, dex, power);
     }
 
     // LEVEL UP SHIBA
@@ -187,10 +193,7 @@ contract ShibaWars is ERC721 {
         _tokenDetails[id].dexterity += _shiba.dexterityGain;
     }
 
-    // OPEN LUCKY SHIBA PACK
-    function openPack(uint256 id, address caller) public isShibaWars(msg.sender) isOwner(id, caller) {
-        // open pack
-        // burn the token
+    function recycle(uint256 id, address caller) public isShibaWars(msg.sender) isOwner(id, caller) {
         _burn(id);
         delete _tokenDetails[id];
     }
@@ -235,6 +238,10 @@ contract ShibaWars is ERC721 {
 
     function startSeason() public isDev(msg.sender) {
         seasonStart = block.timestamp;
+    }
+
+    function getSeasonStart() public view returns (uint256) {
+        return seasonStart;
     }
 
 }

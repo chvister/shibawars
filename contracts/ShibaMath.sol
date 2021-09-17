@@ -34,6 +34,11 @@ library ShibaMath {
         return (a - b) / _max;
     }
 
+    function percent(uint256 share, uint256 _max) external pure returns (uint256) {
+        require(_max != 0, "PERCENT: Zero division");
+        return (share * 10000) / _max;
+    }
+
     // random between min inclusive and max inclusive
     function random(bytes memory seed_, uint256 min_, uint256 max_) external pure returns (uint256) {
         (uint256 a, uint256 b) = min_ > max_ ? (max_, min_) : (min_, max_);

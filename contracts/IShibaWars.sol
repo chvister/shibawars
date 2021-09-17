@@ -12,15 +12,15 @@ interface IShibaWars {
 
     function decreaseHp(uint256 id, uint damage) external;
 
-    function setScore(uint256 id, uint score) external;
+    function setScore(uint256 id, uint128 score) external;
 
-    function mintNFT(address owner, uint tokenId) external;
+    function mintNFT(address owner, uint tokenId) external returns (uint256);
 
-    function openPack(uint256 id, address caller) external;
+    function recycle(uint256 id, address caller) external;
 
     function addTreats(address user, uint256 count) external;
 
-    function seasonStart() external view returns (uint256); 
+    function getSeasonStart() external view returns (uint256); 
     
     function getWinners() external view returns (uint256[] memory winners, uint256[] memory scores);
 

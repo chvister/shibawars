@@ -1,6 +1,4 @@
 lib
-client/.next
-client/node_modules
 *.json
 .vscode/*
 node_modules/*
