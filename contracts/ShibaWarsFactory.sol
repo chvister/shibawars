@@ -348,8 +348,9 @@ contract ShibaWarsFactory {
     function claimAirdrop(bytes32[] memory proof, uint8 tokenId) public isSeason() {
         require(!airdropClaimed[msg.sender], "Shiba Wars: Airdrop claimed already!");
         require(hasAirdrop(proof, msg.sender, tokenId), "Shiba Wars: Address is not eligible for this airdrop");
-        shibaWars.mintNFT(msg.sender, tokenId);
+        uint id = shibaWars.mintNFT(msg.sender, tokenId);
         airdropClaimed[msg.sender] = true;
+        emit TokenBought(id, msg.sender);
     }
 
     function userTrainerTokens(address user) public view returns (uint256) {

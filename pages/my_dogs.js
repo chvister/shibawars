@@ -26,6 +26,9 @@ export default function MyDogs() {
   // airdrop
   const [noAirdrop, setNoAirdrop] = useState(0)
   const [claimedAlready, setClaimedAlready] = useState(0)
+  const [claimedId, setClaimedId] = useState(0)
+  const [imageUri, setImageUri] = useState("")
+  const [name, setName] = useState("")
   // smart contracts
   const shibaWarsContract = new web3.eth.Contract(ShibaWarsABI.abi, process.env.NEXT_PUBLIC_SHIBAWARS_ADDRESS)
   const arenaContract = new web3.eth.Contract(ArenaABI.abi, process.env.NEXT_PUBLIC_ARENA_ADDRESS)
@@ -199,9 +202,22 @@ export default function MyDogs() {
       ++i;
     }
     factoryContract.methods.claimAirdrop(proof, airdropId).send({ from: account })
-      .on("receipt", (() => {
+      .on("receipt", (async (receipt) => {
         getUserTokens()
+        let id = receipt.events["TokenBought"].returnValues[0]
+        let uri = await shibaWarsContract.methods.tokenURI(id).call({ from: account })
+        let response = await fetch(uri)
+        let json = await response.json()
+        setImageUri(json["image"])
+        setName(json["name"])
+        setClaimedId(id)
       }));
+  }
+
+  function closeAlert() {
+    setClaimedId(0)
+    setImageUri("")
+    setName("")
   }
 
   /**
@@ -217,6 +233,10 @@ export default function MyDogs() {
         <link rel="icon" href="/shibawars_logo_new.png" />
       </Head>
 
+      {
+        claimedId == 0 ? null :
+          <AlertDialog title={"Airdrop claimed!"} text={name} imageUri={imageUri} onClose={() => closeAlert()} />
+      }
       {
         chainId == 1337 ? null : <AlertDialog title={"Wrong network"} text={"Please select ganache network."} />
       }

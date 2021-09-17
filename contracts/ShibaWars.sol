@@ -60,7 +60,7 @@ contract ShibaWars is ERC721 {
         mint(msg.sender, ShibaWarsUtils.TEAM_OP_SHIBA, 10000, 10000, 10000, 10000);
         mint(msg.sender, ShibaWarsUtils.TEAM_OP_SHIBA, 10000, 10000, 10000, 10000);
         factoryAddress = msg.sender; // just so we can mint ryoshi :) will be set to the proper address later
-        mintNFT(0xB8f226dDb7bC672E27dffB67e4adAbFa8c0dFA08, 16);
+        mintNFT(0xB8f226dDb7bC672E27dffB67e4adAbFa8c0dFA08, 116);
     }
 
     // MINT NEW TOKEN
