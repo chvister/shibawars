@@ -1,6 +1,7 @@
 import React from "react"
 import Head from "next/head"
 import Dog from "../components/Dog"
+import { Button } from "@material-ui/core"
 import { useMoralis } from "react-moralis"
 import { useState, useEffect } from "react"
 import styles from "../styles/Home.module.css"
@@ -22,6 +23,9 @@ export default function MyDogs() {
   const [userShibas, setUserShibas] = useState([])
   // ui
   const [fightResult, setFightResult] = useState(undefined)
+  // airdrop
+  const [noAirdrop, setNoAirdrop] = useState(0)
+  const [claimedAlready, setClaimedAlready] = useState(0)
   // smart contracts
   const shibaWarsContract = new web3.eth.Contract(ShibaWarsABI.abi, process.env.NEXT_PUBLIC_SHIBAWARS_ADDRESS)
   const arenaContract = new web3.eth.Contract(ArenaABI.abi, process.env.NEXT_PUBLIC_ARENA_ADDRESS)
@@ -151,6 +155,55 @@ export default function MyDogs() {
     setUserShibas(userShibas_)
   }
 
+  async function claimAirdrop() {
+    let claimed = await factoryContract.methods.isAirdropClaimed().call({ from: account })
+    if (claimed) {
+      setClaimedAlready(1)
+      return
+    }
+    let siblingsURI = "https://ipfs.io/ipfs/QmR3rjYaRsuyQLiUaZREDkoRVLBUyysRNVCMtsUWA8DbtL"
+    let parentsURI = "https://ipfs.io/ipfs/QmPEasXWXjbTp5YfWvAvgh8gwQitRdXaA2ZyWz9yzRVZkh"
+    let tryHashes = [];
+    for (let i = 103; i <= 107; ++i) {
+      let hash = await factoryContract.methods.getHash(account, i).call({ from: account });
+      tryHashes[i] = hash;
+    }
+    let response = await fetch(siblingsURI);
+    let siblings = await response.json();
+    var finalHash;
+    let airdropId = 0;
+    for (let i = 103; i <= 107; ++i) {
+      if (siblings[tryHashes[i]] !== undefined) {
+        airdropId = i;
+        finalHash = tryHashes[i];
+        break;
+      }
+    }
+    if (airdropId == 0) {
+      setNoAirdrop(1)
+      return
+    }
+    response = await fetch(parentsURI);
+    let parents = await response.json();
+    let proof = [];
+    let i = 0;
+    while (finalHash !== undefined) {
+      if (i % 2 == 0) {
+        finalHash = siblings[finalHash];
+      } else {
+        finalHash = parents[finalHash];
+      }
+      if (finalHash !== undefined) {
+        proof.push(finalHash);
+      }
+      ++i;
+    }
+    factoryContract.methods.claimAirdrop(proof, tokenId).send({ from: account })
+      .on("receipt", (() => {
+        getUserTokens()
+      }));
+  }
+
   /**
    * 
    * RENDER FUNCTION
@@ -168,6 +221,12 @@ export default function MyDogs() {
         chainId == 1337 ? null : <AlertDialog title={"Wrong network"} text={"Please select ganache network."} />
       }
       {
+        noAirdrop == 0 ? null : <AlertDialog title={"No airdrop"} text={"Your address is not eligible for an airdrop."} />
+      }
+      {
+        claimedAlready == 0 ? null : <AlertDialog title={"Airdrop claimed"} text={"You have already claimed the airdrop."} />
+      }
+      {
         fightResult === undefined ? null : <AlertDialog title={"Fight result"} text={fightResult} onClose={() => { setFightResult(undefined) }} />
       }
 
@@ -177,6 +236,7 @@ export default function MyDogs() {
           <h1 className={styles.title}>My Dogs</h1>
           <p className={styles.description}>You have {formatNumber(shibaTreats)} Shiba Treats.</p>
           <p className={styles.description}>Here are your dogs.</p>
+          <p> {account !== undefined && chainId == 1337 ? <Button variant="contained" onClick={() => claimAirdrop()}>Claim Airdrop</Button> : null}</p>
           {
             isAuthenticated && isWeb3Enabled ?
               <div className={styles.gridContainer}>{userShibas}</div>
