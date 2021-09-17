@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import Header from '../components/Header'
 import { useState, useEffect } from "react"
 import { useMoralis } from 'react-moralis'
@@ -6,6 +7,8 @@ import styles from '../styles/Home.module.css'
 import NavbarApp from '../components/NavbarApp'
 import Footer from '../components/mainPage/Footer'
 import AlertDialog from "../components/AlertDialog"
+import { BigNumber } from '@ethersproject/bignumber'
+import ShibaWarsABI from '../build/contracts/ShibaWars.json'
 import FactoryABI from '../build/contracts/ShibaWarsFactory.json'
 
 export default function Arena() {
@@ -13,16 +16,18 @@ export default function Arena() {
   const { isAuthenticated, enableWeb3, isWeb3Enabled, web3, Moralis } = useMoralis();
   const [account, setAccount] = useState(undefined)
   const [chainId, setChainId] = useState(0)
-  // prizepool
+  // arena
   const [prizePoolShib, setPrizePoolShib] = useState("0")
   const [prizePoolLeash, setPrizePoolLeash] = useState("0")
   const [prizePoolFloki, setPrizePoolFloki] = useState("0")
+  const [winners, setWinners] = useState([])
   // fights reward
   const [rewardShib, setRewardShib] = useState("0")
   const [rewardLeash, setRewardLeash] = useState("0")
   const [rewardFloki, setRewardFloki] = useState("0")
   // smart contracts
   const factoryContract = new web3.eth.Contract(FactoryABI.abi, process.env.NEXT_PUBLIC_FACTORY_ADDRESS)
+  const shibaWarsContract = new web3.eth.Contract(ShibaWarsABI.abi, process.env.NEXT_PUBLIC_SHIBAWARS_ADDRESS)
 
   /**
      * 
@@ -74,20 +79,56 @@ export default function Arena() {
     let shib_ = await factoryContract.methods.getPrizePool().call({ from: account })
     setPrizePoolShib(formatNumber(shib_))
 
-    shib_ = reward["_shib"]
-    setRewardShib(formatNumber(shib_))
+    let shibReward_ = reward["_shib"]
+    setRewardShib(formatNumber(shibReward_))
 
     let floki_ = await factoryContract.methods.getPrizePoolFloki().call({ from: account })
     setPrizePoolFloki(formatNumber(floki_))
 
-    floki_ = reward["_floki"]
-    setRewardFloki(formatNumber(floki_))
+    let flokiReward = reward["_floki"]
+    setRewardFloki(formatNumber(flokiReward))
 
     let leash_ = await factoryContract.methods.getPrizePoolLeash().call({ from: account })
     setPrizePoolLeash(formatNumber(leash_))
 
-    leash_ = reward["_leash"]
-    setRewardLeash(formatNumber(leash_))
+    let leashReward = reward["_leash"]
+    setRewardLeash(formatNumber(leashReward))
+
+    let winnersReturn = await shibaWarsContract.methods.getWinners().call({ from: account })
+
+    let winnerIds = winnersReturn[0].map((i) => { return i })
+    let scores = winnersReturn[1].map((i) => { return i })
+
+    for (let i = 0; i < 9; ++i) {
+      for (let j = i + 1; j < 10; ++j) {
+        if (scores[i] < scores[j]) {
+          let tmp = winnerIds[j];
+          winnerIds[j] = winnerIds[i];
+          winnerIds[i] = tmp;
+          tmp = scores[j];
+          scores[j] = scores[i];
+          scores[i] = tmp;
+        }
+      }
+    }
+
+    let shares = [26, 20, 15, 12, 9, 7, 4, 3, 2, 1]
+    let winners_ = []
+    for (let i = 0; i < 10; ++i) {
+      let object = []
+      object["rank"] = i + 1
+      object["dogId"] = winnerIds[i]
+      object["address"] = await shibaWarsContract.methods.ownerOf(winnerIds[i]).call({ from: account })
+      object["score"] = scores[i]
+      let shib = BigNumber.from(shib_).mul(BigNumber.from(shares[i])).div(200)
+      let leash = BigNumber.from(leash_).mul(BigNumber.from(shares[i])).div(200)
+      let floki = BigNumber.from(floki_).mul(BigNumber.from(shares[i])).div(200)
+      object["shib"] = formatNumber(shib.toString())
+      object["leash"] = formatNumber(leash.toString())
+      object["floki"] = formatNumber(floki.toString())
+      winners_[i] = object
+    }
+    setWinners(winners_)
 
   }
 
@@ -111,16 +152,14 @@ export default function Arena() {
           </p>
           <div className={styles.table}>
             <TableRow rank={"#"} dogId={"Dog Id"} address={"Owner Address"} score={"Score"} share={"Share"} />
-            <TableRow rank={1} dogId={1} address={"0xcbE7c78A07C59FDb5aC36836846089c7f8f5aC38"} score={1000} share={26} />
-            <TableRow rank={2} dogId={2} address={"0xcbE7c78A07C59FDb5aC36836846089c7f8f5aC38"} score={900} share={20} />
-            <TableRow rank={3} dogId={3} address={"0xcbE7c78A07C59FDb5aC36836846089c7f8f5aC38"} score={810} share={15} />
-            <TableRow rank={4} dogId={4} address={"0xcbE7c78A07C59FDb5aC36836846089c7f8f5aC38"} score={700} share={12} />
-            <TableRow rank={5} dogId={5} address={"0xcbE7c78A07C59FDb5aC36836846089c7f8f5aC38"} score={600} share={9} />
-            <TableRow rank={6} dogId={6} address={"0xcbE7c78A07C59FDb5aC36836846089c7f8f5aC38"} score={500} share={7} />
-            <TableRow rank={7} dogId={7} address={"0xcbE7c78A07C59FDb5aC36836846089c7f8f5aC38"} score={400} share={4} />
-            <TableRow rank={8} dogId={8} address={"0xcbE7c78A07C59FDb5aC36836846089c7f8f5aC38"} score={300} share={3} />
-            <TableRow rank={9} dogId={9} address={"0xcbE7c78A07C59FDb5aC36836846089c7f8f5aC38"} score={200} share={2} />
-            <TableRow rank={10} dogId={10} address={"0xcbE7c78A07C59FDb5aC36836846089c7f8f5aC38"} score={100} share={1} />
+            {
+              winners.map((winner) => {
+                return <Fragment key={winner["rank"]}>
+                  <TableRow rank={winner["rank"]} dogId={winner["dogId"]} address={winner["address"]}
+                    score={winner["score"]} shib={winner["shib"]} leash={winner["leash"]} floki={winner["floki"]} />
+                </Fragment>
+              })
+            }
           </div>
         </div>
       </main>
