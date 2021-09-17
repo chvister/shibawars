@@ -82,11 +82,7 @@ export default function Shop() {
   // erc20 info
   async function getUserErc20() {
     let shib_ = await shibaInuContract.methods.balanceOf(account).call({ from: account })
-    if (shib_.length <= 18) {
-      setShibaInu("0")
-    } else {
-      setShibaInu(thousandSeparator(shib_.substring(0, shib_.length - 18)))
-    }
+    setShibaInu(formatNumber(shib_))
 
     let shibAllowance = await shibaInuContract.methods.allowance(account, process.env.NEXT_PUBLIC_FACTORY_ADDRESS)
       .call({ from: account })
@@ -97,11 +93,7 @@ export default function Shop() {
     }
 
     let floki_ = await flokiInuContract.methods.balanceOf(account).call({ from: account })
-    if (floki_.length <= 18) {
-      setFloki("0")
-    } else {
-      setFloki(thousandSeparator(floki_.substring(0, floki_.length - 18)))
-    }
+    setFloki(formatNumber(floki_))
 
     let flokiAllowance = await flokiInuContract.methods.allowance(account, process.env.NEXT_PUBLIC_FACTORY_ADDRESS)
       .call({ from: account })
@@ -112,19 +104,7 @@ export default function Shop() {
     }
 
     let leash_ = await leashContract.methods.balanceOf(account).call({ from: account })
-    if (leash_.length <= 18) {
-      if (leash_.length <= 16) {
-        setLeash("0")
-      } else {
-        if (leash_.length == 18) {
-          setLeash("0," + leash_.substring(0, 2))
-        } else {
-          setLeash("0,0" + leash_.substring(0, 1))
-        }
-      }
-    } else {
-      setLeash(thousandSeparator(leash_.substring(0, leash_.length - 18)))
-    }
+    setLeash(formatNumber(leash_))
 
     let leashAllowance = await leashContract.methods.allowance(account, process.env.NEXT_PUBLIC_FACTORY_ADDRESS)
       .call({ from: account })
@@ -138,7 +118,7 @@ export default function Shop() {
     setTrainerTokens(trainerTokens)
 
     let shibaTreats = await shibaWarsContract.methods.getUserTreatTokens(account).call({ from: account })
-    setShibaTreats(thousandSeparator(shibaTreats))
+    setShibaTreats(formatNumber(shibaTreats))
   }
 
   /**
@@ -284,7 +264,7 @@ export default function Shop() {
           <p>
             <TextField id="treats-count" variant="outlined" defaultValue={buyTreatsCount} type="number" onChange={handleChange} />
             <Button variant="contained" onClick={() => { buyShibaTreats() }}>
-              Buy {thousandSeparator(buyTreatsCount)} Shiba Treats for {thousandSeparator(buyTreatsCount / 10)} $SHIB
+              Buy {formatNumber(buyTreatsCount)} Shiba Treats for {formatNumber(buyTreatsCount / 10)} $SHIB
             </Button>
           </p>
           <div className={styles.gridContainer}>
@@ -401,11 +381,27 @@ export default function Shop() {
   )
 }
 
-function thousandSeparator(x) {
-  for (var i = x.toString().length - 3; i > 0; i -= 3) {
-    var left = x.toString().substring(0, i)
-    var right = x.toString().substring(i)
-    x = left + "." + right
+function formatNumber(x) {
+  let decimal = ""
+  let integer = ""
+
+  if (x.length > 18) {
+    integer = x.substring(0, x.length - 18)
+    decimal = x.substring(x.length - 18, x.length - 16)
+  } else if (x.length > 16) {
+    integer = "0"
+    if (x.length == 17) {
+      x = "0" + x
+    }
+    decimal = x.substring(0, x.length - 16)
+  } else {
+    return "0"
   }
-  return x
+
+  for (var i = integer.length - 3; i > 0; i -= 3) {
+    var left = integer.substring(0, i)
+    var right = integer.substring(i)
+    integer = left + "." + right
+  }
+  return integer + (decimal == "00" ? "" : "," + decimal)
 }

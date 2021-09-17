@@ -89,7 +89,7 @@ export default function MyDogs() {
         <p>Attacker did {attackerDamage / 100} damage and defender did {defenderDamage / 100} damage</p>
         {attackerDamage <= defenderDamage && reward > 0 ? <p>Defender fainted</p> : null}
         {defenderDamage <= attackerDamage && reward == 0 ? <p>Attacker fainted</p> : null}
-        <p>{reward > 0 ? "Attacker won " + thousandSeparator(reward) + " treats." : "Defender won"}</p>
+        <p>{reward > 0 ? "Attacker won " + formatNumber(reward) + " treats." : "Defender won"}</p>
       </p>)
     } else {
       let values = event["returnValues"]
@@ -175,7 +175,7 @@ export default function MyDogs() {
       <main className={styles.main}>
         <div className={styles.section_app}>
           <h1 className={styles.title}>My Dogs</h1>
-          <p className={styles.description}>You have {thousandSeparator(shibaTreats)} Shiba Treats.</p>
+          <p className={styles.description}>You have {formatNumber(shibaTreats)} Shiba Treats.</p>
           <p className={styles.description}>Here are your dogs.</p>
           {
             isAuthenticated && isWeb3Enabled ?
@@ -190,11 +190,27 @@ export default function MyDogs() {
   )
 }
 
-function thousandSeparator(x) {
-  for (var i = x.toString().length - 3; i > 0; i -= 3) {
-    var left = x.toString().substring(0, i)
-    var right = x.toString().substring(i)
-    x = left + "." + right
+function formatNumber(x) {
+  let decimal = ""
+  let integer = ""
+
+  if (x.length > 18) {
+    integer = x.substring(0, x.length - 18)
+    decimal = x.substring(x.length - 18, x.length - 16)
+  } else if (x.length > 16) {
+    integer = "0"
+    if (x.length == 17) {
+      x = "0" + x
+    }
+    decimal = x.substring(0, x.length - 16)
+  } else {
+    return "0"
   }
-  return x
+
+  for (var i = integer.length - 3; i > 0; i -= 3) {
+    var left = integer.substring(0, i)
+    var right = integer.substring(i)
+    integer = left + "." + right
+  }
+  return integer + (decimal == "00" ? "" : "," + decimal)
 }

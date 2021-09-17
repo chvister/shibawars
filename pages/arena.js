@@ -152,5 +152,5 @@ function formatNumber(x) {
     var right = integer.substring(i)
     integer = left + "." + right
   }
-  return integer + "," + decimal
+  return integer + (decimal == "00" ? "" : "," + decimal)
 }
