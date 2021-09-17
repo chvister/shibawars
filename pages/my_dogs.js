@@ -161,8 +161,8 @@ export default function MyDogs() {
       setClaimedAlready(1)
       return
     }
-    let siblingsURI = "https://ipfs.io/ipfs/QmR3rjYaRsuyQLiUaZREDkoRVLBUyysRNVCMtsUWA8DbtL"
-    let parentsURI = "https://ipfs.io/ipfs/QmPEasXWXjbTp5YfWvAvgh8gwQitRdXaA2ZyWz9yzRVZkh"
+    let siblingsURI = "https://ipfs.io//ipfs/QmWFkiifm66Sgq1NpKrARrju178evUy8MzmM57CzkVa6jK"
+    let parentsURI = "https://ipfs.io/ipfs/QmbwZUD3pj8fqtqL6xXkbFMy8gJrrFYGJqLMtBm2VxVS4P"
     let tryHashes = [];
     for (let i = 103; i <= 107; ++i) {
       let hash = await factoryContract.methods.getHash(account, i).call({ from: account });
@@ -198,7 +198,7 @@ export default function MyDogs() {
       }
       ++i;
     }
-    factoryContract.methods.claimAirdrop(proof, tokenId).send({ from: account })
+    factoryContract.methods.claimAirdrop(proof, airdropId).send({ from: account })
       .on("receipt", (() => {
         getUserTokens()
       }));

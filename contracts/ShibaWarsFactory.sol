@@ -36,7 +36,7 @@ contract ShibaWarsFactory {
     uint256 private burnAmountLeash;
 
     uint256 constant SEASON_DURATION = 90 * 24 * 60 * 60;
-    bytes32 constant merkleRoot = 0x3ec34dbb7ba6997c3cc877559af6f99873409a96f669760d4f24b17c0e75a49b;
+    bytes32 constant merkleRoot = 0x1e6bcaf9bed99bb583085bdc0b3386ed666694f09ca69aebf4163eadadd2979c;
     mapping(address => bool) private airdropClaimed;
     mapping(address => bool) private prizeClaimed;
     mapping(address => uint256) private trainerTokens;
