@@ -327,11 +327,13 @@ contract ShibaWarsFactory {
         if(prizeClaimed[user]){
             _shib = 0;
             _leash = 0;
+            _floki = 0;
         } else {
             (uint256 _matchesWon, uint256 _totalMatches) = shibaWarsArena.getMatchesWon(msg.sender);
-            _shib = matchmakingReward.ratio(_matchesWon, _totalMatches.mul(10));
-            _leash = matchmakingRewardLeash.ratio(_matchesWon, _totalMatches.mul(10));
-            _floki = matchmakingRewardFloki.ratio(_matchesWon, _totalMatches.mul(10));
+            (_shib, _leash, _floki) = _matchesWon == 0 || _totalMatches == 0 ? (0,0,0) : 
+                (matchmakingReward.ratio(_matchesWon, _totalMatches.mul(10)), 
+                matchmakingRewardLeash.ratio(_matchesWon, _totalMatches.mul(10)),
+                matchmakingRewardFloki.ratio(_matchesWon, _totalMatches.mul(10)));
         }
     }
 

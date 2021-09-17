@@ -127,7 +127,7 @@ def get_description(token_id):
     elif token_id == 114:
         return "A friend should always underestimate your virtues and an enemy overestimate your faults."
     elif token_id == 115:
-        return "A member of very rare race of golden shiba inus"
+        return "Cute pup that is ready to defend the Doge Father.W"
     elif token_id == 116:
         return "The one who took us under their wings. Ryoshi."
     elif token_id == 117:
