@@ -1,19 +1,18 @@
 pragma solidity ^0.8.0;
 
 library ShibaMath {
-
     function add(uint256 a, uint256 b) external pure returns (uint256) {
-        require (a + b > a || a == 0 || b == 0, "ADD: Math Error");
-        return a + b; 
+        require(a + b > a || a == 0 || b == 0, "ADD: Math Error");
+        return a + b;
     }
 
     function sub(uint256 a, uint256 b) external pure returns (uint256) {
-        require (a >= b, "SUB: Math Error");
+        require(a >= b, "SUB: Math Error");
         return a - b;
     }
 
-    function mul(uint256 a, uint256 b) external pure returns (uint out) {
-        if(a == 0 || b == 0) {
+    function mul(uint256 a, uint256 b) external pure returns (uint256 out) {
+        if (a == 0 || b == 0) {
             return 0;
         }
         out = a * b;
@@ -22,25 +21,37 @@ library ShibaMath {
     }
 
     function div(uint256 a, uint256 b) external pure returns (uint256 out) {
-        require (b != 0, "DIV: Math Error");
+        require(b != 0, "DIV: Math Error");
         return a / b;
     }
 
-    function ratio(uint256 number, uint256 share, uint256 _max) external pure returns (uint256) {
+    function ratio(
+        uint256 number,
+        uint256 share,
+        uint256 _max
+    ) external pure returns (uint256) {
         require(_max != 0, "RATIO: Zero division");
         require(_max >= share, "RATIO: Max is greater than shares");
-        (uint256 a, uint256 b) = (number * _max, number * (_max - share)); 
+        (uint256 a, uint256 b) = (number * _max, number * (_max - share));
         require(a >= b, "RATIO: Math Error");
         return (a - b) / _max;
     }
 
-    function percent(uint256 share, uint256 _max) external pure returns (uint256) {
+    function percent(uint256 share, uint256 _max)
+        external
+        pure
+        returns (uint256)
+    {
         require(_max != 0, "PERCENT: Zero division");
         return (share * 10000) / _max;
     }
 
     // random between min inclusive and max inclusive
-    function random(bytes memory seed_, uint256 min_, uint256 max_) external pure returns (uint256) {
+    function random(
+        bytes memory seed_,
+        uint256 min_,
+        uint256 max_
+    ) external pure returns (uint256) {
         (uint256 a, uint256 b) = min_ > max_ ? (max_, min_) : (min_, max_);
         require(b > 0, "RAND: Zero interval");
         return (uint256(keccak256(seed_)) % (b + 1 - a)) + a;
@@ -54,21 +65,28 @@ library ShibaMath {
         return a < b ? b : a;
     }
 
-    function trim(uint256 number_, uint256 min_, uint256 max_) external pure returns (uint256) {
+    function trim(
+        uint256 number_,
+        uint256 min_,
+        uint256 max_
+    ) external pure returns (uint256) {
         return number_ > min_ ? (number_ < max_ ? number_ : max_) : min_;
     }
 
-    function inRange(uint256 number, uint256 min_, uint256 max_) external pure returns (bool) {
+    function inRange(
+        uint256 number,
+        uint256 min_,
+        uint256 max_
+    ) external pure returns (bool) {
         return number >= min_ && number <= max_;
     }
 
-    function sqrt(uint x) public pure returns (uint y) {
-        uint z = (x + 1) / 2;
+    function sqrt(uint256 x) public pure returns (uint256 y) {
+        uint256 z = (x + 1) / 2;
         y = x;
         while (z < y) {
             y = z;
             z = (x / z + z) / 2;
         }
     }
-
 }
