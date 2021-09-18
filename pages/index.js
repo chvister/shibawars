@@ -14,6 +14,7 @@ export default function Home() {
         <link rel="icon" href="/shibawars_logo_new.png" />
         <meta property="og:title" content="Shibawars" key="title" />
         <meta property="og:image" content="/shibawars_logo_new.png"/>
+        <meta property="og:description" content="Fight with your Shiba Inus in the arena to compete for the prizepool!"/>
       </Head>
       <div className={styles.pageBackgroundColor}>
         <PageWrapper />
