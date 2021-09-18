@@ -5,6 +5,7 @@ import "./ShibaMath.sol";
 import "./ShibaWarsUtils.sol";
 import "./ShibaWarsEntity.sol";
 
+// SPDX-License-Identifier: UNLICENSED
 contract ShibaWars is ERC721 {
     using ShibaWarsEntity for ShibaWarsEntity.Shiba;
 

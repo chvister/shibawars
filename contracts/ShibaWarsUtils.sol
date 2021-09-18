@@ -1,5 +1,6 @@
 pragma solidity ^0.8.0;
 
+// SPDX-License-Identifier: UNLICENSED
 library ShibaWarsUtils {
     // token ids
     uint256 constant LUCKY_SHIBA_PACK_GEN_1 = 100;

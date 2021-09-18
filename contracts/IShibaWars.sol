@@ -2,6 +2,7 @@ pragma solidity ^0.8.0;
 
 import "./ShibaWarsEntity.sol";
 
+// SPDX-License-Identifier: UNLICENSED
 interface IShibaWars {
     function ownerOf(uint256 tokenId) external view returns (address owner);
 

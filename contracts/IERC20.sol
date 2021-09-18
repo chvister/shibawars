@@ -1,5 +1,6 @@
 pragma solidity ^0.8.0;
 
+// SPDX-License-Identifier: UNLICENSED
 interface IERC20 {
     function burn(uint256 value) external;
 

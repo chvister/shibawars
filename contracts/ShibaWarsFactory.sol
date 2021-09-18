@@ -6,6 +6,7 @@ import "./IShibaWars.sol";
 import "./IShibaWarsArena.sol";
 import "./ShibaWarsUtils.sol";
 
+// SPDX-License-Identifier: UNLICENSED
 contract ShibaWarsFactory {
     using ShibaMath for uint256;
     using ShibaMath for bytes;

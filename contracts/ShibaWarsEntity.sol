@@ -1,5 +1,6 @@
 pragma solidity ^0.8.0;
 
+// SPDX-License-Identifier: UNLICENSED
 library ShibaWarsEntity {
     struct Shiba {
         uint256 id; // uinque id of token
