@@ -1,6 +1,7 @@
 import java.awt.image.BufferedImage
 import java.io.File
 import java.io.IOException
+import java.util.*
 import javax.imageio.ImageIO
 
 object Main {
@@ -10,12 +11,14 @@ object Main {
 
     @JvmStatic
     fun main(args: Array<String>) {
+//        processShiba("og-shiba", 105)
         processShiba("shiba-warlord", 106)
 //        processShiba("shiba-warrior", 107)
     }
 
     @Throws(IOException::class)
     fun processShiba(shibaName: String, shibaId: Int) {
+        val random = Random()
         val path = "$MAIN_PATH$shibaName/"
 
         val backgrounds = path + "background"
@@ -48,7 +51,10 @@ object Main {
         val started = System.currentTimeMillis()
 
         for (bgI in 0 until bgLength) {
-            val background = ImageIO.read(File("$backgrounds/$bgI.png"))
+            val isFolder = !File("$backgrounds/$bgI.png").exists()
+            val folderLength = if (isFolder) File("$backgrounds/$bgI").list()!!.size else 0
+            val randomBg = if (isFolder) random.nextInt(folderLength) else 0
+            val background = if (isFolder) ImageIO.read(File("$backgrounds/$bgI/$randomBg.png")) else ImageIO.read(File("$backgrounds/$bgI.png"))
             var eyeI = 0
             while (eyeI < eyeLength || eyeI < 1) {
                 val eye = if (eyeLength > 0) ImageIO.read(File("$eyes/$eyeI.png")) else null
@@ -82,7 +88,7 @@ object Main {
                                     earring?.let { g.drawImage(it, 0, 0, null) }
                                     g.dispose()
 
-                                    val name = "$shibaId$bgI${if (eyeLength > 0) eyeI else ""}" +
+                                    val name = "$shibaId${bgI + randomBg}${if (eyeLength > 0) eyeI else ""}" +
                                             "${if (headLength > 0) headI else ""}${if (miscLength > 0) miscI else ""}" +
                                             "${if (necklaceLength > 0) necklaceI else ""}${if (wpLength > 0) weaponI else ""}" +
                                             "${if (earringLength > 0) earRingI else ""}.png"
