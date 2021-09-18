@@ -12,18 +12,18 @@ const NavbarApp = () => {
     return (
         <div className={styles.navbar}>
             <div>
-                <Image src="/shibawars_logo_title_new.png" alt="Shibawars" width={1024} height={256}/>
+                <Image src="/shibawars_logo_title_new.png" alt="Shibawars" width={1024} height={256} />
             </div>
             <div>
                 {
-                    authError ? 
-                    <AlertDialog title={"Error"} text={authError.message}/>
-                    : null
+                    authError ?
+                        <AlertDialog title={"Error"} text={authError.message} />
+                        : null
                 }
-                {isAuthenticated ? null : 
-                    <Button hidden="true" variant="contained" onClick={() => authenticate() } disabled={isAuthenticating}>
-                        { isAuthenticating ? <CircularProgress size={20}/> : "Login" }
-                    </Button> 
+                {isAuthenticated ? null :
+                    <Button variant="contained" onClick={() => authenticate()} disabled={isAuthenticating}>
+                        {isAuthenticating ? <CircularProgress size={20} /> : "Login"}
+                    </Button>
                 }
                 <Link href="/my_dogs" passHref>
                     <Button variant="contained">My Dogs</Button>
@@ -34,7 +34,7 @@ const NavbarApp = () => {
                 <Link href="/shop" passHref>
                     <Button variant="contained">Shop</Button>
                 </Link>
-                {isAuthenticated ? <Button hidden="true" variant="contained" onClick={() => logout() }>Logout</Button> : null }
+                {isAuthenticated ? <Button variant="contained" onClick={() => logout()}>Logout</Button> : null}
             </div>
         </div>
     )

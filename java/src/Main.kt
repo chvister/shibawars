@@ -10,7 +10,8 @@ object Main {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        processShiba("shiba-warrior", 108)
+        processShiba("shiba-warlord", 106)
+//        processShiba("shiba-warrior", 107)
     }
 
     @Throws(IOException::class)

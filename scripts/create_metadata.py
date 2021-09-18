@@ -181,13 +181,13 @@ def get_description(token_id):
     elif token_id == SHIBA_GENERAL:
         return "When the times are difficult, the Shiba Generals embrace the morale of ShibaArmy."
     elif token_id == IRON:
-        return "Increases the stats of your doge in fight by 15%"
+        return "Increases the stats of your shiba in fight by 15%"
     elif token_id == SILVER:
-        return "Increases the stats of your doge in fight by 20%"
+        return "Increases the stats of your shiba in fight by 20%"
     elif token_id == GOLDEN:
-        return "Increases the stats of your doge in fight by 25%"
+        return "Increases the stats of your shiba in fight by 25%"
     elif token_id == DIAMOND:
-        return "Increases the stats of your doge in fight by 30%"
+        return "Increases the stats of your shiba in fight by 30%"
     else:
         return ""
 
@@ -195,6 +195,9 @@ def backgroundName(tokenId, id):
     if (tokenId == SHIBA_WARRIOR):
         if(id == 0):
             return "Shiba Castle"
+    elif (tokenId == SHIBA_WARLORD):
+        if(id == 0):
+            return "Boneyard"
     return ""
 
 def earringName(tokenId, id):
@@ -203,6 +206,9 @@ def earringName(tokenId, id):
             return "Single earring"
         elif(id == 1):
             return "Triple earring"
+    elif (tokenId == SHIBA_WARLORD):
+        if(id == 0):
+            return "Septum"
     return "None"
 
 def eyeName(tokenId, id):
@@ -227,12 +233,18 @@ def headName(tokenId, id):
             return "Bronze Helmet"
         elif(id == 4):
             return "Diamond Helmet"
+    elif (tokenId == SHIBA_WARLORD):
+        if(id == 0):
+            return "Viking Hair"
     return "None"
 
 def necklaceName(tokenId, id):
     if (tokenId == SHIBA_WARRIOR):
         if(id == 0):
             return "Bone Necklace"
+    elif (tokenId == SHIBA_WARLORD):
+        if(id == 0):
+            return "Rib Necklace"
     return "None"
 
 def miscName(tokenId, id):
@@ -251,12 +263,22 @@ def miscName(tokenId, id):
             return "Bronze Armor"
         elif(id == 6):
             return "Kawaii Armor"
+    elif (tokenId == SHIBA_WARLORD):
+        if(id == 0):
+            return "Bloody Teeth"
+        elif(id == 1):
+            return "Black Battle Painting"
+        elif(id == 2):
+            return "Red Battle Painting"
     return "None"
 
 def weaponName(tokenId, id):
     if (tokenId == SHIBA_WARRIOR):
         if(id == 0):
             return "Knife"
+    elif (tokenId == SHIBA_WARLORD):
+        if(id == 0):
+            return "Battle Axe"
     return ""
 
 main()             
