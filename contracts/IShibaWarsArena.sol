@@ -6,4 +6,8 @@ interface IShibaWarsArena {
         external
         view
         returns (uint256 _matchesWon, uint256 _totalMatches);
+
+    function unleashShiba(uint256 shibaId) external;
+
+    function isLeashed(uint256 shibaId) external view returns (bool);
 }

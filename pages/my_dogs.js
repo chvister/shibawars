@@ -178,7 +178,6 @@ export default function MyDogs() {
     for (let i = 103; i <= 107; ++i) {
       if (siblings[tryHashes[i]] !== undefined) {
         airdropId = i;
-        finalHash = tryHashes[i];
         break;
       }
     }

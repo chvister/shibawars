@@ -154,21 +154,21 @@ export default function Shop() {
    */
 
   async function buyShiba(shibaId) {
-    factoryContract.methods.buyShiba(shibaId).send({ from: account, gasLimit: 500000 })
+    factoryContract.methods.buyShiba(shibaId).send({ from: account, gasLimit: 450000 })
       .on("receipt", (async (receipt) => {
         processPurchase(receipt)
       }))
   }
 
   async function buyShibaWithFloki(shibaId) {
-    factoryContract.methods.buyShibaWithFloki(shibaId).send({ from: account, gasLimit: 500000 })
+    factoryContract.methods.buyShibaWithFloki(shibaId).send({ from: account, gasLimit: 450000 })
       .on("receipt", (async (receipt) => {
         processPurchase(receipt)
       }))
   }
 
   async function buyShibaTT(shibaId) {
-    factoryContract.methods.buyShibaWithTrainerTokens(shibaId).send({ from: account, gasLimit: 500000 })
+    factoryContract.methods.buyShibaWithTrainerTokens(shibaId).send({ from: account, gasLimit: 450000 })
       .on("receipt", (async (receipt) => {
         processPurchase(receipt)
       }))

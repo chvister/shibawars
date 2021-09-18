@@ -337,6 +337,9 @@ contract ShibaWarsFactory {
         );
         uint256 tokenId = shiba_.tokenId;
         uint256 reward = ShibaWarsUtils.getTrainerTokenReward(tokenId);
+        if (shibaWarsArena.isLeashed(shibaId)) {
+            shibaWarsArena.unleashShiba(shibaId);
+        }
         shibaWars.recycle(shibaId, msg.sender);
         trainerTokens[msg.sender] += reward;
     }

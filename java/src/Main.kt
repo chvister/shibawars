@@ -11,8 +11,8 @@ object Main {
 
     @JvmStatic
     fun main(args: Array<String>) {
-//        processShiba("og-shiba", 105)
-        processShiba("shiba-warlord", 106)
+        processShiba("og-shiba", 105)
+//        processShiba("shiba-warlord", 106)
 //        processShiba("shiba-warrior", 107)
     }
 
