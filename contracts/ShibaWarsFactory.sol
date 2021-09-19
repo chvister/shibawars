@@ -6,6 +6,7 @@ import "./IShibaWars.sol";
 import "./IShibaWarsArena.sol";
 import "./ShibaWarsUtils.sol";
 
+// SPDX-License-Identifier: UNLICENSED
 contract ShibaWarsFactory {
     using ShibaMath for uint256;
     using ShibaMath for bytes;
@@ -158,6 +159,7 @@ contract ShibaWarsFactory {
             _shibaInu.transferFrom(msg.sender, factory, cost),
             "Shiba Wars: Can not transfer tokens to the smart contract"
         );
+
         (uint256 _burn, uint256 _dev, uint256 _matchmaking, uint256 _winners) =
             getFees(cost);
         winnersReward = winnersReward.add(_winners);
@@ -184,8 +186,10 @@ contract ShibaWarsFactory {
             _leash.transferFrom(msg.sender, factory, cost),
             "Shiba Wars: Can not transfer tokens to the smart contract"
         );
+
         (uint256 _burn, uint256 _dev, uint256 _matchmaking, uint256 _winners) =
             getFees(cost);
+
         winnersRewardLeash = winnersRewardLeash.add(_winners);
         matchmakingRewardLeash = matchmakingRewardLeash.add(_matchmaking);
         devRewardLeash = devRewardLeash.add(_dev);
@@ -212,8 +216,10 @@ contract ShibaWarsFactory {
             "Shiba Wars: Can not transfer tokens to the smart contract"
         );
         uint256 realCost = _floki.balanceOf(address(this)).sub(balance);
+
         (uint256 _burn, uint256 _dev, uint256 _matchmaking, uint256 _winners) =
             getFees(realCost);
+
         winnersRewardFloki = winnersRewardFloki.add(_winners);
         matchmakingRewardFloki = matchmakingRewardFloki.add(_matchmaking);
         devRewardFloki = devRewardFloki.add(_dev);
@@ -274,17 +280,14 @@ contract ShibaWarsFactory {
     }
 
     // BUY SHIBA FROM SHOP
-    function buyShiba(uint256 tokenId) public isSeason() isUser() {
+
+    function buyShiba(uint256 tokenId) public isSeason isUser {
         payTheContract(ShibaWarsUtils.getTokenPrice(tokenId));
         uint256 id = shibaWars.mintNFT(msg.sender, tokenId);
         emit TokenBought(id, msg.sender);
     }
 
-    function buyShibaWithTrainerTokens(uint256 tokenId)
-        public
-        isSeason()
-        isUser()
-    {
+    function buyShibaWithTrainerTokens(uint256 tokenId) public isSeason isUser {
         uint256 tokenPrice = ShibaWarsUtils.getTokenPriceTrainerTokens(tokenId);
         require(
             tokenPrice != 0,
@@ -299,26 +302,27 @@ contract ShibaWarsFactory {
         emit TokenBought(id, msg.sender);
     }
 
-    function buyShibaWithFloki(uint256 tokenId) public isSeason() isUser() {
+    function buyShibaWithFloki(uint256 tokenId) public isSeason isUser {
         payTheContractFloki(ShibaWarsUtils.getTokenPriceFloki(tokenId));
         uint256 id = shibaWars.mintNFT(msg.sender, tokenId);
         emit TokenBought(id, msg.sender);
     }
 
     // BUY LEASH FROM SHOP
-    function buyLeash(uint256 tokenId) public isSeason() isUser() {
+    function buyLeash(uint256 tokenId) public isSeason isUser {
         payTheContractLeash(ShibaWarsUtils.getTokenPriceLeash(tokenId));
         uint256 id = shibaWars.mintNFT(msg.sender, tokenId);
         emit TokenBought(id, msg.sender);
     }
 
     // BUY SHIBA TREAT TOKENS
-    function buyTreats(uint256 count) public isSeason() {
+
+    function buyTreats(uint256 count) public isSeason {
         payTheContract(count.mul(10**17));
         shibaWars.addTreats(msg.sender, count);
     }
 
-    function recycleShiba(uint256 shibaId) public isSeason() {
+    function recycleShiba(uint256 shibaId) public isSeason {
         ShibaWarsEntity.Shiba memory shiba_ =
             shibaWars.getTokenDetails(shibaId);
         require(
@@ -327,17 +331,21 @@ contract ShibaWarsFactory {
         );
         uint256 tokenId = shiba_.tokenId;
         uint256 reward = ShibaWarsUtils.getTrainerTokenReward(tokenId);
+        if (shibaWarsArena.isLeashed(shibaId)) {
+            shibaWarsArena.unleashShiba(shibaId);
+        }
         shibaWars.recycle(shibaId, msg.sender);
         trainerTokens[msg.sender] += reward;
     }
 
     // OPEN LUCKY SHIBA PACK
     // we will prevent calling this function from smart contracts
-    function openPack(uint256 id) public isUser() {
+    function openPack(uint256 id) public isUser {
         // open pack
         // burn the token
         shibaWars.recycle(id, msg.sender);
         // mint random token
+
         uint256 tokenId =
             ShibaWarsUtils.getRandomId(
                 abi.encodePacked(block.difficulty, block.timestamp, id).random(
@@ -348,8 +356,9 @@ contract ShibaWarsFactory {
         shibaWars.mintNFT(msg.sender, tokenId);
     }
 
-    function endSeason() public seasonEnded() {
+    function endSeason() public seasonEnded {
         // get top 10
+
         (uint256[] memory winners, uint256[] memory scores) =
             shibaWars.getWinners();
         for (uint256 i = 0; i < 9; ++i) {
@@ -409,7 +418,7 @@ contract ShibaWarsFactory {
         redeemDevReward();
     }
 
-    function claimPrize() public seasonEnded() {
+    function claimPrize() public seasonEnded {
         require(!prizeClaimed[msg.sender], "SHIBAWARS: PRIZE CLAIMED ALREADY!");
         (uint256 _matchesWon, uint256 _totalMatches) =
             shibaWarsArena.getMatchesWon(msg.sender);
@@ -473,7 +482,7 @@ contract ShibaWarsFactory {
 
     function claimAirdrop(bytes32[] memory proof, uint8 tokenId)
         public
-        isSeason()
+        isSeason
     {
         require(
             !airdropClaimed[msg.sender],

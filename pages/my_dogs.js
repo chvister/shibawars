@@ -31,6 +31,7 @@ export default function MyDogs() {
   const [claimedId, setClaimedId] = useState(0)
   const [imageUri, setImageUri] = useState("")
   const [name, setName] = useState("")
+  const [airdropAvailable, setAirdropAvailable] = useState(false)
   // smart contracts
   const shibaWarsContract = new web3.eth.Contract(
     ShibaWarsABI.abi,
@@ -72,8 +73,10 @@ export default function MyDogs() {
     if (chainId != 1337) {
       setUserShibas([])
       setPowerTreats(0)
+      setAirdropAvailable(false)
     } else if (account !== undefined) {
       getUserTokens()
+      isAirdropAvailable()
     }
   }, [account, chainId])
 
@@ -237,6 +240,37 @@ export default function MyDogs() {
     setUserShibas(userShibas_)
   }
 
+  async function isAirdropAvailable() {
+    let claimed = await factoryContract.methods
+      .isAirdropClaimed()
+      .call({ from: account })
+    if (claimed) {
+      return
+    }
+    let siblingsURI =
+      "https://ipfs.io//ipfs/QmWFkiifm66Sgq1NpKrARrju178evUy8MzmM57CzkVa6jK"
+    let tryHashes = []
+    for (let i = 103; i <= 107; ++i) {
+      let hash = await factoryContract.methods
+        .getHash(account, i)
+        .call({ from: account })
+      tryHashes[i] = hash
+    }
+    let response = await fetch(siblingsURI)
+    let siblings = await response.json()
+    let airdropId = 0
+    for (let i = 103; i <= 107; ++i) {
+      if (siblings[tryHashes[i]] !== undefined) {
+        airdropId = i
+        break
+      }
+    }
+    if (airdropId == 0) {
+      return
+    }
+    setAirdropAvailable(true)
+  }
+
   async function claimAirdrop() {
     console.log("debilko")
     let claimed = await factoryContract.methods
@@ -301,6 +335,8 @@ export default function MyDogs() {
         setImageUri(json["image"])
         setName(json["name"])
         setClaimedId(id)
+
+        setAirdropAvailable(false)
       })
   }
 
@@ -395,17 +431,21 @@ export default function MyDogs() {
             You have {thousandSeparator(shibaTreats)} Shiba Treats.
           </p>
           <p className={styles.description}>Here are your dogs.</p>
-          <p>
-            {" "}
-            {account !== undefined && chainId == 1337 ? (
-              <Button variant="contained" onClick={() => claimAirdrop()}>
-                Claim Airdrop
-              </Button>
-            ) : null}
-          </p>
-          {isAuthenticated && isWeb3Enabled ? (
-            <div className={styles.gridContainer}>{userShibas}</div>
-          ) : null}
+
+
+
+
+          <p> {airdropAvailable ? <Button variant="contained" onClick={() => claimAirdrop()}>Claim Airdrop</Button> : null}</p>
+          {
+            isAuthenticated && isWeb3Enabled ?
+              <div className={styles.gridContainer}>{userShibas}</div>
+              : null
+          }
+
+
+
+
+          
         </div>
       </main> */}
 

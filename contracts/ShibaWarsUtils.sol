@@ -1,39 +1,39 @@
 pragma solidity ^0.8.0;
 
+// SPDX-License-Identifier: UNLICENSED
 library ShibaWarsUtils {
-
     // token ids
-    uint constant LUCKY_SHIBA_PACK_GEN_1 = 100;
-    uint constant SHIBAWARS_SUPPORTER = 101;
-    uint constant TEAM_OP_SHIBA = 102;
-    uint constant WOOFMEISTER = 103;
-    uint constant SHIBA_WHALE = 104;
-    uint constant OG_SHIBA = 105;
-    uint constant SHIBA_WARLORD = 106;
-    uint constant SHIBA_WARRIOR = 107;
-    uint constant DOGE_KILLER = 108;
-    uint constant AGGRESIVE_SHIBA_INU = 109;
-    uint constant BORED_SHIBA_INU = 110;
-    uint constant SHIBA_INU = 111;
-    uint constant AGGRESIVE_SHIBA_PUP = 112;
-    uint constant SHIBA_PUP = 113;
-    uint constant DOGE_FATHER = 114;
-    uint constant FLOKI = 115;
-    uint constant RYOSHI = 116;
-    uint constant SHIBA_GENERAL = 117;
-    uint constant SHIBA_MAGE = 118;
-    uint constant EXCLUSIVE_SHIBA = 119;
+    uint256 constant LUCKY_SHIBA_PACK_GEN_1 = 100;
+    uint256 constant SHIBAWARS_SUPPORTER = 101;
+    uint256 constant TEAM_OP_SHIBA = 102;
+    uint256 constant WOOFMEISTER = 103;
+    uint256 constant SHIBA_WHALE = 104;
+    uint256 constant OG_SHIBA = 105;
+    uint256 constant SHIBA_WARLORD = 106;
+    uint256 constant SHIBA_WARRIOR = 107;
+    uint256 constant DOGE_KILLER = 108;
+    uint256 constant AGGRESIVE_SHIBA_INU = 109;
+    uint256 constant BORED_SHIBA_INU = 110;
+    uint256 constant SHIBA_INU = 111;
+    uint256 constant AGGRESIVE_SHIBA_PUP = 112;
+    uint256 constant SHIBA_PUP = 113;
+    uint256 constant DOGE_FATHER = 114;
+    uint256 constant FLOKI = 115;
+    uint256 constant RYOSHI = 116;
+    uint256 constant SHIBA_GENERAL = 117;
+    uint256 constant SHIBA_MAGE = 118;
+    uint256 constant EXCLUSIVE_SHIBA = 119;
 
-    uint constant IRON = 1;
-    uint constant SILVER = 2;
-    uint constant GOLDEN = 3;
-    uint constant DIAMOND = 4;
+    uint256 constant IRON = 1;
+    uint256 constant SILVER = 2;
+    uint256 constant GOLDEN = 3;
+    uint256 constant DIAMOND = 4;
 
-    uint constant MILLION = 10 ** 6;
-    uint constant THOUSAND = 10 ** 3;
-    uint constant TOKEN = 10 ** 18;
+    uint256 constant MILLION = 10**6;
+    uint256 constant THOUSAND = 10**3;
+    uint256 constant TOKEN = 10**18;
 
-    function getStatsMultiplier(uint tokenId) public pure returns (uint) {
+    function getStatsMultiplier(uint256 tokenId) public pure returns (uint256) {
         if (tokenId == TEAM_OP_SHIBA) {
             return 1000;
         } else if (tokenId == WOOFMEISTER) {
@@ -82,7 +82,11 @@ library ShibaWarsUtils {
         return 0;
     }
 
-    function getTrainerTokenReward(uint tokenId) public pure returns (uint) {
+    function getTrainerTokenReward(uint256 tokenId)
+        public
+        pure
+        returns (uint256)
+    {
         if (tokenId == WOOFMEISTER) {
             return 200000;
         } else if (tokenId == DOGE_KILLER) {
@@ -109,7 +113,7 @@ library ShibaWarsUtils {
         return 0;
     }
 
-    function breeds(uint tokenId) public pure returns (uint) {
+    function breeds(uint256 tokenId) public pure returns (uint256) {
         if (tokenId == TEAM_OP_SHIBA) {
             return 3;
         } else if (tokenId == WOOFMEISTER) {
@@ -150,19 +154,19 @@ library ShibaWarsUtils {
         return 1;
     }
 
-    function millions(uint count) private pure returns (uint) {
+    function millions(uint256 count) private pure returns (uint256) {
         return count * MILLION;
     }
 
-    function thousand(uint count) private pure returns (uint) {
+    function thousand(uint256 count) private pure returns (uint256) {
         return count * THOUSAND;
     }
 
-    function tokens(uint count) private pure returns (uint) {
+    function tokens(uint256 count) private pure returns (uint256) {
         return count * TOKEN;
     }
 
-    function getTokenPrice(uint tokenId) public pure returns (uint256) {
+    function getTokenPrice(uint256 tokenId) public pure returns (uint256) {
         if (tokenId == DOGE_KILLER) {
             return tokens(millions(200));
         } else if (tokenId == AGGRESIVE_SHIBA_INU) {
@@ -179,11 +183,15 @@ library ShibaWarsUtils {
             return tokens(millions(15));
         } else if (tokenId == SHIBAWARS_SUPPORTER) {
             return tokens(thousand(500));
-        } 
+        }
         return 0;
     }
 
-    function getTokenPriceTrainerTokens(uint tokenId) public pure returns (uint256) {
+    function getTokenPriceTrainerTokens(uint256 tokenId)
+        public
+        pure
+        returns (uint256)
+    {
         if (tokenId == DOGE_KILLER) {
             return 800;
         } else if (tokenId == AGGRESIVE_SHIBA_INU) {
@@ -200,11 +208,11 @@ library ShibaWarsUtils {
             return 60;
         } else if (tokenId == SHIBAWARS_SUPPORTER) {
             return 2;
-        } 
+        }
         return 0;
     }
 
-    function getTokenPriceFloki(uint tokenId) public pure returns (uint256) {
+    function getTokenPriceFloki(uint256 tokenId) public pure returns (uint256) {
         if (tokenId == DOGE_KILLER) {
             return tokens(millions(35));
         } else if (tokenId == AGGRESIVE_SHIBA_INU) {
@@ -221,11 +229,11 @@ library ShibaWarsUtils {
             return tokens(thousand(2625));
         } else if (tokenId == SHIBAWARS_SUPPORTER) {
             return tokens(thousand(875) / 10);
-        } 
+        }
         return 0;
     }
 
-    function getTokenPriceLeash(uint tokenId) public pure returns (uint256) {
+    function getTokenPriceLeash(uint256 tokenId) public pure returns (uint256) {
         if (tokenId == IRON) {
             return tokens(1) / 100;
         } else if (tokenId == SILVER) {
@@ -256,7 +264,7 @@ library ShibaWarsUtils {
             tokenId = ShibaWarsUtils.BORED_SHIBA_INU;
         } else if (number < 3000) {
             // akita inu
-            tokenId = ShibaWarsUtils.SHIBA_INU; 
+            tokenId = ShibaWarsUtils.SHIBA_INU;
         } else if (number < 5500) {
             // sanshu inu
             tokenId = ShibaWarsUtils.AGGRESIVE_SHIBA_PUP;
@@ -266,21 +274,20 @@ library ShibaWarsUtils {
         }
     }
 
-    function isShiba(uint id) public pure returns (bool) {
+    function isShiba(uint256 id) public pure returns (bool) {
         return id / 100 == 1 && id > 101;
     }
 
-    function isLeash(uint id) public pure returns (bool) {
+    function isLeash(uint256 id) public pure returns (bool) {
         return id / 100 == 0;
     }
 
-    function getMaxHp(uint64 strength) public pure returns(uint) {
+    function getMaxHp(uint64 strength) public pure returns (uint256) {
         return (uint64)(strength * 5 + 5000);
     }
-    
+
     // COST OF LEVEL UP IN POWER TREATS
-    function levelUpCost(uint level) public pure returns (uint) {
+    function levelUpCost(uint256 level) public pure returns (uint256) {
         return level * 150000;
     }
-
 }
