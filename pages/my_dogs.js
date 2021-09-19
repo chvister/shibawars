@@ -11,10 +11,12 @@ import AlertDialog from "../components/AlertDialog"
 import ShibaWarsABI from "../build/contracts/ShibaWars.json"
 import ArenaABI from "../build/contracts/ShibaWarsArena.json"
 import FactoryABI from "../build/contracts/ShibaWarsFactory.json"
+import { Card, Modal, Row, Col } from "react-bootstrap"
 
 export default function MyDogs() {
   // web3
-  const { isAuthenticated, enableWeb3, isWeb3Enabled, web3, Moralis } = useMoralis();
+  const { isAuthenticated, enableWeb3, isWeb3Enabled, web3, Moralis } =
+    useMoralis()
   const [account, setAccount] = useState(undefined)
   const [chainId, setChainId] = useState(0)
   // game stats
@@ -30,14 +32,23 @@ export default function MyDogs() {
   const [imageUri, setImageUri] = useState("")
   const [name, setName] = useState("")
   // smart contracts
-  const shibaWarsContract = new web3.eth.Contract(ShibaWarsABI.abi, process.env.NEXT_PUBLIC_SHIBAWARS_ADDRESS)
-  const arenaContract = new web3.eth.Contract(ArenaABI.abi, process.env.NEXT_PUBLIC_ARENA_ADDRESS)
-  const factoryContract = new web3.eth.Contract(FactoryABI.abi, process.env.NEXT_PUBLIC_FACTORY_ADDRESS)
+  const shibaWarsContract = new web3.eth.Contract(
+    ShibaWarsABI.abi,
+    process.env.NEXT_PUBLIC_SHIBAWARS_ADDRESS
+  )
+  const arenaContract = new web3.eth.Contract(
+    ArenaABI.abi,
+    process.env.NEXT_PUBLIC_ARENA_ADDRESS
+  )
+  const factoryContract = new web3.eth.Contract(
+    FactoryABI.abi,
+    process.env.NEXT_PUBLIC_FACTORY_ADDRESS
+  )
 
   /**
-   * 
+   *
    * WEB3 FUNCTIONS
-   * 
+   *
    */
 
   useEffect(() => {
@@ -74,9 +85,9 @@ export default function MyDogs() {
   }
 
   /**
-   * 
+   *
    * UI FUNCTIONS
-   * 
+   *
    */
 
   async function showFight(receipt, shibaId) {
@@ -91,13 +102,30 @@ export default function MyDogs() {
       let defenderId = values["enemyId"]
       let defenderDamage = values["enemyStrength"]
       let reward = values["reward"]
-      setFightResult(<p>
-        <p>Fight ({attackerId}, Attacker) vs ({defenderId == 0 ? "Wild Shiba" : defenderId == 1 ? "Wolf" : "Bear"}, Defender)</p>
-        <p>Attacker did {attackerDamage / 100} damage and defender did {defenderDamage / 100} damage</p>
-        {attackerDamage <= defenderDamage && reward > 0 ? <p>Defender fainted</p> : null}
-        {defenderDamage <= attackerDamage && reward == 0 ? <p>Attacker fainted</p> : null}
-        <p>{reward > 0 ? "Attacker won " + thousandSeparator(reward) + " treats." : "Defender won"}</p>
-      </p>)
+      setFightResult(
+        <p>
+          <p>
+            Fight ({attackerId}, Attacker) vs (
+            {defenderId == 0 ? "Wild Shiba" : defenderId == 1 ? "Wolf" : "Bear"}
+            , Defender)
+          </p>
+          <p>
+            Attacker did {attackerDamage / 100} damage and defender did{" "}
+            {defenderDamage / 100} damage
+          </p>
+          {attackerDamage <= defenderDamage && reward > 0 ? (
+            <p>Defender fainted</p>
+          ) : null}
+          {defenderDamage <= attackerDamage && reward == 0 ? (
+            <p>Attacker fainted</p>
+          ) : null}
+          <p>
+            {reward > 0
+              ? "Attacker won " + thousandSeparator(reward) + " treats."
+              : "Defender won"}
+          </p>
+        </p>
+      )
     } else {
       let values = event["returnValues"]
       let attackerId = values["attackerId"]
@@ -105,23 +133,46 @@ export default function MyDogs() {
       let defenderId = values["defenderId"]
       let defenderDamage = values["defenderDamage"]
       let result = values["outcome"]
-      setFightResult(<p>
-        <p>Fight ({attackerId}, Attacker) vs ({defenderId}, Defender)</p>
-        <p>Your Shiba was the {shibaId == attackerId ? "attacker" : "defender"}</p>
-        <p>Attacker did {attackerDamage / 100} damage and defender did {defenderDamage / 100} damage</p>
-        {attackerDamage <= defenderDamage && result == 1 ? <p>Defender fainted</p> : null}
-        {defenderDamage <= attackerDamage && result == 2 ? <p>Attacker fainted</p> : null}
-        <p>{result == 1 ? "Attacker won" : result == 2 ? "Defender won" : "It was a draw"}</p>
-      </p>)
+      setFightResult(
+        <p>
+          <p>
+            Fight ({attackerId}, Attacker) vs ({defenderId}, Defender)
+          </p>
+          <p>
+            Your Shiba was the {shibaId == attackerId ? "attacker" : "defender"}
+          </p>
+          <p>
+            Attacker did {attackerDamage / 100} damage and defender did{" "}
+            {defenderDamage / 100} damage
+          </p>
+          {attackerDamage <= defenderDamage && result == 1 ? (
+            <p>Defender fainted</p>
+          ) : null}
+          {defenderDamage <= attackerDamage && result == 2 ? (
+            <p>Attacker fainted</p>
+          ) : null}
+          <p>
+            {result == 1
+              ? "Attacker won"
+              : result == 2
+              ? "Defender won"
+              : "It was a draw"}
+          </p>
+        </p>
+      )
     }
   }
 
   async function filterLeashes(tokens) {
     let userLeashes = []
     for (let tokenId of tokens) {
-      let dogeData = await shibaWarsContract.methods.getTokenDetails(tokenId).call({ from: ethereum.selectedAddress })
+      let dogeData = await shibaWarsContract.methods
+        .getTokenDetails(tokenId)
+        .call({ from: ethereum.selectedAddress })
       if (dogeData.tokenId >= 1 && dogeData.tokenId <= 4) {
-        let isLeashUsed = await arenaContract.methods.isLeashUsed(tokenId).call({ from: ethereum.selectedAddress })
+        let isLeashUsed = await arenaContract.methods
+          .isLeashUsed(tokenId)
+          .call({ from: ethereum.selectedAddress })
         if (!isLeashUsed) {
           userLeashes.push([tokenId, dogeData.tokenId])
         }
@@ -131,27 +182,55 @@ export default function MyDogs() {
   }
 
   async function getUserTokens() {
-    let shibaTreats_ = await shibaWarsContract.methods.getUserTreatTokens(account).call({ from: account });
+    let shibaTreats_ = await shibaWarsContract.methods
+      .getUserTreatTokens(account)
+      .call({ from: account })
     setPowerTreats(shibaTreats_)
-    let userTokens = await shibaWarsContract.methods.getUserTokens(account).call({ from: account })
+    let userTokens = await shibaWarsContract.methods
+      .getUserTokens(account)
+      .call({ from: account })
     const userShibas_ = []
     const leashes = await filterLeashes(userTokens)
     for (var shibaId of userTokens) {
       const dogContent = []
-      let dog = await shibaWarsContract.methods.getTokenDetails(shibaId).call({ from: account })
+      let dog = await shibaWarsContract.methods
+        .getTokenDetails(shibaId)
+        .call({ from: account })
       dogContent["dog"] = dog
-      let tokenUri = await shibaWarsContract.methods.tokenURI(shibaId).call({ from: account })
+      let tokenUri = await shibaWarsContract.methods
+        .tokenURI(shibaId)
+        .call({ from: account })
       dogContent["tokenUri"] = tokenUri
       dogContent["treats"] = shibaTreats_
-      dogContent["adventure"] = parseInt(await arenaContract.methods.getAdventureLevel(shibaId).call({ from: account })) + 1
+      dogContent["adventure"] =
+        parseInt(
+          await arenaContract.methods
+            .getAdventureLevel(shibaId)
+            .call({ from: account })
+        ) + 1
       dogContent["leashes"] = leashes
-      dogContent["leashId"] = await arenaContract.methods.getLeashId(shibaId).call({ from: account })
-      dogContent["leashToken"] = await shibaWarsContract.methods.getTokenDetails(dogContent["leashId"]).call({ from: account })
+      dogContent["leashId"] = await arenaContract.methods
+        .getLeashId(shibaId)
+        .call({ from: account })
+      dogContent["leashToken"] = await shibaWarsContract.methods
+        .getTokenDetails(dogContent["leashId"])
+        .call({ from: account })
 
       userShibas_.push(
         <React.Fragment key={dog["id"]}>
-          <Dog arenaContract={arenaContract} dogData={dogContent} factoryContract={factoryContract} account={account}
-            onOpen={() => { getUserTokens() }} shibaWarsContract={shibaWarsContract} showFight={(receipt) => { showFight(receipt, dog["id"]) }} />
+          <Dog
+            arenaContract={arenaContract}
+            dogData={dogContent}
+            factoryContract={factoryContract}
+            account={account}
+            onOpen={() => {
+              getUserTokens()
+            }}
+            shibaWarsContract={shibaWarsContract}
+            showFight={(receipt) => {
+              showFight(receipt, dog["id"])
+            }}
+          />
         </React.Fragment>
       )
     }
@@ -159,59 +238,70 @@ export default function MyDogs() {
   }
 
   async function claimAirdrop() {
-    let claimed = await factoryContract.methods.isAirdropClaimed().call({ from: account })
+    console.log("debilko")
+    let claimed = await factoryContract.methods
+      .isAirdropClaimed()
+      .call({ from: account })
     if (claimed) {
       setClaimedAlready(1)
       return
     }
-    let siblingsURI = "https://ipfs.io//ipfs/QmWFkiifm66Sgq1NpKrARrju178evUy8MzmM57CzkVa6jK"
-    let parentsURI = "https://ipfs.io/ipfs/QmbwZUD3pj8fqtqL6xXkbFMy8gJrrFYGJqLMtBm2VxVS4P"
-    let tryHashes = [];
+    let siblingsURI =
+      "https://ipfs.io//ipfs/QmWFkiifm66Sgq1NpKrARrju178evUy8MzmM57CzkVa6jK"
+    let parentsURI =
+      "https://ipfs.io/ipfs/QmbwZUD3pj8fqtqL6xXkbFMy8gJrrFYGJqLMtBm2VxVS4P"
+    let tryHashes = []
     for (let i = 103; i <= 107; ++i) {
-      let hash = await factoryContract.methods.getHash(account, i).call({ from: account });
-      tryHashes[i] = hash;
+      let hash = await factoryContract.methods
+        .getHash(account, i)
+        .call({ from: account })
+      tryHashes[i] = hash
     }
-    let response = await fetch(siblingsURI);
-    let siblings = await response.json();
-    var finalHash;
-    let airdropId = 0;
+    let response = await fetch(siblingsURI)
+    let siblings = await response.json()
+    var finalHash
+    let airdropId = 0
     for (let i = 103; i <= 107; ++i) {
       if (siblings[tryHashes[i]] !== undefined) {
-        airdropId = i;
-        finalHash = tryHashes[i];
-        break;
+        airdropId = i
+        finalHash = tryHashes[i]
+        break
       }
     }
     if (airdropId == 0) {
       setNoAirdrop(1)
       return
     }
-    response = await fetch(parentsURI);
-    let parents = await response.json();
-    let proof = [];
-    let i = 0;
+    response = await fetch(parentsURI)
+    let parents = await response.json()
+    let proof = []
+    let i = 0
     while (finalHash !== undefined) {
       if (i % 2 == 0) {
-        finalHash = siblings[finalHash];
+        finalHash = siblings[finalHash]
       } else {
-        finalHash = parents[finalHash];
+        finalHash = parents[finalHash]
       }
       if (finalHash !== undefined) {
-        proof.push(finalHash);
+        proof.push(finalHash)
       }
-      ++i;
+      ++i
     }
-    factoryContract.methods.claimAirdrop(proof, airdropId).send({ from: account, gasLimit: 350000 })
-      .on("receipt", (async (receipt) => {
+    factoryContract.methods
+      .claimAirdrop(proof, airdropId)
+      .send({ from: account, gasLimit: 350000 })
+      .on("receipt", async (receipt) => {
         getUserTokens()
         let id = receipt.events["TokenBought"].returnValues[0]
-        let uri = await shibaWarsContract.methods.tokenURI(id).call({ from: account })
+        let uri = await shibaWarsContract.methods
+          .tokenURI(id)
+          .call({ from: account })
         let response = await fetch(uri)
         let json = await response.json()
         setImageUri(json["image"])
         setName(json["name"])
         setClaimedId(id)
-      }));
+      })
   }
 
   function closeAlert() {
@@ -221,9 +311,9 @@ export default function MyDogs() {
   }
 
   /**
-   * 
+   *
    * RENDER FUNCTION
-   * 
+   *
    */
 
   return (
@@ -233,37 +323,91 @@ export default function MyDogs() {
         <link rel="icon" href="/shibawars_logo_new.png" />
       </Head>
 
-      {
-        claimedId == 0 ? null :
-          <AlertDialog title={"Airdrop claimed!"} text={name} imageUri={imageUri} onClose={() => closeAlert()} />
-      }
-      {
-        chainId == 1337 ? null : <AlertDialog title={"Wrong network"} text={"Please select ganache network."} />
-      }
-      {
-        noAirdrop == 0 ? null : <AlertDialog title={"No airdrop"} text={"Your address is not eligible for an airdrop."} />
-      }
-      {
-        claimedAlready == 0 ? null : <AlertDialog title={"Airdrop claimed"} text={"You have already claimed the airdrop."} />
-      }
-      {
-        fightResult === undefined ? null : <AlertDialog title={"Fight result"} text={fightResult} onClose={() => { setFightResult(undefined) }} />
-      }
-
+      {claimedId == 0 ? null : (
+        <AlertDialog
+          title={"Airdrop claimed!"}
+          text={name}
+          imageUri={imageUri}
+          onClose={() => closeAlert()}
+        />
+      )}
+      {chainId == 1337 ? null : (
+        <AlertDialog
+          title={"Wrong network"}
+          text={"Please select ganache network."}
+        />
+      )}
+      {noAirdrop == 0 ? null : (
+        <AlertDialog
+          title={"No airdrop"}
+          text={"Your address is not eligible for an airdrop."}
+        />
+      )}
+      {claimedAlready == 0 ? null : (
+        <AlertDialog
+          title={"Airdrop claimed"}
+          text={"You have already claimed the airdrop."}
+        />
+      )}
+      {fightResult === undefined ? null : (
+        <AlertDialog
+          title={"Fight result"}
+          text={fightResult}
+          onClose={() => {
+            setFightResult(undefined)
+          }}
+        />
+      )}
       <NavbarApp />
-      <main className={styles.main}>
+
+      <div style={{ marginTop: "5rem" }}>
+        <Card.Img
+          variant="top"
+          src="MYDOGS.png"
+          className={styles.titlePhotoRoadMap}
+          data-aos="fade-up"
+        />
+        <Card.Body className={styles.description} data-aos="fade-up">
+          <p className={styles.description}>
+            You have {thousandSeparator(shibaTreats)} Shiba Treats.
+          </p>
+          <p className={styles.description}>Here are your dogs.</p>
+          <p>
+            {" "}
+            {account !== undefined && chainId == 1337 ? (
+              <button
+                className={styles.navbarButton}
+                onClick={() => claimAirdrop()}
+              >
+                Claim Airdrop
+              </button>
+            ) : null}
+          </p>
+          {isAuthenticated && isWeb3Enabled ? (
+            <div className={styles.gridContainer}>{userShibas}</div>
+          ) : null}
+        </Card.Body>
+      </div>
+      {/* <main className={styles.main}>
         <div className={styles.section_app}>
           <h1 className={styles.title}>My Dogs</h1>
-          <p className={styles.description}>You have {thousandSeparator(shibaTreats)} Shiba Treats.</p>
+          <p className={styles.description}>
+            You have {thousandSeparator(shibaTreats)} Shiba Treats.
+          </p>
           <p className={styles.description}>Here are your dogs.</p>
-          <p> {account !== undefined && chainId == 1337 ? <Button variant="contained" onClick={() => claimAirdrop()}>Claim Airdrop</Button> : null}</p>
-          {
-            isAuthenticated && isWeb3Enabled ?
-              <div className={styles.gridContainer}>{userShibas}</div>
-              : null
-          }
+          <p>
+            {" "}
+            {account !== undefined && chainId == 1337 ? (
+              <Button variant="contained" onClick={() => claimAirdrop()}>
+                Claim Airdrop
+              </Button>
+            ) : null}
+          </p>
+          {isAuthenticated && isWeb3Enabled ? (
+            <div className={styles.gridContainer}>{userShibas}</div>
+          ) : null}
         </div>
-      </main>
+      </main> */}
 
       <Footer />
     </div>
