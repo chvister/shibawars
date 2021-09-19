@@ -65,6 +65,7 @@ def write_metadata(shibaId, backgrounds, earrings, eyes, heads, necklaces, miscs
                                             "image": image, 
                                             "attributes" : [
                                                 {"trait_type" : "Generation", "value" : 1},
+                                                {"trait_type" : "Rarity", "value" : getRarity(shibaId)},
                                                 {"trait_type" : "Background", "value" : backgroundName(shibaId, bgI)},
                                                 {"trait_type" : "Earring", "value" : earringName(shibaId, earringI)},
                                                 {"trait_type" : "Eyes", "value" : eyeName(shibaId, eyeI)},
@@ -190,6 +191,39 @@ def get_description(token_id):
         return "Increases the stats of your shiba in fight by 30%"
     else:
         return ""
+
+def getRarity(token_id):
+    # common - can be bought
+    # rare - can be found with <= 10%
+    # epic - can be found with <= 1%
+    # legendary - can be found with <= 0.1%
+    # mythical - can be found with <= 0.01%
+    # limited supply - according to % of supply, epic at lowest
+    # exclusive - epic
+    if token_id == BOJAR_DA_KILLA:
+        return "Mythical"
+    elif token_id == KAYA_THE_WOLFMOTHER:
+        return "Mythical"
+    elif token_id == WOOFMEISTER:
+        return "Mythical"
+    elif token_id == SHIBA_WHALE:
+        return "Legendary"
+    elif token_id == OG_SHIBA:
+        return "Epic"
+    elif token_id == SHIBA_WARLORD:
+        return "Epic"
+    elif token_id == SHIBA_WARRIOR:
+        return "Epic"
+    elif token_id == DOGE_FATHER:
+        return "Legendary"
+    elif token_id == FLOKI:
+        return "Rare"
+    elif token_id == RYOSHI:
+        return "Epic"
+    elif token_id == SHIBA_GENERAL:
+        return "Epic"
+    else:
+        return "Common"
 
 def backgroundName(tokenId, id):
     if (tokenId == SHIBA_WARRIOR):

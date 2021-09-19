@@ -12,7 +12,6 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
     const shibaAdventureLevel = dogData["adventure"]
     const userLeashes = dogData["leashes"]
     const leashId = dogData["leashId"]
-    console.log(leashId)
     const leashTokenId = dogData["leashToken"].tokenId
     const [trainerTokenReward, setTrainerTokenReward] = useState(0)
     const [anchorEl, setAnchorEl] = useState(null);
@@ -53,7 +52,7 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
         setImageUri(json["image"])
         setName(json["name"])
         setDescription(json["description"])
-        const reward = await factoryContract.methods.getTrainerTokenReward(tokenId).call({ from: account, gasLimit: 125000 })
+        const reward = await factoryContract.methods.getTrainerTokenReward(tokenId).call({ from: account })
         setTrainerTokenReward(reward)
     }
 
@@ -64,7 +63,7 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
      */
 
     async function recycleShiba() {
-        factoryContract.methods.recycleShiba(data["id"]).send({ from: account, gasLimit: 150000 })
+        factoryContract.methods.recycleShiba(data["id"]).send({ from: account, gasLimit: 125000 })
             .on("receipt", (async () => {
                 onOpen()
             }))
@@ -79,7 +78,7 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
     }
 
     async function goOnAdventure() {
-        arenaContract.methods.goOnAdventure(uid).send({ from: account, gasLimit: 200000 })
+        arenaContract.methods.goOnAdventure(uid).send({ from: account, gasLimit: 175000 })
             .on("receipt", (async (receipt) => {
                 onOpen()
                 showFight(receipt)
@@ -87,7 +86,7 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
     }
 
     async function openPack() {
-        factoryContract.methods.openPack(uid).send({ from: account, gasLimit: 500000 })
+        factoryContract.methods.openPack(uid).send({ from: account, gasLimit: 300000 })
             .on("receipt", (async () => {
                 onOpen()
             }))
@@ -115,7 +114,7 @@ export default function Dog({ dogData, factoryContract, account, onOpen, shibaWa
     }
 
     async function unleash() {
-        arenaContract.methods.unleashShiba(uid).send({ from: account, gasLimit: 40000 })
+        arenaContract.methods.unleashShiba(uid).send({ from: account, gasLimit: 50000 })
             .on("receipt", (async () => {
                 onOpen()
             }))
